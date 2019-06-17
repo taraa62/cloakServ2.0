@@ -123,7 +123,7 @@ export abstract class BaseServer implements IServer {
             });
         }
         await Promise.all(_listPromiseInit).then((v) => {
-            this.logger.info("all modules initialization before up server");
+            console.log('anit end!')
         }).catch((er) => {
             this.logger.error(er);
             this.logger.error("----- ERROR inti modules before up server");

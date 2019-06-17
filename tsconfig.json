@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "experimentalDecorators": true,
     "target": "es2017",
     "module": "commonjs",
     "esModuleInterop": true,
@@ -9,9 +10,16 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./src",
-
+    "emitDecoratorMetadata": true,
     "allowUnreachableCode": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "importHelpers": true,
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
   "include": [
     "src/**/*"
