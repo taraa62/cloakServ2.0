@@ -1,7 +1,7 @@
 import {BaseServer} from "./BaseServer";
 import {FileManager} from "../utils/FileManager";
-import {Signals} from "../const/Signals";
 import {RequestListener} from "http";
+import {Http2ServerRequest, Http2ServerResponse, ServerHttp2Session} from "http2";
 
 export class ServerHTTP2 extends BaseServer {
 
@@ -26,13 +26,14 @@ export class ServerHTTP2 extends BaseServer {
             };
 
             const opt = {
-                key: FileManager._fs.readFileSync(this.conf.dirProject + '/localhost-privkey.pem'),
-                cert: FileManager._fs.readFileSync(this.conf.dirProject + '/localhost-cert.pem')
-            }
+                key: FileManager._fs.readFileSync(this.conf.dirProject + '/key.pem'),
+                cert: FileManager._fs.readFileSync(this.conf.dirProject + '/cert.pem'),
+                allowHTTP1: true,
+            };
 
 
             const http2 = await require("http2");
-            const server = http2.createSecureServer(opt);
+            /*const server = http2.createSecureServer(opt);
             server.on('stream', (stream: any, headers: any) => {
                 stream.respond({
                     'content-type': 'text/html',
@@ -41,14 +42,29 @@ export class ServerHTTP2 extends BaseServer {
                 stream.end('<h1>Hello World</h1>');
             });
 
+            server.on('session', (session: ServerHttp2Session) => {
+               console.log('ssqws');
+            });
+            server.on('sessionError', (er: Error) => {
+                console.log(er);
+            });*/
+
+
+            const server = http2.createSecureServer(opt,  (request: Http2ServerRequest, response: Http2ServerResponse) => {
+
+
+            })
+
 
             server.listen(port, async () => {
                 const isInit: boolean = await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
                 if (isInit) {
-                    console.log("----- all module initialization----------")
+                    console.log("----- all module initialization----------");
                 }
             });
         }
     }
 }
+
+
 

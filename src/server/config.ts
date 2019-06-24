@@ -42,7 +42,7 @@ export const config = {
         {
             isUse: false,
             name: "cmd_utils",
-            path: "./dist/module/cmdUtils/CMDUtilsModule",
+            path: "./dist/module/cmdUtils/CMDUtils",
             config: {},
         },{
             isUse: false,

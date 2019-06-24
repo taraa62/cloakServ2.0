@@ -41,7 +41,7 @@
             }
         ],
         "no-arg": true,
-        "no-bitwise": true,
+        "no-bitwise": false,
         "no-console": [
             true,
             "debug",
@@ -91,6 +91,8 @@
             true,
             "allow-null-check"
         ],
+        "quotemark": false,
+        "trailing-comma": false,
         "typedef-whitespace": [
             false,
             {

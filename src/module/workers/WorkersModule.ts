@@ -1,43 +1,18 @@
 import {BModule} from "../BModule";
-import {MessageChannel, Worker} from "worker_threads";
+import {ItemWorker} from "./ItemWorker";
+import {WorkerOption} from "./WorkerOption";
 
 export class WorkersModule extends BModule {
 
-    private worker: Worker;
+    private listWorker: Map<string, ItemWorker> = new Map();
 
-    init(wait: Function): void {
-        this.worker = new Worker(__dirname + "/WorkerTest.js");
-        this.addListener();
+    public addWorker(path: string, data: any, option: WorkerOption = null): void {
+        option = Object.assign(new WorkerOption(), option);
+        const worker = new ItemWorker(path, data, option);
 
-        const channel = new MessageChannel();
-
-        this.worker.postMessage({port: channel.port1}, [channel.port1]);
-
-        channel.port2.on("message", (data: any) => {
-            console.log('port message: ' + data);
-        });
-
-        super.init(wait);
+        this.listWorker.set(worker.getId(), worker);
     }
 
-
-    private addListener() {
-        this.worker.on("error", (er: Error) => {
-            console.log(er);
-        });
-        this.worker.on("exit", (ex: number) => {
-            console.log("exit " + ex);
-        });
-        this.worker.on("online", () => {
-            console.log("online");
-            this.worker.postMessage({});
-        });
-        this.worker.on("message", (val: any) => {
-            console.log("worker mess: "+ val);
-        });
-
-
-    }
 
 }
 
