@@ -1,9 +1,18 @@
 import {FileManager} from "./FileManager";
-import {IResult} from "./IUtils";
+import {IConfigNginx, IResult, ItemConfig} from "./IUtils";
 import {CDMCommand, CMDResult} from "./cmd/CMDResult";
 import {CMDUtils} from "./cmd/CMDUtils";
+import {BLogger} from "../module/logger/BLogger";
 
 export class NginxUtils {
+
+    private static logger: BLogger | any = console;
+
+    private static configs: Map<string, IConfigNginx> = new Map<string, IConfigNginx>();
+
+    public static setLogger(logger: BLogger) {
+        NginxUtils.logger = logger;
+    }
 
 
     public static checkNginxPid(): void {
@@ -75,4 +84,43 @@ export class NginxUtils {
         return res;
     }
 
+
+    public static async createNginxConfig(conf: ItemConfig, pathToResource: string): Promise<IResult> {
+        NginxUtils.logger.info(`create config for: ${conf.domain} in folder: ${pathToResource}`);
+
+        if (!conf || !pathToResource) return <IResult>{error: "one or more params is null"};
+        const config: string = await this.getConfig(conf.nameConfig);
+
+        console.log('sdwqd')
+    }
+
+
+    public static async getConfig(nameConfig: string): Promise<string> {
+        if (this.configs && this.configs.size == 0) {
+            let path = FileManager.backFolder(__dirname, 2);
+            path += "/libs/nginx/";
+            const res: IResult = await FileManager.getFileInFolder(path);
+            if (res.success && res.data instanceof Array) {
+                for (let v of res.data) {
+                    const conf = await FileManager.readFile(v.path);
+                    if (conf.success) {
+                        const ss = conf.data.indexOf("##", 2);
+                        if (ss > 5) {
+                            const name = conf.data.substr(2, ss - 2).split("=")[1];
+                            if (name) {
+                                const item: IConfigNginx = {
+                                    name: name,
+                                    config: conf.data
+                                };
+                                this.configs.set(name, item);
+                            }
+                        }
+                    }
+                }
+            }
+            if (this.configs.has(nameConfig)) return this.configs.get(nameConfig).config;
+        }
+
+        return null;
+    }
 }

@@ -10,7 +10,7 @@ export class WorkersModule extends BModule {
 
 
     async init(_wait: Function): Promise<any> {
-        const res: IResult = await NginxUtils.checkRun();
+        const res: any = await NginxUtils.getConfig('http');
 
         super.init(_wait);
     }

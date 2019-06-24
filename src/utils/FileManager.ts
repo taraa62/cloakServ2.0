@@ -3,6 +3,7 @@ import path from "path";
 import readline from "readline";
 import {Stream} from "stream";
 import {IFileInfo, IResult} from "./IUtils";
+import recursive from "recursive-readdir";
 
 export class FileManager {
 
@@ -76,11 +77,11 @@ export class FileManager {
         return fs.existsSync(path);
     }
 
-    static readFile(path: string): Promise<any> {
+    static readFile(path: string, encode:BufferEncoding = "utf8"): Promise<IResult> {
         return new Promise((res, rej) => {
             fs.readFile(path, (err, data) => {
-                if (err) rej(err);
-                else res(data);
+                if (err) rej({error: err});
+                else res({success: true, data: data.toString(encode)});
             });
         });
     }
@@ -197,4 +198,40 @@ export class FileManager {
         });
     }
 
+
+    static async getAllFileInFolderRecursive(path: string): Promise<IResult> {
+        return await new Promise((res, rej) => {
+            if (!fs.existsSync(path)) {
+                rej({error: `file "${path}" is not found`});
+            } else {
+                recursive(path, (err: Error, files: string[]) => {
+                    (err) ? rej({error: err}) : res({data: files, success: true});
+                });
+            }
+
+        });
+    }
+
+    static async getFileInFolder(path: string): Promise<IResult> {
+        if (!fs.existsSync(path))
+            return {error: `folder ${path} isn't found"`};
+        path = this._path.normalize(path);
+
+        return new Promise((res, rej) => {
+            fs.readdir(path, async (err: Error, item) => {
+                if (err) rej({error: err});
+                else {
+                    const listFile = [];
+                    for (let y = 0; y < item.length; y++) {
+                        const obj = {
+                            path: path + this._path.sep + item[y],
+                            info: await this.getInfoFile(path + this._path.sep + item[y])
+                        };
+                        listFile.push(obj);
+                    }
+                    res({success: true, data: listFile});
+                }
+            });
+        });
+    }
 }

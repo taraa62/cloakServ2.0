@@ -22,3 +22,19 @@ export interface IFileInfo extends IResult {
     isDirectory: boolean;
     isBlockDevice: boolean;
 }
+
+//**** Nginx//
+export interface  ItemConfig{
+    nameConfig: string;
+    domain: string;
+    isRewrite: boolean;
+    protocol: string;
+    nameServerConfD: string;
+    sslSertificate?: string;
+    sslSertificateKey?: string;
+}
+
+export interface  IConfigNginx{
+    name:string;
+    config:string;
+}

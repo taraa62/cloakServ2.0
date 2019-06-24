@@ -11,6 +11,9 @@ export class ServerHTTP2 extends BaseServer {
     protected async start(): Promise<any> {
         const isInit: boolean = await this.initModules(this.conf.getInitModuleBefore()).then((v) => true).catch((er) => false);
         if (isInit) {
+            const isInit: boolean = await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
+            return
+
             this.logger.info("all modules initialization before up server");
             const port = this.conf.config.server.port || 8080;
 
