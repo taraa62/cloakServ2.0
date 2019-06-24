@@ -40,12 +40,7 @@ export const config = {
     },
     initModuleBeforeRunServe: [
         {
-            isUse: false,
-            name: "cmd_utils",
-            path: "./dist/module/cmdUtils/CMDUtils",
-            config: {},
-        },{
-            isUse: false,
+            isUse: true,
             name: "workers",
             path: "./dist/module/workers/WorkersModule",
             config: {},

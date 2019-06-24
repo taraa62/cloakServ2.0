@@ -83,7 +83,7 @@ export class ItemWorker {
 
     public addListenerWorker(event: string | symbol, callback: Function): void {
         if (!this.listenersWorker.has(event)) {
-            this.listenersWorker.set(event, new Set().add(callback));
+            this.listenersWorker.set(event, new Set<Function>().add(callback));
         } else {
             const _set: Set<Function> = this.listenersWorker.get(event);
             if (!_set.has(callback)) _set.add(callback);
@@ -91,7 +91,7 @@ export class ItemWorker {
     }
     public addListenerChannel(event: string | symbol, callback: Function): void {
         if (!this.listenersChannel.has(event)) {
-            this.listenersChannel.set(event, new Set().add(callback));
+            this.listenersChannel.set(event, new Set<Function>().add(callback));
         } else {
             const _set: Set<Function> = this.listenersChannel.get(event);
             if (!_set.has(callback)) _set.add(callback);

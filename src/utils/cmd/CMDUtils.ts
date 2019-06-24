@@ -16,7 +16,7 @@ export class CMDUtils {
      */
    public static async runCommandFullResult(command: string): Promise<CMDResult> {
         return new Promise<CMDResult>((result, rej) => {
-            const com = CMDUtils.commandLine(command);
+            const com = CMDUtils.commandLine.run(command);
 
             const res: CMDResult = new CMDResult();
             com.stdout.on('data', (data: any) => {
@@ -40,7 +40,7 @@ export class CMDUtils {
      * @param callback
      */
     public static runCommandChunk(command: string, callback: Function, logger: any = null): void {
-        const com = CMDUtils.commandLine(command);
+        const com = CMDUtils.commandLine.run(command);
         com.stdout.on('data', (data: any) => {
             if (logger) logger.info('stdout: ', data);
             if (callback && callback instanceof Function) {

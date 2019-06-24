@@ -1,8 +1,9 @@
 export interface IResult {
-    error: string | Error;
-    code: number;
-    success: boolean | string;
-    data: any;
+    error?: string | Error;
+    code?: number;
+    success?: boolean | string;
+    msg?: string;
+    data?: any;
 }
 
 export interface IFileInfo extends IResult {

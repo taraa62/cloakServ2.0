@@ -14,4 +14,5 @@ export class CMDResult {
 export enum CDMCommand{
     STOP_NGINX = "sudo systemctl stop nginx",
     START_NGINX = "sudo systemctl start nginx",
+    STATUS_NGINX = "sudo systemctl status nginx",
 }
