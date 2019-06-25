@@ -11,7 +11,12 @@ export class ServerHTTP2 extends BaseServer {
     protected async start(): Promise<any> {
         const isInit: boolean = await this.initModules(this.conf.getInitModuleBefore()).then((v) => true).catch((er) => false);
         if (isInit) {
-            const isInit: boolean = await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
+            const isInit2: boolean = await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
+
+            if(isInit2){
+                await this.endInitModules();
+            }
+
             return
 
             this.logger.info("all modules initialization before up server");
@@ -62,6 +67,7 @@ export class ServerHTTP2 extends BaseServer {
             server.listen(port, async () => {
                 const isInit: boolean = await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
                 if (isInit) {
+                    await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
                     console.log("----- all module initialization----------");
                 }
             });

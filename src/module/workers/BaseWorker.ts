@@ -1,15 +1,26 @@
-import {MessagePort, parentPort, workerData, WorkerOptions, MessageChannel} from "worker_threads";
+import {MessagePort, parentPort, workerData} from "worker_threads";
 
-export class WorkerTest {
+
+/*
+    for extend all workers
+ */
+export class BaseWorker {
 
     private port: MessagePort;
 
     constructor() {
         console.log('create new Worker Test');
 
+        parentPort.on("init3", (data) => {
+            console.log(data)
+        });
 
+        parentPort.postMessage( {msg:"hello init"})
         parentPort.on("message", this.newMessage.bind(this));
+        this.init();
+    }
 
+    protected init() {
     }
 
 
@@ -29,12 +40,11 @@ export class WorkerTest {
         if (data.port instanceof MessagePort) {
             this.port = data.port;
             this.port.postMessage('hello from port')
-        }else {
-            this.test();
+        } else {
+          //  this.test();
         }
 
     }
 
 }
 
-new WorkerTest();

@@ -44,8 +44,8 @@ export const config = {
             name: "workers",
             path: "./dist/module/workers/WorkersModule",
             config: {},
-        },{
-            isUse: true,
+        }, {
+            isUse: false,
             name: "route",
             path: "./dist/module/route/RouteModule",
             config: {},
@@ -53,9 +53,9 @@ export const config = {
 
     ],
     initModuleAfterRunServe: [{
-        isUse:false,
-        name: "",
-        path: "",
+        isUse: true,
+        name: "donor",
+        path: "./dist/submodule/DonorModule",
         config: {},
     }],
 };

@@ -1,17 +1,23 @@
 import {FileManager} from "./FileManager";
-import {IConfigNginx, IResult, ItemConfig} from "./IUtils";
+import {IConfigNginx, IItemConfig, IResult} from "./IUtils";
 import {CDMCommand, CMDResult} from "./cmd/CMDResult";
 import {CMDUtils} from "./cmd/CMDUtils";
 import {BLogger} from "../module/logger/BLogger";
+import {StringUtils} from "./InitDefUtils";
 
 export class NginxUtils {
 
     private static logger: BLogger | any = console;
+    private static isBlockGenerateConfigs: boolean = false;
 
     private static configs: Map<string, IConfigNginx> = new Map<string, IConfigNginx>();
 
     public static setLogger(logger: BLogger) {
         NginxUtils.logger = logger;
+    }
+
+    public static blockGenerateConfigs(isBlock: boolean) {
+        this.isBlockGenerateConfigs = isBlock;
     }
 
 
@@ -39,7 +45,6 @@ export class NginxUtils {
                     // this.logger.error(`error=> ${err} line => ${line}  close => ${close}`)
                 }
             });
-
         };
     }
 
@@ -74,6 +79,12 @@ export class NginxUtils {
         return this.getResult(result);
     }
 
+    public static async createLinkOnConfig(domain: string): Promise<IResult> {
+        const command = `ln -s /etc/nginx/sites-available/${domain} /etc/nginx/sites-enabled/`
+        const result: CMDResult = await CMDUtils.runCommandFullResult(command);
+        return this.getResult(result);
+    }
+
     public static getResult(result: CMDResult): IResult {
         const res: IResult = {
             code: result.exitCode,
@@ -85,28 +96,35 @@ export class NginxUtils {
     }
 
 
-    public static async createNginxConfig(conf: ItemConfig, pathToResource: string): Promise<IResult> {
-        NginxUtils.logger.info(`create config for: ${conf.domain} in folder: ${pathToResource}`);
+    public static async createNginxConfig(conf: IItemConfig): Promise<IResult> {
+        if (this.isBlockGenerateConfigs) return NginxUtils.logger.info(`Block create all configs`);
+        NginxUtils.logger.info(`create config for: ${conf.domain} in folder: ${conf.pathToResource}`);
 
-        if (!conf || !pathToResource) return <IResult>{error: "one or more params is null"};
-        const config: string = await this.getConfig(conf.nameConfig);
+        if (!conf) return {error: "one or more params is null"} as IResult;
+        let config: string = await this.getConfigsWithFile(conf.nameConfig);
+        if (config) {
+            config = this.replaceConfig(config, conf);
 
-        console.log('sdwqd')
+            const iRes: IResult = await this.generateConfig(config, conf);
+            return iRes;
+        } else {
+            return {error: "config not found!"};
+        }
     }
 
 
-    public static async getConfig(nameConfig: string): Promise<string> {
-        if (this.configs && this.configs.size == 0) {
+    public static async getConfigsWithFile(nameConfig: string): Promise<string> {
+        if (this.configs && this.configs.size < 1) {
             let path = FileManager.backFolder(__dirname, 2);
             path += "/libs/nginx/";
             const res: IResult = await FileManager.getFileInFolder(path);
             if (res.success && res.data instanceof Array) {
-                for (let v of res.data) {
+                for (const v of res.data) {
                     const conf = await FileManager.readFile(v.path);
                     if (conf.success) {
                         const ss = conf.data.indexOf("##", 2);
                         if (ss > 5) {
-                            const name = conf.data.substr(2, ss - 2).split("=")[1];
+                            const name: string = conf.data.substr(2, ss - 2).split("=")[1];
                             if (name) {
                                 const item: IConfigNginx = {
                                     name: name,
@@ -120,7 +138,33 @@ export class NginxUtils {
             }
             if (this.configs.has(nameConfig)) return this.configs.get(nameConfig).config;
         }
-
         return null;
+    }
+
+    private static async generateConfig(config: string, conf: IItemConfig): Promise<IResult> {
+        const pathToConf: string = "/etc/nginx/sites-available/" + conf.domain;
+        const isConfExist: boolean = await FileManager.isExist(pathToConf);
+        if (isConfExist && !conf.isRewrite) return {error: "config is exist and isn't rewrite"};
+        else {
+            if (!isConfExist) {
+                const iRes = await FileManager.writeToNewFile(pathToConf, config);
+                if (iRes.error) return iRes;
+                else return await this.createLinkOnConfig(conf.domain);
+            } else {
+                return await FileManager.rewriteFile(pathToConf, config);
+            }
+        }
+    }
+
+    public static replaceConfig(config: string, conf: IItemConfig): string {
+        config = StringUtils.replaceAll(config, "{DOMAIN_NAME}", conf.domain);
+        config = StringUtils.replaceAll(config, "{SITE_ROOT_PATH}", conf.pathToResource);
+        config = StringUtils.replaceAll(config, "{DOMAIN_PROTOCOL}", conf.protocolServer);
+        config = StringUtils.replaceAll(config, "{NAME_SERVER}", conf.nameServerConfD);
+
+        if (conf.sslSertificate) config = StringUtils.replaceAll(config, "{SSL_CERTIFICATE}", conf.sslSertificate);
+        if (conf.sslSertificateKey) config = StringUtils.replaceAll(config, "{SSL_CERTIFICATE_KEY}", conf.sslSertificateKey);
+
+        return config
     }
 }

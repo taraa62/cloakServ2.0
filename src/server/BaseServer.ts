@@ -8,6 +8,7 @@ import {ILoggerConfig, IModuleConfig} from "./IConfig";
 import {IServer} from "./IServer";
 import {ServerConfig} from "./ServerConfig";
 
+
 export abstract class BaseServer implements IServer {
 
     protected conf: ServerConfig;
@@ -130,6 +131,12 @@ export abstract class BaseServer implements IServer {
         });
     }
 
+    protected endInitModules(): void {
+        this.modules.forEach(v => {
+            v.endInit();
+        })
+    }
+
 
     protected abstract start(): void;
 
@@ -139,7 +146,7 @@ export abstract class BaseServer implements IServer {
     }
 
     public getModule(name: string): BModule {
-        return null;
+        return this.modules.get(name);
     }
 
     public getConfigModule(name: string): IModuleConfig {

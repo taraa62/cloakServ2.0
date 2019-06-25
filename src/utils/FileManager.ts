@@ -73,11 +73,11 @@ export class FileManager {
         });
     }
 
-    static isExist(path: string): boolean {
-        return fs.existsSync(path);
+    static async isExist(path: string): Promise<boolean> {
+        return await fs.existsSync(path);
     }
 
-    static readFile(path: string, encode:BufferEncoding = "utf8"): Promise<IResult> {
+    static readFile(path: string, encode: BufferEncoding = "utf8"): Promise<IResult> {
         return new Promise((res, rej) => {
             fs.readFile(path, (err, data) => {
                 if (err) rej({error: err});

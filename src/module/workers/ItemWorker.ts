@@ -2,8 +2,9 @@ import {Random} from "../../utils/Random";
 import {MessageChannel, Worker} from "worker_threads";
 import {FileManager} from "../../utils/FileManager";
 import {IWorkerData, WorkerOption} from "./WorkerOption";
+import {IResult} from "../../utils/IUtils";
 
-
+//TODO close channels port!!!!;
 export class ItemWorker {
 
     private worker: Worker;
@@ -19,8 +20,6 @@ export class ItemWorker {
 
 
     private init(): void {
-        this.worker = new Worker(this._path);
-        this.listenerListenerWorker();
 
 
         let channel: MessageChannel = null;
@@ -31,15 +30,18 @@ export class ItemWorker {
         }
 
         const data: IWorkerData = {
-            port: channel ? channel.port1 : null,
+        //    port: channel ? channel.port1 : null,
             data: this.data
         };
         const transfer: any[] = [];
         if (channel) transfer.push(channel.port1);
 
+        this.worker = new Worker(this._path, {workerData: data});
+        this.listenerListenerWorker();
 
-        this.worker.postMessage(data, transfer);
 
+        // this.worker.postMessage(data, transfer);
+        this.worker.emit("init3", data)
 
     }
 
@@ -51,11 +53,6 @@ export class ItemWorker {
         channel.port2.on("close", (data: any) => {
             console.log('port message: ' + data);
         });
-        if (this.option.channelEvent) {
-            channel.port2.on(this.option.channelEvent, (data: any) => {
-                console.log('port message: ' + data);
-            });
-        }
     }
 
 
@@ -73,13 +70,7 @@ export class ItemWorker {
         this.worker.on("message", (val: any) => {
             console.log("worker mess: " + val);
         });
-        if (this.option.event) {
-            this.worker.on(this.option.event, (data: any) => {
-                console.log('port message: ' + data);
-            });
-        }
-
-    }
+          }
 
     public addListenerWorker(event: string | symbol, callback: Function): void {
         if (!this.listenersWorker.has(event)) {
@@ -89,6 +80,7 @@ export class ItemWorker {
             if (!_set.has(callback)) _set.add(callback);
         }
     }
+
     public addListenerChannel(event: string | symbol, callback: Function): void {
         if (!this.listenersChannel.has(event)) {
             this.listenersChannel.set(event, new Set<Function>().add(callback));
@@ -101,5 +93,26 @@ export class ItemWorker {
 
     public getId(): string {
         return this.id;
+    }
+
+
+    public async destroy(): Promise<IResult> {
+        this.data = null;
+        this.worker = null;
+        this.option = null;
+
+        this.listenersWorker.clear();
+        this.listenersWorker = null;
+
+        this.listenersChannel.clear();
+        this.listenersChannel = null;
+
+        this.worker.removeAllListeners();
+        let IRes: IResult = null;
+        await this.worker.terminate((err, code) => {
+            if (err) IRes = {error: err, code: code};
+            else IRes = {success: true, code: code};
+        });
+        return IRes;
     }
 }

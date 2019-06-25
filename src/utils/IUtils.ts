@@ -24,17 +24,19 @@ export interface IFileInfo extends IResult {
 }
 
 //**** Nginx//
-export interface  ItemConfig{
+
+export interface IItemConfig {
     nameConfig: string;
     domain: string;
     isRewrite: boolean;
-    protocol: string;
+    protocolServer: string;
     nameServerConfD: string;
+    pathToResource: string;
     sslSertificate?: string;
     sslSertificateKey?: string;
 }
 
-export interface  IConfigNginx{
-    name:string;
-    config:string;
+export interface IConfigNginx {
+    name: string;
+    config: string;
 }

@@ -1,7 +1,6 @@
 import {BModule} from "../BModule";
 import {ItemWorker} from "./ItemWorker";
 import {WorkerOption} from "./WorkerOption";
-import {NginxUtils} from "../../utils/NginxUtils";
 import {IResult} from "../../utils/IUtils";
 
 export class WorkersModule extends BModule {
@@ -10,17 +9,39 @@ export class WorkersModule extends BModule {
 
 
     async init(_wait: Function): Promise<any> {
-        const res: any = await NginxUtils.getConfig('http');
-
+        /*        const confItem: IItemConfig = {
+                    domain: "testDomain",
+                    nameConfig: "http",
+                    protocolServer: "https",
+                    isRewrite: false,
+                    nameServerConfD: "backend2",
+                    pathToResource: "/var/test/test/test"
+                };
+                const res: any = await NginxUtils.createNginxConfig(confItem);
+        */
         super.init(_wait);
     }
 
 
-    public addWorker(path: string, data: any, option: WorkerOption = null): void {
+    public addWorker(path: string, data: any, option: WorkerOption = null): ItemWorker {
         option = Object.assign(new WorkerOption(), option);
-        const worker = new ItemWorker(path, data, option);
+        const worker: ItemWorker = new ItemWorker(path, data, option);
 
         this.listWorker.set(worker.getId(), worker);
+        return worker;
+    }
+
+    public async removeWorker(id: string): Promise<IResult> {
+        try {
+            if (this.listWorker.has(id)) {
+              const iRes:IResult = await this.listWorker.get(id).destroy();
+                this.listWorker.delete(id);
+                if(iRes.error)return iRes;
+            }
+        } catch (e) {
+            return {error: e};
+        }
+        return {success: true};
     }
 
 
