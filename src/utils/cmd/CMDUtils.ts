@@ -3,18 +3,23 @@ import {Random} from "../Random";
 import {CMDResult} from "./CMDResult";
 
 
-
 export class CMDUtils {
 
     private static commandLine: any = require("node-cmd");
 
-    private dockChecker: DefCheckerDocker;
+    private static dockerUtils: DefCheckerDocker;
+
+
+    public static getDockerUtils(): DefCheckerDocker {
+        if (!this.dockerUtils) this.dockerUtils = new DefCheckerDocker();
+        return this.dockerUtils;
+    }
 
     /**
      * Результат по закінченню комманди
      * @param command
      */
-   public static async runCommandFullResult(command: string): Promise<CMDResult> {
+    public static async runCommandFullResult(command: string): Promise<CMDResult> {
         return new Promise<CMDResult>((result, rej) => {
             const com = CMDUtils.commandLine.run(command);
 

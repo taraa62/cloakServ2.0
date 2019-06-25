@@ -12,7 +12,7 @@ export class BModule {
     protected subConfig: any;
     protected isDestroy: boolean;
     protected listWait: Array<Promise<boolean>>;
-    protected logger: null;
+    protected logger: any;
 
 
     constructor(config: IModuleConfig, app: IServer, wait: Function) {

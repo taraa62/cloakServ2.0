@@ -41,6 +41,16 @@ export const config = {
     initModuleBeforeRunServe: [
         {
             isUse: true,
+            name: "mongo",
+            path: "./dist/module/db/mongo/MongoDBModule",
+            config: {
+                debug:true,
+                url: "mongodb://localhost:27017/cloaker",
+                isCheckDockerContainer: true,
+                dockContainerName: "mongodb"
+            },
+        }, {
+            isUse: true,
             name: "workers",
             path: "./dist/module/workers/WorkersModule",
             config: {},
