@@ -1,17 +1,7 @@
-export interface IDataWorker{
-    pathConfigsFolder:string;
-    db:IConfigDB
-}
-
-export interface IConfigDB {
-    debug:boolean;
-    url:string;
-}
-
-
-
+import {ObjectId} from "bson";
 
 export interface IItemConfig {
+    _id: string | ObjectId;
 
     isOnlyOne?: boolean;
     isClearDB?: boolean;

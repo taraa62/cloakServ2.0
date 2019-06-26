@@ -36,7 +36,7 @@ export class BModule {
     }
 
     getWaitInit(): Function {
-        let resp:Function = null;
+        let resp: Function = null;
         const waite = new Promise((res) => {
             resp = res;
         });
@@ -45,36 +45,37 @@ export class BModule {
     }
 
     // for simple initialization after call constructor
-    init(_wait: Function):void {
+    init(_wait: Function): void {
         _wait();
     }
 
 
-    initResolve():void {
+    initResolve(): void {
         if (this._wait && this.listWait.length < 1) {
             this._wait(true);
             delete this._wait;
         }
     }
 
-    endInit():void {
+    endInit(): void {
     } // run after initialization all modules (before and after run app)
 
-     destroy():void {
+    destroy(): void {
         console.log("destroy=>", this.name || this.constructor.name);
         this.isDestroy = true;
     }
 
-    getModule(name:string):BModule {
+    getModule(name: string): BModule {
         return this.app.getModule(name);
     }
 
-    getConfigModule(name:string):IModuleConfig {
+    getConfigModule(name: string): IModuleConfig {
         return this.app.getConfigModule(name);
     }
 
-
-
+    public getLogger(): any {
+        return this.logger;
+    }
 
 
 }

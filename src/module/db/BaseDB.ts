@@ -1,20 +1,25 @@
 import {BModule} from "../BModule";
+import {IResult} from "../../utils/IUtils";
 
 export class BaseDB extends BModule{
 
-    async insert(params:any[]) {
+    public async insert(...params:any):Promise<any> {
 
     }
 
-    async query(params:any[]) {
+    public async query(...params:any):Promise<any> {
 
     }
 
-    async update(params:any[]) {
+    public async update(...params:any):Promise<any> {
 
     }
 
-    async remove(params:any[]) {
+    public async remove(...params:any):Promise<any> {
+
+    }
+
+    public async destroy(): Promise<any> {
 
     }
 

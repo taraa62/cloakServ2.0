@@ -18,8 +18,12 @@ export class DonorModule extends BModule {
     }
 
     endInit(): void {
-        this.donorControllers.set('conf', new DonorConfigsController(this));
+        this.donorControllers.set('conf', new DonorConfigsController(this, this.getConfigForController("configsModule")));
 
+    }
+
+    private getConfigForController(name: string): any {
+        return this.subConfig[name]
     }
 
     public getWorkersModule(): WorkersModule {

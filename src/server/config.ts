@@ -44,8 +44,8 @@ export const config = {
             name: "mongo",
             path: "./dist/module/db/mongo/MongoDBModule",
             config: {
-                debug:true,
-                url: "mongodb://localhost:27017/cloaker",
+                debug: true,
+                url: "mongodb://localhost:27017/cloaker2",
                 isCheckDockerContainer: true,
                 dockContainerName: "mongodb"
             },
@@ -66,6 +66,13 @@ export const config = {
         isUse: true,
         name: "donor",
         path: "./dist/submodule/DonorModule",
-        config: {},
+        config: {
+            configsModule: {
+                pathToConfFiles: "./libs/configs/",
+                dbTable: "configs",
+                isUpdateConfWithFile:false,
+                isClearAllConfigsDB:false
+            }
+        },
     }],
 };

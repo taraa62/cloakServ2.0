@@ -1,31 +1,154 @@
-import {BaseDonorController} from "../BaseDonorController";
-import {WorkerOption} from "../../module/workers/WorkerOption";
-import {ItemWorker} from "../../module/workers/ItemWorker";
-import {FileManager} from "../../utils/InitDefUtils";
-import {IDataWorker} from "./IData";
+import {BaseDonorController, IBaseDonorConfig} from "../BaseDonorController";
+import {ReadConfFile} from "./ReadConfFile";
+import {MongoDBModule} from "../../module/db/mongo/MongoDBModule";
+import {configSchema} from "./configSchema";
+import {Model} from "mongoose";
+import {IItemConfig} from "./IData";
+import {IResult} from "../../utils/IUtils";
+import {ObjectId} from "bson";
 
+
+export interface IDonorConfigs extends IBaseDonorConfig {
+    pathToConfFiles: string;
+    dbTable: string;
+    isUpdateConfWithFile: boolean;
+    isClearAllConfigsDB: boolean;
+}
+
+/*
+    Working in main thread
+ */
 export class DonorConfigsController extends BaseDonorController {
 
-    private worker: ItemWorker;
 
-    protected init() {
-        const workPath = FileManager.getSimplePath(__dirname, "/dict/submodule/donor_configs") + "/worker/WorkerController.js";
+    //private worker: ItemWorker;
+    private sConfig: IDonorConfigs;
+    private db: MongoDBModule;
+    private confSchema = configSchema;
+    private confModel: Model<any>;
 
-        const opt: WorkerOption = <WorkerOption>{
-            isMessageChannel: true,
 
-        };
-        const data: IDataWorker = {
-            pathConfigsFolder: "./../libs/configs/",
-            db: {
-                debug: true,
-                url: "testaa"
+    protected async init(): Promise<any> {
+        this.sConfig = this.config as IDonorConfigs;
+        this.db = this.parent.getModule("mongodb") as MongoDBModule;
+        this.confModel = this.db.getModel(this.sConfig.dbTable, this.confSchema);
+
+        let fileCont: IItemConfig[];
+        if (this.sConfig.isClearAllConfigsDB) {
+            await this.db.clearDB(this.confModel).then(v => this.logger.info("all configs in db to clear")).catch(er => {
+                this.logger.error("error clear db from configs ", er);
+            })
+        }
+        if (this.sConfig.isUpdateConfWithFile) {
+            fileCont = await new ReadConfFile(this.sConfig, this.logger).check();
+        }
+
+        if (fileCont && fileCont.length > 0) {
+            for (let i = 0; i < fileCont.length; i++) {
+                await this.createNewConfig(fileCont[i]);
             }
         }
 
-
-        this.worker = this.parent.getWorkersModule().addWorker(workPath, data, opt);
-
     }
 
+
+    public async createNewConfig(conf: IItemConfig) {
+        const saveList: IItemConfig[] = await this.findConfigByDonorAndOurHost(conf.data.donorOrigin, conf.data.ourHost, conf.data.nameResourceFolder);
+        if (!this.sConfig.isUpdateConfWithFile && (!saveList || saveList && saveList.length > 0)) {
+            return "config is exist!"
+        } else {
+            await this.checkCleaner(conf, saveList);
+            return await this.db.insert(this.confModel, conf).catch(err => {
+                this.logger.error(err);
+                return err;
+            });
+        }
+        return null;
+    }
+
+    private async checkCleaner(conf: IItemConfig, list: IItemConfig[]): Promise<void> {
+        if (list.length > 0) {
+            for (let i = 0; i < list.length; i++) {
+                const iRes: IResult = await this.removeConfig(list[i]._id.toString())
+                if (iRes.error) this.logger.error(iRes.error);
+            }
+        }
+    }
+
+
+    //****** FIND*******//
+    public async findConfigByID(id: string): Promise<IItemConfig> {
+        const iRes: IResult = await this.db.query(this.confModel, {_id: this.db.getObjectID(id)});
+        if (iRes.success) return iRes.data;
+        return null;
+    }
+
+    public async findConfigCloneID(id: string | ObjectId): Promise<IItemConfig> {
+        const iRes: IResult = await this.db.query(this.confModel, {cloneID: id});
+        if (iRes.success) return iRes.data;
+        return null;
+    }
+
+
+    public async findConfigByDonorHost(host: string): Promise<IItemConfig> {
+        const iRes: IResult = await this.db.query(this.confModel, {"config.config.donor": host});
+        if (iRes.success) return iRes.data;
+        return null;
+    }
+
+    public async findConfigByOurHost(host: string): Promise<IItemConfig> {
+        const iRes: IResult = await this.db.query(this.confModel, {"config.config.serverHost": host});
+        if (iRes.success) return iRes.data;
+        return null;
+    }
+
+    public async findConfigByDonorAndOurHost(donor: string, host: string, pathResource: string): Promise<IItemConfig[]> {
+        const iRes: IResult = await this.db.query(this.confModel, {
+            $and: [
+                {"config.config.donor": donor},
+                {"config.config.serverHost": host},
+                {"config.config.pathToResourceFolder": pathResource}]
+        });
+        if (iRes.success) return iRes.data;
+        return null;
+    }
+
+    public async getUseConfigs(): Promise<IItemConfig[]> {
+        const iRes: IResult = await this.db.query(this.confModel, {"config.isUse": true});
+        if (iRes.success) return iRes.data;
+        return [];
+    }
+
+    public async getAllConfigs(): Promise<IItemConfig[]> {
+        const iRes: IResult = await this.db.query(this.confModel, {});
+        if (iRes.success) return iRes.data;
+        return [];
+    }
+
+    public async removeConfig(id: string | ObjectId): Promise<IResult> {
+        if (id instanceof String) id = this.db.getObjectID(id as string);
+        return await this.db.remove(this.confModel, {_id: id})
+    }
+
+
+    /*  private testWorker() {
+          const workPath = FileManager.getSimplePath(__dirname, "/dict/submodule/donor_configs") + "/worker/WorkerController.js";
+
+          const opt: WorkerOption = <WorkerOption>{
+              isMessageChannel: true,
+
+          };
+          const data: IDataWorker = {
+              pathConfigsFolder: "./../libs/configs/",
+              db: {
+                  debug: true,
+                  url: "testaa"
+              }
+          }
+
+
+          this.worker = this.parent.getWorkersModule().addWorker(workPath, data, opt);
+
+      }
+  */
 }

@@ -1,15 +1,21 @@
 import {DonorModule} from "./DonorModule";
 
+export interface IBaseDonorConfig {
+
+}
+
 export class BaseDonorController {
 
-    constructor(protected parent: DonorModule) {
+    protected logger: any;
+
+    constructor(protected parent: DonorModule, protected config: IBaseDonorConfig) {
+        this.logger = parent.getLogger();
         this.init();
     }
 
-    protected init(){
+    protected init() {
 
     }
-
 
 
 }
