@@ -1,12 +1,19 @@
 import mongoose from "mongoose";
+import { IItemConfig} from "./IData";
+import {ObjectId} from "bson";
 
-export const configSchema = new mongoose.Schema({
-    userCreate: String,
-    userEdit: String,
-    config: Object,
-    cloneID: String,
-    dateCreate: Date,
-    timeStartEdit: Date
+const _configSchema = new mongoose.Schema<IItemConfig>({
+
+    isOnlyOne: Boolean,
+    isClearDB: Boolean,
+    isCheckFile: Boolean,
+
+    isUse: Boolean,
+    updatedBy: Boolean,
+    updatedAt: Boolean,
+    data: Object,
 }, {
     timestamps: true
 });
+
+export const configSchema = _configSchema;

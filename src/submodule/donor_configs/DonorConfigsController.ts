@@ -31,7 +31,7 @@ export class DonorConfigsController extends BaseDonorController {
     protected async init(): Promise<any> {
         this.sConfig = this.config as IDonorConfigs;
         this.db = this.parent.getModule("mongodb") as MongoDBModule;
-        this.confModel = this.db.getModel(this.sConfig.dbTable, this.confSchema);
+        this.confModel = this.db.getModel(this.sConfig.dbTable, configSchema);
 
         let fileCont: IItemConfig[];
         if (this.sConfig.isClearAllConfigsDB) {
@@ -45,7 +45,9 @@ export class DonorConfigsController extends BaseDonorController {
 
         if (fileCont && fileCont.length > 0) {
             for (let i = 0; i < fileCont.length; i++) {
-                await this.createNewConfig(fileCont[i]);
+               const res =  await this.createNewConfig(fileCont[i]);
+
+               console.log(111)
             }
         }
 
@@ -58,6 +60,7 @@ export class DonorConfigsController extends BaseDonorController {
             return "config is exist!"
         } else {
             await this.checkCleaner(conf, saveList);
+
             return await this.db.insert(this.confModel, conf).catch(err => {
                 this.logger.error(err);
                 return err;

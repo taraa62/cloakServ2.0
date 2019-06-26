@@ -1,0 +1,125 @@
+{
+  "data": {
+    "donorOrigin": "https://a.belochki.info",
+    "ourHost": "tess",
+    "nameResourceFolder": "./resource2/ritcapuk_5.com",
+    "fraudfilter": {
+      "isUse": false,
+      "fraudfilterList": [
+        {
+          "safeUrl": "/safe/",
+          "moneyUrl": "/myPage/",
+          "apiUrl": "http://130.211.20.155/l7rak",
+          "XFFP": "a12f5e0a-0805-4fc0-9745-decb71ed5ad9",
+          "safeUrlStrictBehavior": true,
+          "moneyUrlStrictBehavior": true,
+          "authExpirationTime": "1m"
+        },
+        {
+          "safeUrl": "/",
+          "moneyUrl": "/myPage/",
+          "apiUrl": "http://130.211.20.155/l7rak",
+          "XFFP": "a12f5e0a-0805-4fc0-9745-decb71ed5ad9",
+          "safeUrlStrictBehavior": false,
+          "moneyUrlStrictBehavior": false,
+          "authExpirationTime": "1m"
+        }
+      ]
+    },
+    "listSubHost": [
+      {
+        "isUse": false,
+        "serverHost": "ironsky.today",
+        "nginx": {
+          "ssl": true,
+          "sslStrictMod": true,
+          "isRewriteConfigNginx": true,
+          "pathSslCertificate": "/etc/nginx/ssl/cert.pem",
+          "pathSslCertificateKey": "/etc/nginx/ssl/cert.key"
+        },
+        "fraudfilter": {
+          "isUse": true,
+          "fraudfilterList": [
+            {
+              "safeUrl": "/ssss",
+              "moneyUrl": "aaaaaa/",
+              "safeUrlStrictBehavior": true,
+              "moneyUrlStrictBehavior": false,
+              "authExpirationTime": "10m"
+            }
+          ]
+        },
+        "googleManagerID": "ssssssssss"
+      }
+    ],
+    "cleaner": {
+      "isClearInvConfig": false,
+      "isClearOnlyHTML": false,
+      "isClearSubDomains": false,
+      "isClearAllNotLocalFiles": false,
+      "isClearResourceFolder": true
+    },
+
+    "GET": {
+      "removeHead": [
+        "server"
+      ],
+      "editHead": {
+        "who": "I'm"
+      }
+    },
+    "blackParamForSave": [],
+    "prioritySaveParam": [
+      "t",
+      "d"
+    ],
+    "pathToLocalResources": [
+      "/_localFiles"
+    ],
+    "googleManagerID": "ttTTTTtt",
+    "regulations": [
+      {
+        "pages": [
+          "/"
+        ],
+        "regular": [
+          {
+            "process": "post",
+            "event": "e",
+            "reg": {
+              "innerHTML": "Богдан.... ти... ой всьо!!!!"
+            },
+            "where": {
+              "queryAll": ".col-sm-12.col-md-12.home-title h1"
+            }
+          }
+        ]
+      }
+    ],
+    "invalidation": {
+      "invTime": {
+        "images": "none"
+      },
+      "urlNoCache": {
+        "indexOf": [
+          "site-tools/search/"
+        ],
+        "startsWith": [],
+        "endsWith": [],
+        "exactly": []
+      },
+      "invEditUrl": [
+        {
+          "url": "in6dex.html",
+          "fUrl": "indexOf",
+          "check": "time",
+          "value": "10m"
+        }
+      ]
+    },
+    "nginx": {}
+  },
+  "isUse": true,
+  "updated_by": "t62",
+  "updated_at": "2019-04-19T13:04:17.604Z"
+}

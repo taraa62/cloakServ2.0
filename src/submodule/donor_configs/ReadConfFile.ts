@@ -2,6 +2,7 @@ import {IDonorConfigs} from "./DonorConfigsController";
 import {FileManager} from "../../utils/FileManager";
 import {ServerConfig} from "../../server/ServerConfig";
 import {IItemConfig} from "./IData";
+import {IResult} from "../../utils/IUtils";
 
 
 export class ReadConfFile {
@@ -19,20 +20,20 @@ export class ReadConfFile {
 
     private async getConfigs(path: string): Promise<IItemConfig[]> {
         const result: Array<IItemConfig> = [];
-        const list = await FileManager.getFileInFolder(path).catch(er => {
+        const list:IResult = await FileManager.getFileInFolder(path).catch(er => {
             return null;
         });
-        if (list && list.length > 0) {
-            for (let i = 0, y = list.length; i < y; i++) {
+        if (list.success && list.data.length > 0) {
+            for (let i = 0, y = list.data.length; i < y; i++) {
                 try {
-                    const v = list[i];
+                    const v = list.data[i];
                     if (v.info.isFile) {
                         let obj = await FileManager.readFile(v.path).catch(er => {
                             return null
                         });
 
                         if (obj) {
-                            obj = JSON.parse(obj.toString());
+                            obj = JSON.parse(obj.data.toString());
                             result.push(obj);
                         }
                     }

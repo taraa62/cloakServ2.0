@@ -41,10 +41,10 @@ export const config = {
     initModuleBeforeRunServe: [
         {
             isUse: true,
-            name: "mongo",
+            name: "mongodb",
             path: "./dist/module/db/mongo/MongoDBModule",
             config: {
-                debug: true,
+                debug: false,
                 url: "mongodb://localhost:27017/cloaker2",
                 isCheckDockerContainer: true,
                 dockContainerName: "mongodb"
@@ -70,7 +70,7 @@ export const config = {
             configsModule: {
                 pathToConfFiles: "./libs/configs/",
                 dbTable: "configs",
-                isUpdateConfWithFile:false,
+                isUpdateConfWithFile:true,
                 isClearAllConfigsDB:false
             }
         },
