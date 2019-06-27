@@ -1,0 +1,165 @@
+{
+    "canDoRequestToDonor": true,
+    "basePathToResourceFolder": "./resource2/",
+    "maskAcceptContentType": [
+        "images/",
+        "image/",
+        "application/",
+        "audio/",
+        "video/",
+        "text/",
+        "font/",
+        "application/"
+    ],
+    "maskEditContentType": [
+        "/htm"
+    ],
+    "maskEditBeforeSendToClient": [
+        "/htm"
+    ],
+    "maskTextReplaceBeforeSafe": [
+        "text/",
+        "application/"
+    ],
+    "maskAutoRedirectResponse": [
+        "image/",
+        "font/",
+        "audio/",
+        "video/",
+        "images/",
+        "application/"
+    ],
+    "blackWordStarts": [
+        "javascript",
+        "about:"
+    ],
+    "listBlackChatLinks": [
+        "embed.tawk.to",
+        "code.jivosite.com",
+        "code.tidio.co"
+    ],
+    "listBlackScripts": [
+        "mc.yandex.ru/metrika",
+        "static.zdassets.com",
+        "cdn.blitz-market.ru",
+        "cloudflare-static",
+        "document.location =",
+        "document.location=",
+        "call.chatra.io",
+        "googletagmanager.com",
+        "recaptcha",
+        "www.google-analytics.com",
+        "GoogleAnalyticsObject",
+        "api-maps.yandex.ru",
+        "yandexMaps.js",
+        "vk.com/share.php",
+        "yastatic.net/share",
+        "counter.yadro.ru"
+    ],
+    "listBlackNoScript": [
+        "mc.yandex.ru/watch",
+        "googletagmanager.com"
+    ],
+    "listMeta": [
+        "google-site-verification",
+        "msvalidate.01",
+        "yandex-verification"
+    ],
+    "maxUseParamForSaveFile": 2,
+    "blackParamForSave": [
+        "_",
+        "callback",
+        "tm"
+    ],
+    "prioritySaveParam": [
+        "v",
+        "ver",
+        "version",
+        "_v",
+        "name",
+        "rev"
+    ],
+    "proxy": {
+        "proxyList": [
+            [
+                false,
+                "socks5",
+                "176.114.8.14",
+                65234,
+                "evgeniyadsf",
+                "K9z3LwM",
+                "Kso19qoIlFmSOcc=="
+            ],
+            [
+                false,
+                "socks5",
+                "176.107.179.106",
+                65234,
+                "evgeniyadsf",
+                "K9z3LwM",
+                "FEwegethervetvdts=="
+            ],
+            [
+                false,
+                "https",
+                "176.114.8.14",
+                65233,
+                "evgeniyadsf",
+                "K9z3LwM",
+                "DfwqqFqwF32e=="
+            ],
+            [
+                false,
+                "http",
+                "194.67.196.5:",
+                34512,
+                "evgeniyadsf",
+                "K9z3LwM",
+                "dwefetwv3qdaz=="
+            ],
+            [
+                false,
+                "socks5",
+                "194.67.196.5",
+                34513,
+                "evgeniyadsf",
+                "K9z3LwM",
+                "cew4fqeraac4af=="
+            ],
+            [
+                true,
+                "socks5",
+                "91.229.79.201",
+                8000,
+                "5kTc78",
+                "RFMAqk",
+                "dewfwe5hgaexdcq=="
+            ]
+        ],
+        "proxyName": "t62Session"
+    },
+    "defListInvAutoTime": [
+        "30m",
+        "1h",
+        "2h30m",
+        "6h",
+        "12h",
+        "1d",
+        "2d",
+        "5d",
+        "10d",
+        "20d",
+        "30d"
+    ],
+    "defInvTime":{
+        "def": "none"
+    },
+    "fraudfilter": {
+        "nameCookies": "watchT62",
+        "authExpirationTime": "1m"
+    },
+    "topGoogleManager": "<!-- Google Tag Manager -->\n  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':\n  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],\n  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=\n  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);\n  })(window,document,'script','dataLayer','{GOOGLE_ID}');</script>\n  <!-- End Google Tag Manager -->",
+    "bottomGoogleManager": "<!-- Google Tag Manager (noscript) -->\n<noscript><iframe src=\"https://www.googletagmanager.com/ns.html?id={GOOGLE_ID}\"\n                  height=\"0\" width=\"0\" style=\"display:none;visibility:hidden\"></iframe></noscript>\n<!-- End Google Tag Manager (noscript) -->",
+    "updated_by": "t62",
+    "updated_at": "2019-05-22T07:01:25.776Z"
+}

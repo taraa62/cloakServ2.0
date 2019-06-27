@@ -28,7 +28,7 @@ export class DonorConfigsController extends BaseDonorController {
     private confModel: Model<any>;
 
 
-    protected async init(): Promise<any> {
+    public async init(): Promise<IResult> {
         this.sConfig = this.config as IDonorConfigs;
         this.db = this.parent.getModule("mongodb") as MongoDBModule;
         this.confModel = this.db.getModel(this.sConfig.dbTable, configSchema);
@@ -50,7 +50,7 @@ export class DonorConfigsController extends BaseDonorController {
                console.log(111)
             }
         }
-
+        return super.init()
     }
 
 

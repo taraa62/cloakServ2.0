@@ -12,11 +12,10 @@ export class MongoDBModule extends BaseDB {
 
     private isRunDB: boolean = false;
 
-    async init(wait: Function): Promise<any> {
+    public async init(): Promise<IResult> {
         await this.checkDocker();
         await this.connectToDB();
-
-        super.init(wait);
+        return super.init();
     }
 
     private async checkDocker(): Promise<any> {

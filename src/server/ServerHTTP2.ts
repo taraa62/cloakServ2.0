@@ -1,77 +1,60 @@
 import {BaseServer} from "./BaseServer";
 import {FileManager} from "../utils/FileManager";
-import {RequestListener} from "http";
-import {Http2ServerRequest, Http2ServerResponse, ServerHttp2Session} from "http2";
+import {Http2ServerRequest, Http2ServerResponse} from "http2";
+import {IResult} from "../utils/IUtils";
 
 export class ServerHTTP2 extends BaseServer {
 
 
-    protected server: any;
+    protected async upServer(): Promise<IResult> {
 
-    protected async start(): Promise<any> {
-        const isInit: boolean = await this.initModules(this.conf.getInitModuleBefore()).then((v) => true).catch((er) => false);
-        if (isInit) {
-            const isInit2: boolean = await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
-
-            if(isInit2){
-                await this.endInitModules();
-            }
-
-            return
-
-            this.logger.info("all modules initialization before up server");
-            const port = this.conf.config.server.port || 8080;
+        return new Promise<IResult>(async (res, rej) => {
+            try {
+                const port = this.conf.config.server.port || 8080;
 
 
-            const httpsHandler: RequestListener = (req: any, res: any) => {
-                console.log(req.url);
-                // send empty response for favicon.ico
-                if (req.url === "/favicon.ico") {
-                    res.writeHead(200);
-                    res.end();
-                    return;
-                }
-            };
-
-            const opt = {
-                key: FileManager._fs.readFileSync(this.conf.dirProject + '/key.pem'),
-                cert: FileManager._fs.readFileSync(this.conf.dirProject + '/cert.pem'),
-                allowHTTP1: true,
-            };
+                const opt = {
+                    key: FileManager._fs.readFileSync(this.conf.dirProject + '/libs/https/key.pem'),
+                    cert: FileManager._fs.readFileSync(this.conf.dirProject + '/libs/https/cert.pem'),
+                    allowHTTP1: true,
+                };
 
 
-            const http2 = await require("http2");
-            /*const server = http2.createSecureServer(opt);
-            server.on('stream', (stream: any, headers: any) => {
-                stream.respond({
-                    'content-type': 'text/html',
-                    ':status': 200
+                const http2 = await require("http2");
+                /*const server = http2.createSecureServer(opt);
+                server.on('stream', (stream: any, headers: any) => {
+                    stream.respond({
+                        'content-type': 'text/html',
+                        ':status': 200
+                    });
+                    stream.end('<h1>Hello World</h1>');
                 });
-                stream.end('<h1>Hello World</h1>');
-            });
 
-            server.on('session', (session: ServerHttp2Session) => {
-               console.log('ssqws');
-            });
-            server.on('sessionError', (er: Error) => {
-                console.log(er);
-            });*/
+                server.on('session', (session: ServerHttp2Session) => {
+                   console.log('ssqws');
+                });
+                server.on('sessionError', (er: Error) => {
+                    console.log(er);
+                });
 
 
-            const server = http2.createSecureServer(opt,  (request: Http2ServerRequest, response: Http2ServerResponse) => {
+                this.server = http2.createSecureServer(opt, (request: Http2ServerRequest, response: Http2ServerResponse) => {
 
 
-            })
+                });*/
 
+                this.server = http2.createSecureServer(opt);
 
-            server.listen(port, async () => {
-                const isInit: boolean = await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
-                if (isInit) {
-                    await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
-                    console.log("----- all module initialization----------");
-                }
-            });
-        }
+                this.server.listen(port, async () => {
+                    this.logger.info(`serve listener post: ${port}`);
+                    await require("../utils/ServerResponse");
+                    res({success: true});
+                });
+            } catch (e) {
+                rej({error: e});
+            }
+        })
+
     }
 }
 

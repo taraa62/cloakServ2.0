@@ -1,4 +1,4 @@
-import express, {Request, Response, Router} from "express";
+import express from "express";
 import {Signals} from "../const/Signals";
 import {BModule} from "../module/BModule";
 import {BLogger} from "../module/logger/BLogger";
@@ -7,6 +7,8 @@ import {FileManager} from "../utils/FileManager";
 import {ILoggerConfig, IModuleConfig} from "./IConfig";
 import {IServer} from "./IServer";
 import {ServerConfig} from "./ServerConfig";
+import {IResult} from "../utils/IUtils";
+import {ClassUtils} from "../utils/ClassUtils";
 
 
 export abstract class BaseServer implements IServer {
@@ -16,6 +18,9 @@ export abstract class BaseServer implements IServer {
     protected logger: BLogger;
     protected appExp: express.Application;
     protected modules: Map<string, BModule>;
+    protected server: any;
+    protected isDestroy: boolean = false;
+    protected isStopInit: boolean = false;
 
 
     constructor() {
@@ -37,7 +42,7 @@ export abstract class BaseServer implements IServer {
     private async appendLogger<T>(): Promise<any> {
         const configLogger: ILoggerConfig = this.conf.config.logger;
         if (configLogger) {
-            this.logModule = await FileManager.createNewClass(configLogger.path, this.conf.dirProject, configLogger, null, null);
+            this.logModule = await ClassUtils.createNewClass(configLogger.path, this.conf.dirProject, configLogger, null, null);
 
             // const _l = require(FileManager.getSimplePath(configLogger.path, this.conf.dirProject));
             // const mod: any = Object.values(_l)[0];
@@ -57,12 +62,12 @@ export abstract class BaseServer implements IServer {
         this.modules = new Map<string, BModule>();
 
 
-        const route: Router = express.Router();
+        /* const route: Router = express.Router();
 
-        route.get("/test", (req: Request, res: Response, next: Function) => {
-            res.send({message: "Hello client GET"});
-        });
-        this.appExp.use("/", route);
+         route.get("/test", (req: Request, res: Response, next: Function) => {
+             res.send({message: "Hello client GET"});
+         });
+         this.appExp.use("/", route);*/
     }
 
     private appendDevModule(): void {
@@ -105,40 +110,87 @@ export abstract class BaseServer implements IServer {
         });
     }
 
-    protected async initModules(list: IModuleConfig[]): Promise<any> {
-        const _listPromiseInit: Array<Promise<any>> = [];
+    protected async initModules(list: IModuleConfig[]): Promise<boolean> {
+        let initModule: boolean = true;
         if (list && list.length > 0) {
-            list.map(async (v: IModuleConfig) => {
+            // list.map(async (v: IModuleConfig) => {
+
+            for (const v of list) {
+
+
                 if (v.isUse) {
                     if (!this.modules.has(v.name)) {
-                        const modul = new Promise(async (res, rej) => {
-                            const m: BModule = await FileManager.createNewClass(v.path, this.conf.dirProject, v, this, res);
-                            if (m) this.modules.set(v.name, m);
-                            else res(true);
-                        });
-                        _listPromiseInit.push(modul);
+
+                        const m: BModule = await ClassUtils.createNewClass(v.path, this.conf.dirProject, v, this);
+                        if (m) {
+                            const iRes: IResult = await m.init();
+                            if (iRes.success) this.modules.set(v.name, m);
+                            else {
+                                initModule = false;
+                                this.logger.error(iRes.error);
+                            }
+                        } else {
+                            this.logger.info(`module ${v.name}  path ${v.path} not initialization`);
+                        }
                     } else {
-                        this.logger.info(`module ${v.name}  path ${v.path} not initialization`);
+                        this.logger.info(`duplicate module ${v.name}  path ${v.path}`);
                     }
                 }
+            }
+        }
+
+        if (!initModule) {
+            this.logger.error("----- ERROR inti modules before up server");
+        }
+        return initModule;
+    }
+
+    protected async endInitModules(): Promise<void> {
+        for (let v of this.modules.values()) {
+            const res: IResult = await v.endInit();
+            if (res.error) {
+                this.logger.error(res.error);
+                if (!this.isStopInit) {
+                    this.isStopInit = true;
+                    process.nextTick(() => {
+                        (process as any).emit(Signals.moduleError, "error initialization 'module after'");
+                    });
+                }
+
+            }
+        }
+    }
+
+
+    private async start(): Promise<any> {
+        let isInit: boolean = await this.initModules(this.conf.getInitModuleBefore()).then((v) => true).catch((er) => false);
+        if (isInit) {
+            this.logger.info("all modules initialization before up server");
+            const iRes: IResult = await this.upServer().catch(er => er);
+            if (iRes.success) {
+                isInit = await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
+                if (isInit) {
+                    await this.endInitModules();
+                    if(!this.isStopInit) console.log("----- all module initialization----------");
+                    else console.log("----- error initialization module in endInit ----------");
+                } else {
+                    process.nextTick(() => {
+                        (process as any).emit(Signals.moduleError, "error initialization 'module after'");
+                    });
+                }
+            } else {
+                this.logger.error(iRes.error);
+                (process as any).emit(Signals.coreError, "error up server!!!!!!!");
+            }
+        } else {
+            process.nextTick(() => {
+                (process as any).emit(Signals.moduleError, "error initialization 'module before'");
             });
         }
-        await Promise.all(_listPromiseInit).then((v) => {
-            console.log('anit end!')
-        }).catch((er) => {
-            this.logger.error(er);
-            this.logger.error("----- ERROR inti modules before up server");
-        });
-    }
-
-    protected endInitModules(): void {
-        this.modules.forEach(v => {
-            v.endInit();
-        })
-    }
+    };
 
 
-    protected abstract start(): void;
+    protected abstract upServer(): Promise<IResult>;
 
     // ****** GET**///
     public getLoggerModule(): LoggerModule {

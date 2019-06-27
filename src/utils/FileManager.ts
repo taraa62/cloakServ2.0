@@ -11,19 +11,6 @@ export class FileManager {
     public static _fs: any = fs;
 
 
-    static async createNewClass<T>(pathTo: string, pathRarent: string = null, ...ags: any[]): Promise<T> {
-        try {
-            const path = FileManager.getSimplePath(pathTo, pathRarent);
-            const _l = await require(path);
-            const mod: any = Object.values(_l)[0];
-            const res: T = new mod(...ags);
-            return res;
-        } catch (e) {
-            console.error(e);
-        }
-        return null;
-    }
-
     static backFolder(path: string, num: number): string {
         const arr = path.split(this._path.sep);
         arr.shift();
@@ -80,8 +67,8 @@ export class FileManager {
     static readFile(path: string, encode: BufferEncoding = "utf8"): Promise<IResult> {
         return new Promise((res, rej) => {
             fs.readFile(path, (err, data) => {
-                if (err) rej({error: err});
-                else res({success: true, data: data.toString(encode)});
+                if (err) rej(IResult.error(err));
+                else res(IResult.succData(data.toString(encode)));
             });
         });
     }

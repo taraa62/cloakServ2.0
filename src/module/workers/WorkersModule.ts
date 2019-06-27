@@ -8,7 +8,7 @@ export class WorkersModule extends BModule {
     private listWorker: Map<string, ItemWorker> = new Map();
 
 
-    async init(_wait: Function): Promise<any> {
+    public async init(): Promise<any> {
         /*        const confItem: IItemConfig = {
                     domain: "testDomain",
                     nameConfig: "http",
@@ -19,7 +19,7 @@ export class WorkersModule extends BModule {
                 };
                 const res: any = await NginxUtils.createNginxConfig(confItem);
         */
-        super.init(_wait);
+       return  super.init();
     }
 
 

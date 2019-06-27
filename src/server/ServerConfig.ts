@@ -5,7 +5,7 @@ import {BaseServer} from "./BaseServer";
 
 export class ServerConfig {
 
-    public NODE_ENV: string = (process.argv.indexOf("--dev") === -1) ? "production" : "test";
+    public NODE_ENV: string = "test";
 
     public dirProject: string = "";
     public version: string = "";

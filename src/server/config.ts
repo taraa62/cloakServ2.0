@@ -1,17 +1,17 @@
 export const config = {
-    nameApp: "cloaker server",
-    version: "1.1",
     mode: "dev",
-    path: "./ServerHTTP",
-    room: "cloaker",
-    type: "test",
-    name: "cloker_parent",
     contentTypes: require("../const/content-type"),
     server: {
+        type: "http",   //"http" | "http2"
         port: 8082,
         x_powered_by: "mask",
         listDisableRoute: ["/", "/favicon.ico"],
         corsWhitelist: ["http://localhost:4200", "http://localhost:8080", "*"],
+    },
+    adminConnection: {
+        room: "cloaker",
+        type: "test",
+        name: "cloker_parent",
     },
     logger: {
         // must be the two element
@@ -55,7 +55,7 @@ export const config = {
             path: "./dist/module/workers/WorkersModule",
             config: {},
         }, {
-            isUse: false,
+            isUse: true,
             name: "route",
             path: "./dist/module/route/RouteModule",
             config: {},
@@ -68,10 +68,13 @@ export const config = {
         path: "./dist/submodule/DonorModule",
         config: {
             configsModule: {
-                pathToConfFiles: "./libs/configs/",
+                pathToConfFiles: "./libs/configs/site/",
                 dbTable: "configs",
-                isUpdateConfWithFile:true,
-                isClearAllConfigsDB:false
+                isUpdateConfWithFile: false,
+                isClearAllConfigsDB: false
+            },
+            itemController: {
+                baseConfig:"./libs/configs/base.config.json"
             }
         },
     }],

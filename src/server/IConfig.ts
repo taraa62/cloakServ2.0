@@ -1,9 +1,15 @@
 export interface IServerConfig {
+    type: string;
     port: number;
     x_powered_by: string;
     listDisableRoute: string[];
     corsWhitelist: string[];
 
+}
+export interface IAdminConfig {
+    room: string;
+    type: string;
+    name: string;
 }
 
 export interface ILoggerConfig {
@@ -19,16 +25,12 @@ export interface IModuleConfig {
 }
 
 export interface IConfig {
-    nameApp: string;
-    version: string;
     mode: string;
-    path: string;
-    room: string;
-    type: string;
-    name: string;
     contentTypes: any;
     server: IServerConfig;
+    adminConnection: IAdminConfig,
     logger: ILoggerConfig;
     initModuleBeforeRunServe: IModuleConfig[];
     initModuleAfterRunServe: IModuleConfig[];
 }
+
