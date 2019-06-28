@@ -11,22 +11,23 @@ import {CloakerController} from "../module/route/HttpControllers/CloakerControll
 import {ItemController} from "./donor_general/ItemController";
 import {ClassUtils} from "../utils/InitDefUtils";
 
+
 export class DonorModule extends BModule {
 
-    private donorControllers: Map<String, BaseDonorController> = new Map<String, BaseDonorController>();
+    private donorControllers: Map<CONTROLLERS, BaseDonorController>;
     private workers: WorkersModule;
 
 
     public async init(): Promise<IResult> {
+        this.donorControllers = new Map<CONTROLLERS, BaseDonorController>();
         this.workers = (<WorkersModule>this.getModule('workers'));
-
 
         return super.init();
     }
 
     public async endInit(): Promise<IResult> {
-        this.donorControllers.set('conf', new DonorConfigsController(this, this.getConfigForController("configsModule")));
-        this.donorControllers.set('itemController', new ItemController(this, this.getConfigForController("itemController")));
+        this.donorControllers.set(CONTROLLERS.CONFIGS, new DonorConfigsController(this, this.getConfigForController(CONTROLLERS.CONFIGS)));
+        this.donorControllers.set(CONTROLLERS.ITEM, new ItemController(this, this.getConfigForController(CONTROLLERS.ITEM)));
 
         const initContr: IResult = await ClassUtils.initClasses(this.donorControllers).catch((er) => IResult.error(er));
         if (initContr.error) return initContr;
@@ -47,8 +48,11 @@ export class DonorModule extends BModule {
         (<CloakerController>route.getSubControllerHttp("cloaker")).registerHOST(host, controller);
     }
 
+    public getController(name: CONTROLLERS): BaseDonorController {
+        return this.donorControllers.get(name);
+    }
 
-    private getConfigForController(name: string): any {
+    private getConfigForController(name: CONTROLLERS): any {
         return this.subConfig[name]
     }
 
@@ -59,4 +63,9 @@ export class DonorModule extends BModule {
     public async destroy(): Promise<IResult> {
         return IResult.success;  //TODO destroy!!!!!
     }
+}
+
+export enum CONTROLLERS {
+    CONFIGS = 'CONFIGS',
+    ITEM = 'ITEM'
 }

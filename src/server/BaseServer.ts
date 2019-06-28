@@ -26,7 +26,6 @@ export abstract class BaseServer implements IServer {
     constructor() {
         console.log("---------START RUN INITIALIZATION SERVER-----------");
         this.conf = (process as any).constant.conf;
-        this.conf.dirProject = FileManager.backFolder(__dirname, 2);
         this.conf.app = this;
         this.init();
     }
@@ -77,7 +76,7 @@ export abstract class BaseServer implements IServer {
         }
     }
 
-
+//TODO  -доробити зупинку сервера!!!!!!!!!!!
     private appendProcessListeners(): void {
         process.on("exit", async (code: number) => {
             this.logger.error(`About to exit with code: ${code}`);
@@ -149,7 +148,7 @@ export abstract class BaseServer implements IServer {
         for (let v of this.modules.values()) {
             const res: IResult = await v.endInit();
             if (res.error) {
-                this.logger.error(res.error);
+                this.logger.error(res);
                 if (!this.isStopInit) {
                     this.isStopInit = true;
                     process.nextTick(() => {

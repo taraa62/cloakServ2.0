@@ -94,13 +94,13 @@ export class DonorConfigsController extends BaseDonorController {
 
 
     public async findConfigByDonorHost(host: string): Promise<IItemConfig> {
-        const iRes: IResult = await this.db.query(this.confModel, {"config.config.donor": host});
+        const iRes: IResult = await this.db.query(this.confModel, {"data.donorOrigin": host});
         if (iRes.success) return iRes.data;
         return null;
     }
 
     public async findConfigByOurHost(host: string): Promise<IItemConfig> {
-        const iRes: IResult = await this.db.query(this.confModel, {"config.config.serverHost": host});
+        const iRes: IResult = await this.db.query(this.confModel, {"data.ourHost": host});
         if (iRes.success) return iRes.data;
         return null;
     }
@@ -108,16 +108,16 @@ export class DonorConfigsController extends BaseDonorController {
     public async findConfigByDonorAndOurHost(donor: string, host: string, pathResource: string): Promise<IItemConfig[]> {
         const iRes: IResult = await this.db.query(this.confModel, {
             $and: [
-                {"config.config.donor": donor},
-                {"config.config.serverHost": host},
-                {"config.config.pathToResourceFolder": pathResource}]
+                {"data.donorOrigin": donor},
+                {"data.ourHost": host},
+                {"data.nameResourceFolder": pathResource}]
         });
         if (iRes.success) return iRes.data;
         return null;
     }
 
     public async getUseConfigs(): Promise<IItemConfig[]> {
-        const iRes: IResult = await this.db.query(this.confModel, {"config.isUse": true});
+        const iRes: IResult = await this.db.query(this.confModel, {"isUse": true});
         if (iRes.success) return iRes.data;
         return [];
     }

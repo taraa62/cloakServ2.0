@@ -31,10 +31,27 @@ export class IResult implements IResult {
     public static errorMsg(e: Error | any, msg: any, code: number = undefined): IResult {
         return {error: e, msg: msg, code: code} as IResult;
     }
+
+    public static resultToString(obj: IResult = null): string {
+        if (!obj) return "";
+        let res: string = "IResult: ";
+        if (obj.error) {
+            if (obj.error instanceof Error) {
+                `[ERROR]: message: ${obj.error.message}  stack: \n ${obj.error.stack}`;
+            } else {
+                res += `[ERROR]: ${obj.error.toString()}`
+            }
+        }
+        if (obj.code) res += "  [CODE]" + obj.code;
+        if (obj.success) res += "  [SUCCESS]" + obj.success;
+        if (obj.msg) res += "  [MSG]" + obj.msg.toString();
+        if (obj.data) res += "  [DATA]" + obj.data.toString();
+        return res;
+    }
 }
 
-
-export interface IFileInfo extends IResult {
+export interface IFileInfo
+    extends IResult {
     size: number;
     mode: string;
     othersExecute: string;

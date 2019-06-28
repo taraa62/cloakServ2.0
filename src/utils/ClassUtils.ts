@@ -31,14 +31,15 @@ export class ClassUtils {
     }
 
 
-    static async createNewClass<T>(pathTo: string, pathRarent: string = null, ...ags: any[]): Promise<T> {
+    static async createNewClass<T>(pathTo: string, pathParent: string = null, ...ags: any[]): Promise<T> {
+        const path = FileManager.getSimplePath(pathTo, pathParent);
         try {
-            const path = FileManager.getSimplePath(pathTo, pathRarent);
             const _l = await require(path);
             const mod: any = Object.values(_l)[0];
             const res: T = new mod(...ags);
             return res;
         } catch (e) {
+            console.error("error in init module=>" + path);
             console.error(e);
         }
         return null;

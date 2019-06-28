@@ -67,13 +67,13 @@ export const config = {
         name: "donor",
         path: "./dist/submodule/DonorModule",
         config: {
-            configsModule: {
+            CONFIGS: {
                 pathToConfFiles: "./libs/configs/site/",
                 dbTable: "configs",
-                isUpdateConfWithFile: false,
+                isUpdateConfWithFile: true,
                 isClearAllConfigsDB: false
             },
-            itemController: {
+            ITEM: {
                 baseConfig:"./libs/configs/base.config.json"
             }
         },

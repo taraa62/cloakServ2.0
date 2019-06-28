@@ -2,12 +2,13 @@ import {ENV} from "../const/System";
 import {FileManager} from "../utils/FileManager";
 import {IConfig, ILoggerConfig, IModuleConfig, IServerConfig} from "./IConfig";
 import {BaseServer} from "./BaseServer";
+import {IResult} from "../utils/IUtils";
 
 export class ServerConfig {
 
     public NODE_ENV: string = "test";
 
-    public dirProject: string = "";
+    public dirProject: string = FileManager.backFolder(__dirname, 2);
     public version: string = "";
 
 
@@ -21,8 +22,8 @@ export class ServerConfig {
     }
 
     public async updVersionServer(): Promise<any> {
-        const json: any = await FileManager.readFile(this.dirProject + "/package.json").catch((er) => '{"version":"undefined"}');
-        this.version = JSON.parse(json).version;
+        const json: IResult = await FileManager.readFile(this.dirProject + "/package.json").catch((er) => '{"version":"undefined"}') as IResult;
+        this.version = JSON.parse(json.data).version;
     }
 
     public isDEV(): boolean {
