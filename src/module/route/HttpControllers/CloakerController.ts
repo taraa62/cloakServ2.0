@@ -1,5 +1,6 @@
 import {Controller} from "./Controller";
 import {IResult} from "../../../utils/IUtils";
+import {Request, Response} from "express";
 
 export class CloakerController extends Controller {
 
@@ -15,6 +16,12 @@ export class CloakerController extends Controller {
     registerHOST(host: string, controller: any): void {
         if (host && controller)
             this.listSubController.set(host, controller);
+    }
+
+    async run(action: string, req: Request, res: Response, next: Function): Promise<any> {
+        if (this.listSubController.has(req.headers.host)) {
+            this.listSubController.get(req.headers.host).run(req, res, next);
+        } else next();
     }
 
 }

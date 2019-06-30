@@ -15,6 +15,7 @@ export class DefCheckerDocker {
         if (this.isDocker) return true;
 
         const iRes: IResult = await CMDUtils.runCommandFullResult("docker -v");
+        // const iRes: IResult = await CMDUtils.runCommandFullResult("docker ps -a");
         if (iRes.success && iRes.data.indexOf("Docker version") > -1) {
             this.isDocker = true;
             return true;

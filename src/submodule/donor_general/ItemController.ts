@@ -40,22 +40,25 @@ export class ItemController extends BaseDonorController {
         const ires: IResult = await FileManager.readFile(path).catch(e => {
             //   this.logger.error(e);
             return e;
-        })
+        });
         if (ires.success) return ires.data;
         return null;
     }
 
-    private async initConfigs(): Promise<any> {
+    private async initConfigs(): Promise<void> {
         const list: IItemConfig[] = await (<DonorConfigsController>this.parent.getController(CONTROLLERS.CONFIGS)).getUseConfigs().catch(er => null);
 
         if (list && list.length > 0) {
             list.map(v => {
                 this.mapDomains.set(v.data.ourHost, new ItemDomain(this, v));
-            })
+            });
         }
         ClassUtils.initClasses(this.mapDomains).catch(er => this.logger.error(er));
     }
 
+    public registerHostInController(host: string, item: ItemDomain): void {
+        this.parent.registerHostInController(host, item);
+    }
 
     public getLogger(): BLogger {
         return this.logger;

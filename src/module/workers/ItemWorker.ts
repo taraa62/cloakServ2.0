@@ -7,42 +7,49 @@ import {IResult} from "../../utils/IUtils";
 //TODO close channels port!!!!;
 export class ItemWorker {
 
-    private worker: Worker;
-    private _path: string;
-    private readonly id: string = Random.randomString();
-    private listenersWorker: Map<string | symbol, Set<Function>> = new Map<string, Set<Function>>();
-    private listenersChannel: Map<string | symbol, Set<Function>> = new Map<string, Set<Function>>();
+    protected worker: Worker;
+    protected _path: string;
+    protected readonly id: string = Random.randomString();
+    protected listenersWorker: Map<string | symbol, Set<Function>> = new Map<string, Set<Function>>();
+    protected listenersChannel: Map<string | symbol, Set<Function>> = new Map<string, Set<Function>>();
 
-    constructor(_path: string, private data: any, private option: WorkerOption) {
+    constructor(_path: string, data: any, protected option: WorkerOption) {
         this._path = FileManager.getSimplePath(_path, __dirname);
-        this.init();
+        this.init(data);
     }
 
 
-    private init(): void {
+    private init(data: any): void {
 
 
-        let channel: MessageChannel = null;
+
+
+        const workData: IWorkerData = {
+        //    port: channel ? channel.port1 : null,
+            data: data
+        };
+        this.worker = new Worker(this._path, {workerData: workData});
+        this.listenerListenerWorker();
+
+
+
+
+    /*    let channel: MessageChannel = null;
         if (this.option.isMessageChannel) {
             channel = new MessageChannel();
 
             this.listenerChannel(channel);
         }
 
-        const data: IWorkerData = {
-        //    port: channel ? channel.port1 : null,
-            data: this.data
-        };
         const transfer: any[] = [];
         if (channel) transfer.push(channel.port1);
 
-        this.worker = new Worker(this._path, {workerData: data});
-        this.listenerListenerWorker();
 
 
-        // this.worker.postMessage(data, transfer);
-        this.worker.emit("init3", data)
 
+        this.worker.postMessage(data, transfer);
+
+*/
     }
 
 
@@ -97,7 +104,6 @@ export class ItemWorker {
 
 
     public async destroy(): Promise<IResult> {
-        this.data = null;
         this.worker = null;
         this.option = null;
 

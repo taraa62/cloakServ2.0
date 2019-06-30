@@ -1,11 +1,13 @@
 import {DefCheckerDocker} from "./DefCheckerDocker";
 import {Random} from "../Random";
 import {CMDResult} from "./CMDResult";
+import {ExecCallback} from "shelljs";
 
 
 export class CMDUtils {
 
-    private static commandLine: any = require("node-cmd");
+    private static commandLine: any = require("node-cmd/cmd.js");
+    private static commandLine2: any = require("shelljs");
 
     private static dockerUtils: DefCheckerDocker;
 
@@ -20,8 +22,10 @@ export class CMDUtils {
      * @param command
      */
     public static async runCommandFullResult(command: string): Promise<CMDResult> {
-        return new Promise<CMDResult>((result, rej) => {
+        return new Promise<CMDResult>(async (result, rej) => {
             const com = CMDUtils.commandLine.run(command);
+
+            // const com =(await require("node-cmd/cmd.js")).run(command);
 
             const res: CMDResult = new CMDResult();
             com.stdout.on('data', (data: any) => {
@@ -34,10 +38,12 @@ export class CMDUtils {
             com.on('exit', (code: number) => {
                 res.exitCode = code;
                 res.exitDesk = (code === 1) ? "error" : "success";
+                // console.log(res.data);
                 result(res);
             });
         });
     }
+
 
     /**
      * Результат кодного разу після отримання результату
@@ -70,6 +76,8 @@ export class CMDUtils {
             }
         });
     }
+
+
 
 
 }

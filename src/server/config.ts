@@ -74,7 +74,11 @@ export const config = {
                 isClearAllConfigsDB: false
             },
             ITEM: {
-                baseConfig:"./libs/configs/base.config.json"
+                baseConfig: "./libs/configs/base.config.json"
+            },
+            WORKER_DONOR: {
+                name: "donorWorker",
+                jsFile: "./workers/WorkWithDonor.js"
             }
         },
     }],

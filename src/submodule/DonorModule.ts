@@ -10,6 +10,8 @@ import {Controller} from "../module/route/HttpControllers/Controller";
 import {CloakerController} from "../module/route/HttpControllers/CloakerController";
 import {ItemController} from "./donor_general/ItemController";
 import {ClassUtils} from "../utils/InitDefUtils";
+import {ItemDomain} from "./donor_general/ItemDomain";
+import {DonorWorkersController} from "./donor_workers/DonorWorkersController";
 
 
 export class DonorModule extends BModule {
@@ -27,6 +29,7 @@ export class DonorModule extends BModule {
 
     public async endInit(): Promise<IResult> {
         this.donorControllers.set(CONTROLLERS.CONFIGS, new DonorConfigsController(this, this.getConfigForController(CONTROLLERS.CONFIGS)));
+       this.donorControllers.set(CONTROLLERS.WORKER_DONOR, new DonorWorkersController(this, this.getConfigForController(CONTROLLERS.WORKER_DONOR)));
         this.donorControllers.set(CONTROLLERS.ITEM, new ItemController(this, this.getConfigForController(CONTROLLERS.ITEM)));
 
         const initContr: IResult = await ClassUtils.initClasses(this.donorControllers).catch((er) => IResult.error(er));
@@ -40,10 +43,10 @@ export class DonorModule extends BModule {
 
         route.getRoute().all("*", async (req: Request, res: Response, next: Function) => {
             await route.getController().runHttp("cloaker", req.originalUrl, req, res, next);
-        })
+        });
     }
 
-    public registerHostInController(host: string, controller: Controller): void {
+    public registerHostInController(host: string, controller: ItemDomain): void {
         const route: RouteModule = this.getModule('route') as RouteModule;
         (<CloakerController>route.getSubControllerHttp("cloaker")).registerHOST(host, controller);
     }
@@ -53,7 +56,7 @@ export class DonorModule extends BModule {
     }
 
     private getConfigForController(name: CONTROLLERS): any {
-        return this.subConfig[name]
+        return this.subConfig[name];
     }
 
     public getWorkersModule(): WorkersModule {
@@ -67,5 +70,7 @@ export class DonorModule extends BModule {
 
 export enum CONTROLLERS {
     CONFIGS = 'CONFIGS',
-    ITEM = 'ITEM'
+    ITEM = 'ITEM',
+    WORKER_DONOR = 'WORKER_DONOR',
+
 }
