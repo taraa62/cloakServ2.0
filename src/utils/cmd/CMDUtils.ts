@@ -4,7 +4,7 @@ import {CMDResult} from "./CMDResult";
 
 export class CMDUtils {
 
-    private static commandLine: any = require("node-cmd/cmd.js");
+    private static commandLine: any = require("node-cmd");
     private static commandLine2: any = require("shelljs");
 
     private static dockerUtils: DefCheckerDocker;
@@ -31,10 +31,9 @@ export class CMDUtils {
             com.stderr.on('data', (error: Error) => {
                 res.error = error;
             });
-
             com.on('exit', (code: number) => {
                 res.exitCode = code;
-                res.exitDesk = (code === 1) ? "error" : "success";
+                res.exitDesk = (code >0) ? "error" : "success";
                 // console.log(res.data);
                 result(res);
             });

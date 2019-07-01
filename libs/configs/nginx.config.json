@@ -4,6 +4,26 @@
     "isRewriteConfigNginx": true,
     "typeConfig": "defaultNginxConfigCloudflare"
   },
+  "configuration": {
+    "http": {
+      "protocol": "http"
+    },
+    "cloudLayar": {
+      "protocol": "https"
+    },
+    "cloudflare": {
+      "protocol": "https"
+    },
+    "cloudflareSSLRedirect": {
+      "protocol": "https"
+    },
+    "cloudflareSSL": {
+      "protocol": "https"
+    },
+    "cloudflareMix": {
+      "protocol": "https"
+    }
+  },
   "item": [
     {
       "host": "t63.com",

@@ -8,13 +8,19 @@ export interface INginxConfig {
     isOffRewriteAll: boolean;
     defForNewConfigs: IItemNginxConfig;
     item: IItemNginxConfig[];
-
+    configuration: any
 }
 
 export interface IItemNginxConfig {
     host: string;
     isRewriteConfigNginx: boolean;
-    typeConfig: string
+    typeConfig: string,
+    configDomain?: INginxConfigDomain //only copy code!!!
+}
+/** for  configuration*/
+export interface INginxConfigDomain {
+
+    protocol: string
 }
 
 

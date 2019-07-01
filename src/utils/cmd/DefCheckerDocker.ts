@@ -14,10 +14,10 @@ export class DefCheckerDocker {
     private async checkRunnableDocker(): Promise<boolean> {
         if (this.isDocker) return true;
 
-        const iRes: CMDResult = await CMDUtils.runCommandFullResult("docker -v");
-        // const iRes: IResult = await CMDUtils.runCommandFullResult("docker ps -a");
+        const iRes: CMDResult = await CMDUtils.runCommandFullResult("docker info");
+        // const iRes: IResult = await CMDUtils.runCommandFullResult("nautilus");
 
-        if (iRes.data && iRes.data.indexOf("Docker version") > -1) {
+        if (!iRes.error) {
             this.isDocker = true;
             return true;
         }

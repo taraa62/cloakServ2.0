@@ -8,7 +8,7 @@ import {IItemConfig} from "../donor_configs/IData";
 import {ItemDomain} from "./ItemDomain";
 import {ClassUtils} from "../../utils/ClassUtils";
 import {BLogger} from "../../module/logger/BLogger";
-import {INginxConfig} from "../donor_configs/INginxConfig";
+import {IItemNginxConfig, INginxConfig} from "../donor_configs/INginxConfig";
 
 
 export interface IItemController extends IBaseDonorConfig {
@@ -49,7 +49,7 @@ export class ItemController extends BaseDonorController {
             this.logger.error(e);
             return e;
         });
-        if (ires.success) return ires.data;
+        if (ires.success) return JSON.parse(ires.data);
         return null;
     }
 
@@ -59,7 +59,7 @@ export class ItemController extends BaseDonorController {
             this.logger.error(e);
             return e;
         });
-        if (ires.success) return ires.data;
+        if (ires.success) return JSON.parse(ires.data);
         return null;
     }
 
@@ -72,6 +72,13 @@ export class ItemController extends BaseDonorController {
             });
         }
         ClassUtils.initClasses(this.mapDomains).catch(er => this.logger.error(er));
+    }
+
+    public getNginxConfForHost(host: string): IItemNginxConfig {
+        let conf = this.nginxConfig.item.find(v => v.host === host);
+        if (!conf) conf = this.nginxConfig.defForNewConfigs;
+        conf.configDomain = this.nginxConfig.configuration[host] || this.nginxConfig.configuration["http"];
+        return conf;
     }
 
     public registerHostInController(host: string, item: ItemDomain): void {
