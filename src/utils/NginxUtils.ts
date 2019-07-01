@@ -1,9 +1,10 @@
 import {FileManager} from "./FileManager";
-import {IConfigNginx, IItemConfig, IResult} from "./IUtils";
 import {CDMCommand, CMDResult} from "./cmd/CMDResult";
 import {CMDUtils} from "./cmd/CMDUtils";
 import {BLogger} from "../module/logger/BLogger";
-import {StringUtils} from "./InitDefUtils";
+import {StringUtils} from "./StringUtils";
+import {IConfigNginx, IItemConfigNginx} from "../submodule/donor_configs/INginxConfig";
+import {IResult} from "./IUtils";
 
 export class NginxUtils {
 
@@ -96,7 +97,7 @@ export class NginxUtils {
     }
 
 
-    public static async createNginxConfig(conf: IItemConfig): Promise<IResult> {
+    public static async createNginxConfig(conf: IItemConfigNginx): Promise<IResult> {
         if (this.isBlockGenerateConfigs) return NginxUtils.logger.info(`Block create all configs`);
         NginxUtils.logger.info(`create config for: ${conf.domain} in folder: ${conf.pathToResource}`);
 
@@ -141,7 +142,7 @@ export class NginxUtils {
         return null;
     }
 
-    private static async generateConfig(config: string, conf: IItemConfig): Promise<IResult> {
+    private static async generateConfig(config: string, conf: IItemConfigNginx): Promise<IResult> {
         const pathToConf: string = "/etc/nginx/sites-available/" + conf.domain;
         const isConfExist: boolean = await FileManager.isExist(pathToConf);
         if (isConfExist && !conf.isRewrite) return {error: "config is exist and isn't rewrite"};
@@ -156,7 +157,7 @@ export class NginxUtils {
         }
     }
 
-    public static replaceConfig(config: string, conf: IItemConfig): string {
+    public static replaceConfig(config: string, conf: IItemConfigNginx): string {
         config = StringUtils.replaceAll(config, "{DOMAIN_NAME}", conf.domain);
         config = StringUtils.replaceAll(config, "{SITE_ROOT_PATH}", conf.pathToResource);
         config = StringUtils.replaceAll(config, "{DOMAIN_PROTOCOL}", conf.protocolServer);

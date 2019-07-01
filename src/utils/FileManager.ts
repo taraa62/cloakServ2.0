@@ -34,8 +34,8 @@ export class FileManager {
      * @param isCreateFolder -
      * returm - is create folder.
      */
-    static async checkPathToFolder(pathTo: string, pathParent: string = null, isCreateFolder: boolean = false): Promise<any> {
-        return await new Promise(async (res, rj) => {
+    static checkPathToFolder(pathTo: string, pathParent: string = null, isCreateFolder: boolean = false): Promise<any> {
+        return new Promise(async (res, rj) => {
             const path = this.getSimplePath(pathTo, pathParent);
 
             if (await this.isExist(path)) res(path);
@@ -118,8 +118,8 @@ export class FileManager {
         });
     }
 
-    static async writeToNewFile(path: string, text: string): Promise<IResult> {
-        return await new Promise((res, rej) => {
+    static writeToNewFile(path: string, text: string): Promise<IResult> {
+        return new Promise((res, rej) => {
             fs.appendFile(path, text, (err) => {
                 if (err) rej({error: err});
                 else res({success: true} as IResult);
@@ -156,7 +156,7 @@ export class FileManager {
 
     /*https://nodejs.org/api/fs.html#fs_class_fs_stats */
 
-    static async getInfoFile(path: string): Promise<IFileInfo> {
+    static getInfoFile(path: string): Promise<IFileInfo> {
         return new Promise((res, rej) => {
             fs.stat(path, (err: NodeJS.ErrnoException | null, stats: any) => {
                 if (!err) {
@@ -186,8 +186,8 @@ export class FileManager {
     }
 
 
-    static async getAllFileInFolderRecursive(path: string): Promise<IResult> {
-        return await new Promise((res, rej) => {
+    static getAllFileInFolderRecursive(path: string): Promise<IResult> {
+        return new Promise((res, rej) => {
             if (!fs.existsSync(path)) {
                 rej({error: `file "${path}" is not found`});
             } else {

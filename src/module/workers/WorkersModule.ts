@@ -56,6 +56,13 @@ export class WorkersModule extends BModule {
         return IResult.error("the option has invalid or duplicate name for pool");
     }
 
+    public async setTaskPool(namePool: string, data: any): Promise<IResult> {
+        if (this.listWorkerPool.has(namePool)) {
+            return this.listWorkerPool.get(namePool).newTask(data);
+        }
+        return IResult.error(`pool with name ${namePool} not fount`);
+    }
+
 
 }
 

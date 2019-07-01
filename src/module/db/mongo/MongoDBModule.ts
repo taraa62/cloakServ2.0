@@ -47,9 +47,9 @@ export class MongoDBModule extends BaseDB {
             const res: any = await mongoose.disconnect((er: Error) => er);
             return <IResult>(res ? {error: res} : {success: true});
         } catch (e) {
-            return {error: e};
+            return IResult.error(e);
         }
-        return {error: "undefined error mongo module"};
+        return IResult.error("undefined error mongo module");
     }
 
 
@@ -65,10 +65,10 @@ export class MongoDBModule extends BaseDB {
         return null;
     }
 
-    public async insert<T>(model: Model<any>, data: T): Promise<T> {
+    public insert<T>(model: Model<any>, data: T): Promise<T> {
         const obj = new model(data);
 
-        return await new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             obj.save((err: Error, targ: any) => {
                 if (err) reject(err);
                 else resolve(targ._doc);
@@ -83,47 +83,47 @@ export class MongoDBModule extends BaseDB {
      * @param isSpreadOut - нужно ли нам перебрать ответ и выбрать только обьект с данными, по дефолту  - да
      * @return {Promise<any>}
      */
-    async query<T>(model: Model<any>, find: T, isSpreadOut = true, opt = {}): Promise<IResult> {
-        return await new Promise((resolve, reject) => {
+    query<T>(model: Model<any>, find: T, isSpreadOut = true, opt = {}): Promise<IResult> {
+        return new Promise((resolve, reject) => {
             model.find(find, opt, (err, doc) => {
                 if (err) reject({error: err});
                 else {
                     if (isSpreadOut) {
                         const arr: any[] = [];
                         doc.map(v => arr.push(v._doc));
-                        resolve({success: true, data: arr});
+                        resolve(IResult.succData(arr));
                     } else {
-                        resolve({success: true, data: doc});
+                        resolve(IResult.succData(doc));
                     }
                 }
             })
         })
     }
 
-    public async update<T>(model: Model<any>, findNote: T, replaceTo: T, opt: T = null): Promise<IResult> {
-        return await new Promise((resolve, reject) => {
+    public update<T>(model: Model<any>, findNote: T, replaceTo: T, opt: T = null): Promise<IResult> {
+        return new Promise((resolve, reject) => {
             model.updateMany(findNote, replaceTo, opt, (err, result) => {
-                (err) ? reject({error: err}) : resolve({success: true, data: result});
+                (err) ? reject({error: err}) : resolve(IResult.succData(result));
             })
         })
     }
 
 
-    public async remove<T>(model: Model<any>,  findNote:T): Promise<IResult> {
-        return await new Promise((resolve, reject) => {
-            model.deleteMany(findNote, (err:Error) => {
-                (err) ? reject({error: err}) : resolve({success: true});
+    public remove<T>(model: Model<any>, findNote: T): Promise<IResult> {
+        return new Promise((resolve, reject) => {
+            model.deleteMany(findNote, (err: Error) => {
+                (err) ? reject({error: err}) : resolve(IResult.success);
             })
         })
     }
-   public async clearDB(model: Model<any>): Promise<IResult> {
-        return await new Promise((resolve, reject) => {
+
+    public clearDB(model: Model<any>): Promise<IResult> {
+        return new Promise((resolve, reject) => {
             model.deleteMany({}, (err) => {
-                (err) ? reject({error: err}) : resolve({success: true});
+                (err) ? reject({error: err}) : resolve(IResult.success);
             })
         })
     }
-
 
 
 }

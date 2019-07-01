@@ -1,5 +1,6 @@
 import {CMDUtils} from "./CMDUtils";
 import {IResult} from "../IUtils";
+import {CMDResult} from "./CMDResult";
 
 export class DefCheckerDocker {
 
@@ -11,12 +12,12 @@ export class DefCheckerDocker {
     }
 
     private async checkRunnableDocker(): Promise<boolean> {
-        if (this.isCheckRunDocker) return false;
         if (this.isDocker) return true;
 
-        const iRes: IResult = await CMDUtils.runCommandFullResult("docker -v");
+        const iRes: CMDResult = await CMDUtils.runCommandFullResult("docker -v");
         // const iRes: IResult = await CMDUtils.runCommandFullResult("docker ps -a");
-        if (iRes.success && iRes.data.indexOf("Docker version") > -1) {
+
+        if (iRes.data && iRes.data.indexOf("Docker version") > -1) {
             this.isDocker = true;
             return true;
         }
@@ -24,22 +25,22 @@ export class DefCheckerDocker {
     }
 
     public async checkRunContainer(name: string): Promise<IResult> {
-        if (await this.checkRunnableDocker()) return {error: "docker isn't run"};
+        if (! await this.checkRunnableDocker()) return {error: "docker isn't run"};
 
-        const iRes: IResult = await CMDUtils.runCommandFullResult(`docker inspect --format '{{json .State}}' ${name}`);
-        if (iRes.success) {
+        const iRes: CMDResult = await CMDUtils.runCommandFullResult(`docker inspect --format '{{json .State}}' ${name}`);
+        if (iRes.exitCode == 0 && iRes.data) {
             try {
                 const json = JSON.parse(iRes.data);
-                return (json.Status.indexOf("exit") > 1) ? {error: "docker container is exit"} : {success: true};
+                return (json.Status.indexOf("exit") > 1) ? IResult.error("docker container is exit") : IResult.success;
             } catch (e) {
-                return {error: e};
+                return IResult.error(e);
             }
         }
-        return iRes;
+        return IResult.error(iRes.error, iRes.exitCode);
     }
 
     public async startRunContainer(name: string, isCheckStart: boolean = false): Promise<IResult> {
-        if (await this.checkRunnableDocker()) return {error: "docker isn't run"};
+        if (!await this.checkRunnableDocker()) return {error: "docker isn't run"};
 
         const iRes: IResult = await CMDUtils.runCommandFullResult(`docker start ${name}`);
         if (!isCheckStart || iRes.error) return iRes;

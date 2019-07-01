@@ -6,8 +6,10 @@ export class PoolOptions {
     private _workerOption: WorkerOption;
     public initData: any = null;
     public minWorkers: number = 1;
-    public maxWorkers: number = 2;
-    public timeRunTask: number;
+    public maxWorkers: number = 3;
+    public timeRunTask: number = 10000;
+
+    public maxPoolTaskForUpWorker: number = 100;
 
     public set workerOption(opt: WorkerOption) {
         this._workerOption = Object.assign(new WorkerOption(), opt);

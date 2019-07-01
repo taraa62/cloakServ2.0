@@ -47,7 +47,7 @@ export class DonorConfigsController extends BaseDonorController {
             for (let i = 0; i < fileCont.length; i++) {
                const res =  await this.createNewConfig(fileCont[i]);
 
-               console.log(111)
+               // console.log(111)
             }
         }
         return super.init()

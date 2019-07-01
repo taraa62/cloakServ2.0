@@ -1,7 +1,5 @@
 import {DefCheckerDocker} from "./DefCheckerDocker";
-import {Random} from "../Random";
 import {CMDResult} from "./CMDResult";
-import {ExecCallback} from "shelljs";
 
 
 export class CMDUtils {
@@ -24,7 +22,6 @@ export class CMDUtils {
     public static async runCommandFullResult(command: string): Promise<CMDResult> {
         return new Promise<CMDResult>(async (result, rej) => {
             const com = CMDUtils.commandLine.run(command);
-
             // const com =(await require("node-cmd/cmd.js")).run(command);
 
             const res: CMDResult = new CMDResult();
@@ -76,8 +73,6 @@ export class CMDUtils {
             }
         });
     }
-
-
 
 
 }

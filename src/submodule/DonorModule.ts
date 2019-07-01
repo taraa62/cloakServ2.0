@@ -6,12 +6,11 @@ import {WorkersModule} from "../module/workers/WorkersModule";
 import {RouteModule} from "../module/route/RouteModule";
 import {Request, Response} from "express";
 import {IResult} from "../utils/IUtils";
-import {Controller} from "../module/route/HttpControllers/Controller";
 import {CloakerController} from "../module/route/HttpControllers/CloakerController";
 import {ItemController} from "./donor_general/ItemController";
-import {ClassUtils} from "../utils/InitDefUtils";
 import {ItemDomain} from "./donor_general/ItemDomain";
 import {DonorWorkersController} from "./donor_workers/DonorWorkersController";
+import {ClassUtils} from "../utils/ClassUtils";
 
 
 export class DonorModule extends BModule {
@@ -29,10 +28,10 @@ export class DonorModule extends BModule {
 
     public async endInit(): Promise<IResult> {
         this.donorControllers.set(CONTROLLERS.CONFIGS, new DonorConfigsController(this, this.getConfigForController(CONTROLLERS.CONFIGS)));
-       this.donorControllers.set(CONTROLLERS.WORKER_DONOR, new DonorWorkersController(this, this.getConfigForController(CONTROLLERS.WORKER_DONOR)));
+        this.donorControllers.set(CONTROLLERS.WORKER_DONOR, new DonorWorkersController(this, this.getConfigForController(CONTROLLERS.WORKER_DONOR)));
         this.donorControllers.set(CONTROLLERS.ITEM, new ItemController(this, this.getConfigForController(CONTROLLERS.ITEM)));
 
-        const initContr: IResult = await ClassUtils.initClasses(this.donorControllers).catch((er) => IResult.error(er));
+        const initContr: IResult = await ClassUtils.initClasses(this.donorControllers).catch((er:Error) => IResult.error(er));
         if (initContr.error) return initContr;
         this.registerRoute();
         return IResult.success;

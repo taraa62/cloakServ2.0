@@ -1,4 +1,5 @@
-import {MessagePort, parentPort, workerData} from "worker_threads";
+import {parentPort} from "worker_threads";
+import {WorkerMessage} from "./WorkerMessage";
 
 
 /*
@@ -6,16 +7,12 @@ import {MessagePort, parentPort, workerData} from "worker_threads";
  */
 export class BaseWorker {
 
-    private port: MessagePort;
 
     constructor() {
         console.log('create new Worker Test');
 
-        parentPort.on("init3", (data) => {
-            console.log(data)
-        });
 
-        parentPort.postMessage( {msg:"hello init"})
+        // parentPort.postMessage( {msg:"hello init"})
         parentPort.on("message", this.newMessage.bind(this));
         this.init();
     }
@@ -24,27 +21,36 @@ export class BaseWorker {
     }
 
 
-    async test() {
-        await new Promise(res => {
-            setTimeout((data) => {
-                console.log(data);
-                parentPort.postMessage("hello from parentPort");
-                res();
-            }, 2000, "time use worker");
-        });
+    protected newMessage(data: WorkerMessage | any): void {
 
     }
 
-    private newMessage(data: any): void {
+    protected sendMessage(type: string, mess: any): void {
+        const resp = new WorkerMessage(type, mess);
+        parentPort.postMessage(resp);
+    }
 
-        if (data.port instanceof MessagePort) {
-            this.port = data.port;
-            this.port.postMessage('hello from port')
-        } else {
-          //  this.test();
+
+    /*    async test() {
+            await new Promise(res => {
+                setTimeout((data) => {
+                    console.log(data);
+                    parentPort.postMessage("hello from parentPort");
+                    res();
+                }, 2000, "time use worker")            });
+
         }
+       /* private port: MessagePort;
+        private newMessage(data: any): void {
 
-    }
+            if (data.port instanceof MessagePort) {
+                this.port = data.port;
+                this.port.postMessage('hello from port')
+            } else {
+              //  this.test();
+            }
+
+        }*/
 
 }
 

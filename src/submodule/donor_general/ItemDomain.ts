@@ -4,12 +4,15 @@ import {BLogger} from "../../module/logger/BLogger";
 import {IResult} from "../../utils/IUtils";
 import {Request, Response} from "express";
 import {WorkController} from "./workers/WorkController";
+import {BaseDonorController} from "../BaseDonorController";
+import {CONTROLLERS} from "../DonorModule";
+import {IItemDomainInfo} from "./workers/IClient";
 
 export class ItemDomain {
 
     protected logger: BLogger;
-    private donorURl: URL;
-    private ourURL: URL;
+    private donorURl: IItemDomainInfo;
+    private ourURL: IItemDomainInfo;
 
     private workController: WorkController;
 
@@ -19,8 +22,8 @@ export class ItemDomain {
 
     public async init(): Promise<IResult> {
         try {
-            this.updUrl(this.donorURl, this.conf.data.donorOrigin);
-            this.updUrl(this.ourURL, this.conf.data.ourHost);
+            this.updUrl(this.conf.data.donorOrigin);
+            this.updUrl(this.conf.data.ourHost);
 
             this.workController = new WorkController(this, this.logger);
 
@@ -35,7 +38,12 @@ export class ItemDomain {
 
     }
 
-    private updUrl(url: URL, stUrl: string): void {
+    public getDonorController(name:CONTROLLERS):BaseDonorController{
+        return this.controller.getDonorController(name);
+    }
+
+
+    private updUrl(stUrl: string): void {
 
     }
 

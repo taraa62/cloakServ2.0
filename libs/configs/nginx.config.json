@@ -1,0 +1,15 @@
+{
+  "isOffRewriteAll": false,
+  "defForNewConfigs": {
+    "isRewriteConfigNginx": true,
+    "typeConfig": "defaultNginxConfigCloudflare"
+  },
+  "item": [
+    {
+      "host": "t63.com",
+      "isRewriteConfigNginx": true,
+      "typeConfig": "defaultNginxConfigCloudflare"
+    }
+  ]
+}
+

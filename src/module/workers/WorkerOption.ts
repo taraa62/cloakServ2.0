@@ -10,6 +10,14 @@ export interface IWorkerData {
 }
 
 
+export interface IWorkerController {
+
+    workerEndRun(key: string): void;
+
+    workerDead(key: string, er: number | Error): void;
+
+}
+
 export interface IWorkerOption {
     isMessageChannel: boolean;
 }
@@ -17,3 +25,5 @@ export interface IWorkerOption {
 export class WorkerOption implements IWorkerOption {
     public isMessageChannel: boolean = false;
 }
+
+

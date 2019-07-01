@@ -1,4 +1,4 @@
-import {DonorModule} from "./DonorModule";
+import {CONTROLLERS, DonorModule} from "./DonorModule";
 import {IResult} from "../utils/IUtils";
 import {BLogger} from "../module/logger/BLogger";
 
@@ -17,6 +17,8 @@ export class BaseDonorController {
     public async init(): Promise<IResult> {
         return IResult.success;
     }
-
+    public getDonorController(name:CONTROLLERS):BaseDonorController{
+        return this.parent.getController(name);
+    }
 
 }

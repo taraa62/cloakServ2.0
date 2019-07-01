@@ -4,7 +4,6 @@ export interface IResult {
     success?: boolean | string;
     msg?: string;
     data?: any;
-
 }
 
 export class IResult implements IResult {
@@ -45,7 +44,7 @@ export class IResult implements IResult {
         if (obj.code) res += "  [CODE]" + obj.code;
         if (obj.success) res += "  [SUCCESS]" + obj.success;
         if (obj.msg) res += "  [MSG]" + obj.msg.toString();
-        if (obj.data) res += "  [DATA]" + obj.data.toString();
+        if (obj.data) res += "  [DATA]" + JSON.stringify(obj.data);
         return res;
     }
 }
@@ -68,20 +67,3 @@ export interface IFileInfo
     isBlockDevice: boolean;
 }
 
-//**** Nginx//
-
-export interface IItemConfig {
-    nameConfig: string;
-    domain: string;
-    isRewrite: boolean;
-    protocolServer: string;
-    nameServerConfD: string;
-    pathToResource: string;
-    sslSertificate?: string;
-    sslSertificateKey?: string;
-}
-
-export interface IConfigNginx {
-    name: string;
-    config: string;
-}
