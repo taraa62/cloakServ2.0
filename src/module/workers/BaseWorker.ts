@@ -1,5 +1,6 @@
 import {parentPort} from "worker_threads";
 import {WorkerMessage} from "./WorkerMessage";
+import {BLogger} from "../logger/BLogger";
 
 
 /*
@@ -7,9 +8,11 @@ import {WorkerMessage} from "./WorkerMessage";
  */
 export class BaseWorker {
 
+    protected logger: BLogger;
 
     constructor() {
-        console.log('create new Worker Test');
+        this.logger = new BLogger();
+        this.logger.info('create new Worker Test');
 
 
         // parentPort.postMessage( {msg:"hello init"})
@@ -25,7 +28,17 @@ export class BaseWorker {
 
     }
 
-    protected sendMessage(type: string, mess: any): void {
+    public sendTaskComplitSuccess(mess: any): void {
+        const resp = new WorkerMessage("end", mess);
+        parentPort.postMessage(resp);
+    }
+
+    public sendTaskComplitError(error: any): void {
+        const resp = new WorkerMessage("endError", error);
+        parentPort.postMessage(resp);
+    }
+
+    public sendMessage(type: string, mess: any): void {
         const resp = new WorkerMessage(type, mess);
         parentPort.postMessage(resp);
     }

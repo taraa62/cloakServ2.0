@@ -8,16 +8,20 @@ export class WorkerHeaders extends BWorker {
 
     public getBodyForRequestDonor(client: Client): IRequestOptionForDonor {
         const opt = this.getHeaderForRequestDonor(client);
-        opt.method = client.req.method;
-        opt.hostname = this.parent.getDonorURL().origin;
-        opt.headers.host = opt.hostname = opt.host;
-        opt.path = client.req.originalUrl;
+
         return opt;
     }
 
     private getHeaderForRequestDonor(client: Client): any {
-        const opt: any = new URL(client.domainInfo.origin);
-        opt.headers = {};
+        const opt: any = {
+            headers: {
+                host: this.parent.getDonorURL().host
+            },
+            host: this.parent.getDonorURL().host,
+            hostname: this.parent.getDonorURL().host,
+            method: client.req.method,
+            path: client.req.originalUrl
+        }
         Object.assign(opt.headers, client.req.headers);
 
         this.replaceObjParam(opt.headers, true);

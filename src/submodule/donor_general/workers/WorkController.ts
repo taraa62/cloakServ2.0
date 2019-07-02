@@ -5,6 +5,7 @@ import {Request, Response} from "express";
 import {Client} from "./Client";
 import {IItemDomainInfo} from "./IClient";
 import {BWorker} from "./BWorker";
+import {IResult} from "../../../utils/IUtils";
 
 export class WorkController extends BWorker {
 
@@ -20,7 +21,14 @@ export class WorkController extends BWorker {
 
 
         if (this.poolWorkWithDonor) {
-            this.poolWorkWithDonor.newTask(this.parent.getWorkerHeaders().getBodyForRequestDonor(client));
+            const donorReq = {
+                command: "setRequest",
+                options: this.parent.getWorkerHeaders().getBodyForRequestDonor(client)
+            }
+            const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq);
+            if (IResult.success) {
+                res.json("ok");
+            }
 
         }
 
@@ -28,6 +36,10 @@ export class WorkController extends BWorker {
 
     public getDomainConfig(): IItemDomainInfo {
         return this.parent.getOurURL();
+    }
+
+    public getDonorConfig(): IItemDomainInfo {
+        return this.parent.getDonorURL();
     }
 
 

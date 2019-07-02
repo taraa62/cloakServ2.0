@@ -8,7 +8,6 @@ export class Client {
 
     public isFile: boolean;
 
-    public resp: Response; //response donor
     public contentType: string;
     public isSaveFile: boolean = true;
     public isEditFileBeforeSaveToDisk: boolean = true;
