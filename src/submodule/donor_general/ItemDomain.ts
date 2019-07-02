@@ -8,6 +8,7 @@ import {CONTROLLERS} from "../DonorModule";
 import {IItemDomainInfo} from "./workers/IClient";
 import {IItemNginxConfig} from "../donor_configs/INginxConfig";
 import {IBaseConfig} from "../donor_configs/IBaseConfig";
+import {WorkerHeaders} from "./workers/WorkerHeaders";
 
 export class ItemDomain {
 
@@ -17,6 +18,7 @@ export class ItemDomain {
     private ngixConf: IItemNginxConfig;
 
     private workController: WorkController;
+    private workHeaders: WorkerHeaders;
 
     constructor(private controller: ItemController, private conf: IItemConfig) {
         this.logger = controller.getLogger();
@@ -29,6 +31,7 @@ export class ItemDomain {
             this.ourURL = this.updUrl(this.ngixConf.configDomain.protocol + "://" + this.conf.data.ourHost);
 
             this.workController = new WorkController(this, this.logger);
+            this.workHeaders = new WorkerHeaders(this, this.logger);
 
 
             this.controller.registerHostInController(this.conf.data.ourHost, this.workController);
@@ -44,16 +47,20 @@ export class ItemDomain {
     public getDonorController(name: CONTROLLERS): BaseDonorController {
         return this.controller.getDonorController(name);
     }
-    public getDonorURL():IItemDomainInfo{
+
+    public getDonorURL(): IItemDomainInfo {
         return this.donorURl;
     }
-    public getOurURL():IItemDomainInfo{
+
+    public getOurURL(): IItemDomainInfo {
         return this.ourURL;
     }
-    public getNginxConf():IItemNginxConfig{
+
+    public getNginxConf(): IItemNginxConfig {
         return this.ngixConf;
     }
-    public getBaseConf():IBaseConfig{
+
+    public getBaseConf(): IBaseConfig {
         return this.controller.getBaseConfig();
     }
 
@@ -72,6 +79,15 @@ export class ItemDomain {
             protocolFull: url.protocol + "//",
             domain: domain
         };
+    }
+
+    //*** get controller */
+    public getWorkController(): WorkController {
+        return this.workController;
+    }
+
+    public getWorkerHeaders(): WorkerHeaders {
+        return this.workHeaders;
     }
 
 }

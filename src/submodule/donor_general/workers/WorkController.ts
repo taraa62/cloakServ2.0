@@ -1,22 +1,17 @@
-import {ItemDomain} from "../ItemDomain";
-import {BLogger} from "../../../module/logger/BLogger";
 import {CONTROLLERS} from "../../DonorModule";
 import {DonorWorkersController} from "../../donor_workers/DonorWorkersController";
 import {WorkerPoolController} from "../../../module/workers/pool/WorkerPoolController";
 import {Request, Response} from "express";
 import {Client} from "./Client";
 import {IItemDomainInfo} from "./IClient";
+import {BWorker} from "./BWorker";
 
-export class WorkController {
+export class WorkController extends BWorker {
 
     private poolWorkWithDonor: WorkerPoolController;
 
 
-    constructor(private parent: ItemDomain, private logger: BLogger) {
-        this.init();
-    }
-
-    private init(): void {
+    public init(): void {
         this.poolWorkWithDonor = (<DonorWorkersController>this.parent.getDonorController(CONTROLLERS.WORKER_DONOR)).getPool();
     }
 
@@ -25,13 +20,13 @@ export class WorkController {
 
 
         if (this.poolWorkWithDonor) {
-            // this.poolWorkWithDonor.newTask()
+            this.poolWorkWithDonor.newTask(this.parent.getWorkerHeaders().getBodyForRequestDonor(client));
 
         }
 
     }
 
-    public getDomainConfig():IItemDomainInfo{
+    public getDomainConfig(): IItemDomainInfo {
         return this.parent.getOurURL();
     }
 

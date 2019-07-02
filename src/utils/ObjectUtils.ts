@@ -2,7 +2,7 @@ import {StringUtils} from "./StringUtils";
 
 export class ObjectUtils {
     /**
-     * replace only for string!!! necessary to finish
+     * replace only for string!!! necessary
      * @param obj
      * @param from
      * @param to

@@ -20,12 +20,36 @@ export class Client {
     constructor(public workController: WorkController, public req: Request, public res: Response) {
         this.domainInfo = this.workController.getDomainConfig();
         this.normalizeReqURL();
+   //     this.initAction();
     }
 
     private normalizeReqURL(): void {
-        // const url1:URL = new URL(this.domainInfo.origin+ + this.req.originalUrl);
         const u2 = new URL(decodeURIComponent(this.domainInfo.origin+ + this.req.originalUrl))
 
         this.req.originalUrl = u2.pathname + u2.search;
     }
+
+   /* private initAction(): void {
+        let url = this.req.originalUrl;
+        if(url.length<1)url = "/";
+
+        if (url.endsWith("?")) {
+            url = url.substr(0, url.length - 1)
+        }
+        if (url.endsWith("/")) {
+            url += "index.html";
+        }
+
+        if (url.startsWith("/")) url = url.substr(1, url.length);
+
+
+
+        url = url.toLocaleLowerCase();
+
+        const act = this.getAction(url);
+
+        console.log('dewdw')
+    }*/
+
+
 }
