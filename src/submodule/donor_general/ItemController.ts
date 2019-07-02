@@ -9,6 +9,7 @@ import {ItemDomain} from "./ItemDomain";
 import {ClassUtils} from "../../utils/ClassUtils";
 import {BLogger} from "../../module/logger/BLogger";
 import {IItemNginxConfig, INginxConfig} from "../donor_configs/INginxConfig";
+import {WorkController} from "./workers/WorkController";
 
 
 export interface IItemController extends IBaseDonorConfig {
@@ -24,15 +25,15 @@ export class ItemController extends BaseDonorController {
     private baseConfig: IBaseConfig;
     private nginxConfig: INginxConfig;
 
-    public async init(): Promise<IResult> {
+    public async endInit(): Promise<IResult> {
         try {
             this.sConf = <IItemController>this.config;
             this.mapDomains = new Map<string, ItemDomain>();
 
-            this.baseConfig = await this.loadBaseConfig();
+            this.baseConfig = await this.loadConfig(this.sConf.baseConfig);
             if (!this.baseConfig) return IResult.error("base config isn't load");
 
-            this.nginxConfig = await this.loadNginxConfig();
+            this.nginxConfig = await this.loadConfig(this.sConf.nginxConfig);
             if (!this.nginxConfig) return IResult.error("nginx config isn't load");
 
             this.initConfigs().catch(error => this.logger.error(error));
@@ -43,18 +44,9 @@ export class ItemController extends BaseDonorController {
         return IResult.success;
     }
 
-    private async loadBaseConfig(): Promise<IBaseConfig> {
-        const path: string = FileManager.getSimplePath(this.sConf.baseConfig, FileManager.backFolder(__dirname, 3));
-        const ires: IResult = await FileManager.readFile(path).catch(e => {
-            this.logger.error(e);
-            return e;
-        });
-        if (ires.success) return JSON.parse(ires.data);
-        return null;
-    }
 
-    private async loadNginxConfig(): Promise<INginxConfig> {
-        const path: string = FileManager.getSimplePath(this.sConf.nginxConfig, FileManager.backFolder(__dirname, 3));
+    private async loadConfig(cPath: string): Promise<any> {
+        const path: string = FileManager.getSimplePath(cPath, FileManager.backFolder(__dirname, 3));
         const ires: IResult = await FileManager.readFile(path).catch(e => {
             this.logger.error(e);
             return e;
@@ -81,12 +73,16 @@ export class ItemController extends BaseDonorController {
         return conf;
     }
 
-    public registerHostInController(host: string, item: ItemDomain): void {
-        this.parent.registerHostInController(host, item);
+    public registerHostInController(host: string, controller: WorkController): void {
+        this.parent.registerHostInController(host, controller);
     }
 
     public getLogger(): BLogger {
         return this.logger;
+    }
+
+    public getBaseConfig(): IBaseConfig {
+        return this.baseConfig;
     }
 
 }

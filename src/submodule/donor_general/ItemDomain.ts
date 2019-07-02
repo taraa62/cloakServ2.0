@@ -7,7 +7,7 @@ import {BaseDonorController} from "../BaseDonorController";
 import {CONTROLLERS} from "../DonorModule";
 import {IItemDomainInfo} from "./workers/IClient";
 import {IItemNginxConfig} from "../donor_configs/INginxConfig";
-import {Request, Response} from "express";
+import {IBaseConfig} from "../donor_configs/IBaseConfig";
 
 export class ItemDomain {
 
@@ -31,7 +31,7 @@ export class ItemDomain {
             this.workController = new WorkController(this, this.logger);
 
 
-            this.controller.registerHostInController(this.conf.data.ourHost, this);
+            this.controller.registerHostInController(this.conf.data.ourHost, this.workController);
 
             return IResult.success;
 
@@ -44,7 +44,18 @@ export class ItemDomain {
     public getDonorController(name: CONTROLLERS): BaseDonorController {
         return this.controller.getDonorController(name);
     }
-
+    public getDonorURL():IItemDomainInfo{
+        return this.donorURl;
+    }
+    public getOurURL():IItemDomainInfo{
+        return this.ourURL;
+    }
+    public getNginxConf():IItemNginxConfig{
+        return this.ngixConf;
+    }
+    public getBaseConf():IBaseConfig{
+        return this.controller.getBaseConfig();
+    }
 
     private updUrl(stUrl: string): IItemDomainInfo {
         const url = new URL(stUrl);
@@ -63,8 +74,4 @@ export class ItemDomain {
         };
     }
 
-
-    public async run(req: Request, res: Response, next: Function): Promise<any> {
-        return this.workController.run(req, res, next);
-    }
 }

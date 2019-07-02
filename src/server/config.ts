@@ -71,7 +71,7 @@ export const config = {
                 pathToConfFiles: "./libs/configs/site/",
                 dbTable: "configs",
                 isUpdateConfWithFile: true,
-                isClearAllConfigsDB: false
+                isClearAllConfigsDB: true
             },
             ITEM: {
                 baseConfig: "./libs/configs/base.config.json",

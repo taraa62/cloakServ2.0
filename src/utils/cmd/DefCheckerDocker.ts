@@ -17,7 +17,7 @@ export class DefCheckerDocker {
         const iRes: CMDResult = await CMDUtils.runCommandFullResult("docker info");
         // const iRes: IResult = await CMDUtils.runCommandFullResult("nautilus");
 
-        if (!iRes.error) {
+        if (iRes.exitCode==0) {
             this.isDocker = true;
             return true;
         }

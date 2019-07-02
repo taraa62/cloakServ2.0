@@ -17,6 +17,9 @@ export class BaseDonorController {
     public async init(): Promise<IResult> {
         return IResult.success;
     }
+    public async endInit(): Promise<IResult> {
+        return IResult.success;
+    }
     public getDonorController(name:CONTROLLERS):BaseDonorController{
         return this.parent.getController(name);
     }

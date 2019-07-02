@@ -11,6 +11,7 @@ import {ItemController} from "./donor_general/ItemController";
 import {ItemDomain} from "./donor_general/ItemDomain";
 import {DonorWorkersController} from "./donor_workers/DonorWorkersController";
 import {ClassUtils} from "../utils/ClassUtils";
+import {WorkController} from "./donor_general/workers/WorkController";
 
 
 export class DonorModule extends BModule {
@@ -33,6 +34,9 @@ export class DonorModule extends BModule {
 
         const initContr: IResult = await ClassUtils.initClasses(this.donorControllers).catch((er:Error) => IResult.error(er));
         if (initContr.error) return initContr;
+        const endInit: IResult = await ClassUtils.initClasses(this.donorControllers, "endInit").catch((er:Error) => IResult.error(er));
+        if (endInit.error) return endInit;
+
         this.registerRoute();
         return IResult.success;
     }
@@ -45,7 +49,7 @@ export class DonorModule extends BModule {
         });
     }
 
-    public registerHostInController(host: string, controller: ItemDomain): void {
+    public registerHostInController(host: string, controller:WorkController): void {
         const route: RouteModule = this.getModule('route') as RouteModule;
         (<CloakerController>route.getSubControllerHttp("cloaker")).registerHOST(host, controller);
     }

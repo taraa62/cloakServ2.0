@@ -4,7 +4,7 @@ import {CMDResult} from "./CMDResult";
 
 export class CMDUtils {
 
-    private static commandLine: any = require("node-cmd");
+    private static commandLine: any = require("node-cmd/cmd.js");
     private static commandLine2: any = require("shelljs");
 
     private static dockerUtils: DefCheckerDocker;
