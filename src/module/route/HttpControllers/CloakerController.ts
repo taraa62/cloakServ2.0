@@ -1,15 +1,15 @@
 import {Controller} from "./Controller";
 import {IResult} from "../../../utils/IUtils";
 import {Request, Response} from "express";
-import {WorkController} from "../../../submodule/donor_general/workers/WorkController";
+import {WorkerController} from "../../../submodule/donor_general/workers/WorkerController";
 
 export class CloakerController extends Controller {
 
     //*TODO check type for controller
-    private listSubController: Map<string, WorkController>;
+    private listSubController: Map<string, WorkerController>;
 
     public async endInit(): Promise<IResult> {
-        this.listSubController = new Map<string, WorkController>();
+        this.listSubController = new Map<string, WorkerController>();
 
         return super.endInit();
     }

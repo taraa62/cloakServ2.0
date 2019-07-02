@@ -3,7 +3,7 @@ import {BLogger} from "../../../module/logger/BLogger";
 
 export class BWorker {
 
-    constructor(protected parent: ItemDomain, protected logger: BLogger) {
+    constructor(public parent: ItemDomain, protected logger: BLogger) {
         this.init();
     }
 

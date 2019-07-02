@@ -1,12 +1,13 @@
-import {Client} from "./Client";
+import {Client} from "../item/Client";
 import {StringUtils} from "../../../utils/StringUtils";
 import {BWorker} from "./BWorker";
-import {IRequestOptionForDonor} from "./IWorkerGeneral";
+
+import {IncomingHttpHeaders} from "http";
 
 export class WorkerHeaders extends BWorker {
 
 
-    public getBodyForRequestDonor(client: Client): IRequestOptionForDonor {
+    public getBodyForRequestDonor(client: Client): IncomingHttpHeaders {
         const opt = this.getHeaderForRequestDonor(client);
 
         return opt;

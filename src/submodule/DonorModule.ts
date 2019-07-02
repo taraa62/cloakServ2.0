@@ -11,7 +11,8 @@ import {ItemController} from "./donor_general/ItemController";
 import {ItemDomain} from "./donor_general/ItemDomain";
 import {DonorWorkersController} from "./donor_workers/DonorWorkersController";
 import {ClassUtils} from "../utils/ClassUtils";
-import {WorkController} from "./donor_general/workers/WorkController";
+import {WorkerController} from "./donor_general/workers/WorkerController";
+import {BWorker} from "./donor_general/workers/BWorker";
 
 
 export class DonorModule extends BModule {
@@ -49,7 +50,7 @@ export class DonorModule extends BModule {
         });
     }
 
-    public registerHostInController(host: string, controller:WorkController): void {
+    public registerHostInController(host: string, controller:BWorker): void {
         const route: RouteModule = this.getModule('route') as RouteModule;
         (<CloakerController>route.getSubControllerHttp("cloaker")).registerHOST(host, controller);
     }

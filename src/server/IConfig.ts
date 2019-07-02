@@ -26,7 +26,6 @@ export interface IModuleConfig {
 
 export interface IConfig {
     mode: string;
-    contentTypes: any;
     server: IServerConfig;
     adminConnection: IAdminConfig,
     logger: ILoggerConfig;

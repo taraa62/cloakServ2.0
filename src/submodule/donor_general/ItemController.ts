@@ -9,7 +9,8 @@ import {ItemDomain} from "./ItemDomain";
 import {ClassUtils} from "../../utils/ClassUtils";
 import {BLogger} from "../../module/logger/BLogger";
 import {IItemNginxConfig, INginxConfig} from "../donor_configs/INginxConfig";
-import {WorkController} from "./workers/WorkController";
+import {WorkerController} from "./workers/WorkerController";
+import {BWorker} from "./workers/BWorker";
 
 
 export interface IItemController extends IBaseDonorConfig {
@@ -73,7 +74,7 @@ export class ItemController extends BaseDonorController {
         return conf;
     }
 
-    public registerHostInController(host: string, controller: WorkController): void {
+    public registerHostInController(host: string, controller: BWorker): void {
         this.parent.registerHostInController(host, controller);
     }
 

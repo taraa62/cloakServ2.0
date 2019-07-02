@@ -2,13 +2,16 @@ import {ItemController} from "./ItemController";
 import {IItemConfig} from "../donor_configs/IData";
 import {BLogger} from "../../module/logger/BLogger";
 import {IResult} from "../../utils/IUtils";
-import {WorkController} from "./workers/WorkController";
+import {WorkerController} from "./workers/WorkerController";
 import {BaseDonorController} from "../BaseDonorController";
 import {CONTROLLERS} from "../DonorModule";
-import {IItemDomainInfo} from "./workers/IClient";
+import {IItemDomainInfo} from "./item/IClient";
 import {IItemNginxConfig} from "../donor_configs/INginxConfig";
 import {IBaseConfig} from "../donor_configs/IBaseConfig";
 import {WorkerHeaders} from "./workers/WorkerHeaders";
+import {WorkerActions} from "./workers/WorkerActions";
+import {BWorker} from "./workers/BWorker";
+import {EItemDomainController} from "./workers/IWorkerGeneral";
 
 export class ItemDomain {
 
@@ -17,8 +20,7 @@ export class ItemDomain {
     private ourURL: IItemDomainInfo;
     private ngixConf: IItemNginxConfig;
 
-    private workController: WorkController;
-    private workHeaders: WorkerHeaders;
+    private workersMap: Map<EItemDomainController, BWorker>;
 
     constructor(private controller: ItemController, private conf: IItemConfig) {
         this.logger = controller.getLogger();
@@ -30,11 +32,13 @@ export class ItemDomain {
             this.donorURl = this.updUrl(this.conf.data.donorOrigin);
             this.ourURL = this.updUrl(this.ngixConf.configDomain.protocol + "://" + this.conf.data.ourHost);
 
-            this.workController = new WorkController(this, this.logger);
-            this.workHeaders = new WorkerHeaders(this, this.logger);
+            this.workersMap = new Map<EItemDomainController, BWorker>()
+            this.workersMap.set(EItemDomainController.CONTROLLER, new WorkerController(this, this.logger));
+            this.workersMap.set(EItemDomainController.HEADER, new WorkerHeaders(this, this.logger));
+            this.workersMap.set(EItemDomainController.ACTION, new WorkerActions(this, this.logger));
 
 
-            this.controller.registerHostInController(this.conf.data.ourHost, this.workController);
+            this.controller.registerHostInController(this.conf.data.ourHost, this.workersMap.get(EItemDomainController.CONTROLLER));
 
             return IResult.success;
 
@@ -64,6 +68,13 @@ export class ItemDomain {
         return this.controller.getBaseConfig();
     }
 
+    //*** get controller */
+    public getWorker(worker:EItemDomainController): BWorker {
+        return this.workersMap.get(worker);
+    }
+
+
+
     private updUrl(stUrl: string): IItemDomainInfo {
         const url = new URL(stUrl);
 
@@ -81,13 +92,6 @@ export class ItemDomain {
         };
     }
 
-    //*** get controller */
-    public getWorkController(): WorkController {
-        return this.workController;
-    }
 
-    public getWorkerHeaders(): WorkerHeaders {
-        return this.workHeaders;
-    }
 
 }

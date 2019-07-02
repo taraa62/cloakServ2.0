@@ -1,6 +1,5 @@
 export const config = {
     mode: "dev",
-    contentTypes: require("../const/content-type"),
     server: {
         type: "http",   //"http" | "http2"
         port: 8082,
