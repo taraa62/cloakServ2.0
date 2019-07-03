@@ -4,12 +4,11 @@ import {IBaseConfig} from "../donor_configs/IBaseConfig";
 import {FileManager} from "../../utils/FileManager";
 import {CONTROLLERS} from "../DonorModule";
 import {DonorConfigsController} from "../donor_configs/DonorConfigsController";
-import {IItemConfig} from "../donor_configs/IData";
+import {IItemConfig} from "../donor_configs/IConfig";
 import {ItemDomain} from "./ItemDomain";
 import {ClassUtils} from "../../utils/ClassUtils";
 import {BLogger} from "../../module/logger/BLogger";
 import {IItemNginxConfig, INginxConfig} from "../donor_configs/INginxConfig";
-import {WorkerController} from "./workers/WorkerController";
 import {BWorker} from "./workers/BWorker";
 
 
@@ -26,22 +25,22 @@ export class ItemController extends BaseDonorController {
     private baseConfig: IBaseConfig;
     private nginxConfig: INginxConfig;
 
+    public async init(): Promise<IResult> {
+        this.sConf = <IItemController>this.config;
+        this.mapDomains = new Map<string, ItemDomain>();
+
+        this.baseConfig = await this.loadConfig(this.sConf.baseConfig);
+        if (!this.baseConfig) return IResult.error("base config isn't load");
+
+        this.nginxConfig = await this.loadConfig(this.sConf.nginxConfig);
+        if (!this.nginxConfig) return IResult.error("nginx config isn't load");
+
+        return IResult.success;
+    }
+
     public async endInit(): Promise<IResult> {
-        try {
-            this.sConf = <IItemController>this.config;
-            this.mapDomains = new Map<string, ItemDomain>();
+        this.initConfigs().catch(error => this.logger.error(error));
 
-            this.baseConfig = await this.loadConfig(this.sConf.baseConfig);
-            if (!this.baseConfig) return IResult.error("base config isn't load");
-
-            this.nginxConfig = await this.loadConfig(this.sConf.nginxConfig);
-            if (!this.nginxConfig) return IResult.error("nginx config isn't load");
-
-            this.initConfigs().catch(error => this.logger.error(error));
-
-        } catch (e) {
-            return IResult.error(e);
-        }
         return IResult.success;
     }
 
@@ -85,5 +84,6 @@ export class ItemController extends BaseDonorController {
     public getBaseConfig(): IBaseConfig {
         return this.baseConfig;
     }
+
 
 }

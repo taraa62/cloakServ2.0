@@ -22,7 +22,7 @@ export abstract class BasePoolWorker extends BaseWorker {
     protected checkCommand(data: any): void {
         if (data && data.command) {
             const _f = (this as any)[data.command];
-            if (_f && _f.constructor.name === "Function") {
+            if (_f && _f instanceof Function) {
                 _f.call(this, data);
             }
         }

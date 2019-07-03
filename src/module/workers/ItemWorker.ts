@@ -48,7 +48,7 @@ export class ItemWorker {
 
 
 
-            this.worker.postMessage(data, transfer);
+            this.workers.postMessage(data, transfer);
 
     */
     }
@@ -81,7 +81,7 @@ export class ItemWorker {
         this.worker.on("exit", (ex: number) => {
             if (this.isDead) return;
             dispath(this.listenersWorker.get("exit"), ex);
-            this.callParentDeadWorker(ex);
+            this.callParentDeadWorker(`worker exit with code => ${ex}, path=> ${this._path}`);
         });
         this.worker.on("online", () => {
             if (this.isDead) return;
@@ -119,7 +119,7 @@ export class ItemWorker {
         return this.id;
     }
 
-    protected callParentDeadWorker(er: number | Error): void {
+    protected callParentDeadWorker(er: number|string | Error): void {
         if (this.parent) {
             this.isDead = true;
             this.parent.workerDead(this.key, er);
@@ -136,14 +136,15 @@ export class ItemWorker {
 
         this.listenersChannel.clear();
         this.listenersChannel = null;
+        let IRes: IResult = IResult.success;
+        if (this.worker) {
+            this.worker.removeAllListeners();
 
-        this.worker.removeAllListeners();
-        let IRes: IResult = null;
-        await this.worker.terminate((err, code) => {
-            if (err) IRes = {error: err, code: code};
-            else IRes = {success: true, code: code};
-        });
-
+            await this.worker.terminate((err, code) => {
+                if (err) IRes = {error: err, code: code};
+                else IRes = {success: true, code: code};
+            });
+        }
         return IRes;
     }
 }

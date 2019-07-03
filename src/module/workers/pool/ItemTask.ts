@@ -34,7 +34,7 @@ export class ItemTask {
     }
 
     /**
-     end of job a worker, and result throw here.
+     end of job a workers, and result throw here.
      */
     public setRunDataWorker(error: any = null, data: any = null): void {
         this.isRun = false;

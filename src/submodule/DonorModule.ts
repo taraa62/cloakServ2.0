@@ -8,11 +8,11 @@ import {Request, Response} from "express";
 import {IResult} from "../utils/IUtils";
 import {CloakerController} from "../module/route/HttpControllers/CloakerController";
 import {ItemController} from "./donor_general/ItemController";
-import {ItemDomain} from "./donor_general/ItemDomain";
 import {DonorWorkersController} from "./donor_workers/DonorWorkersController";
 import {ClassUtils} from "../utils/ClassUtils";
 import {WorkerController} from "./donor_general/workers/WorkerController";
 import {BWorker} from "./donor_general/workers/BWorker";
+import {DonorEditController} from "./donor_editor/DonorEditController";
 
 
 export class DonorModule extends BModule {
@@ -32,6 +32,7 @@ export class DonorModule extends BModule {
         this.donorControllers.set(CONTROLLERS.CONFIGS, new DonorConfigsController(this, this.getConfigForController(CONTROLLERS.CONFIGS)));
         this.donorControllers.set(CONTROLLERS.WORKER_DONOR, new DonorWorkersController(this, this.getConfigForController(CONTROLLERS.WORKER_DONOR)));
         this.donorControllers.set(CONTROLLERS.ITEM, new ItemController(this, this.getConfigForController(CONTROLLERS.ITEM)));
+        this.donorControllers.set(CONTROLLERS.EDITOR, new DonorEditController(this, this.getConfigForController(CONTROLLERS.EDITOR)));
 
         const initContr: IResult = await ClassUtils.initClasses(this.donorControllers).catch((er:Error) => IResult.error(er));
         if (initContr.error) return initContr;
@@ -76,5 +77,6 @@ export enum CONTROLLERS {
     CONFIGS = 'CONFIGS',
     ITEM = 'ITEM',
     WORKER_DONOR = 'WORKER_DONOR',
+    EDITOR = 'EDITOR'
 
 }

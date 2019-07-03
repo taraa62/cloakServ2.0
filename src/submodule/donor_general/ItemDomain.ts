@@ -1,5 +1,5 @@
 import {ItemController} from "./ItemController";
-import {IItemConfig} from "../donor_configs/IData";
+import {IItemConfig} from "../donor_configs/IConfig";
 import {BLogger} from "../../module/logger/BLogger";
 import {IResult} from "../../utils/IUtils";
 import {WorkerController} from "./workers/WorkerController";

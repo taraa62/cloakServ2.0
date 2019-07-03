@@ -71,10 +71,10 @@ export class WorkerPoolController implements IWorkerController {
         this.checkRunTask();
     }
 
-    public workerDead(key: string, er: number | Error): void {
-        this.logger.error((er instanceof Error) ? er : "worker exit with code " + er);
+    public workerDead(key: string, er: number|string | Error): void {
+        this.logger.error((er instanceof Error) ? er : (Number(er))? "workers exit with code " + er : er);
         const task: ItemTask = this.workers.get(key).task;
-        if (task.isRunTask()) {
+        if (task && task.isRunTask()) {
             this.awaitTasks.unshift(task)
         }
         this.destroyWorker(key).catch(error => this.logger.error(error));
@@ -82,13 +82,16 @@ export class WorkerPoolController implements IWorkerController {
 
     public async destroyWorker(key: string): Promise<IResult> {
         if (this.workers.has(key)) {
-            this.workers.delete(key);
-            const iRes: IResult = await this.workers.get(key).destroy();
-            if (iRes.error) {
-                this.logger.error(iRes);
-                process.nextTick(() => {
-                    (process as any).emit(Signals.moduleError, "error destroy worker!!!!!!!!!'");
-                });
+            try {
+                const iRes: IResult = await this.workers.get(key).destroy();
+                if (iRes.error) {
+                    this.logger.error(iRes);
+                    process.nextTick(() => {
+                        (process as any).emit(Signals.moduleError, "error destroy workers!!!!!!!!!'");
+                    });
+                }
+            } finally {
+                this.workers.delete(key);
             }
         }
         return IResult.success;

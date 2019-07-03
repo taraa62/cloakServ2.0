@@ -59,7 +59,6 @@
       "isClearAllNotLocalFiles": false,
       "isClearResourceFolder": true
     },
-
     "GET": {
       "removeHead": [
         "server"
@@ -87,7 +86,24 @@
             "process": "post",
             "event": "e",
             "reg": {
-              "innerHTML": "Богдан.... ти... ой всьо!!!!"
+              "innerHTML": "Боdwed233dьо!!!!"
+            },
+            "where": {
+              "queryAll": ".col-sm-12.col-md-12.home-title h1"
+            }
+          }
+        ]
+      },
+      {
+        "pages": [
+          "/"
+        ],
+        "regular": [
+          {
+            "process": "post",
+            "event": "e",
+            "reg": {
+              "innerHTML": "Бsssqswed!!"
             },
             "where": {
               "queryAll": ".col-sm-12.col-md-12.home-title h1"

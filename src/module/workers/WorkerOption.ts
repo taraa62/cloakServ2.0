@@ -14,7 +14,7 @@ export interface IWorkerController {
 
     workerEndRun(key: string): void;
 
-    workerDead(key: string, er: number | Error): void;
+    workerDead(key: string, er: number | string | Error): void;
 
 }
 

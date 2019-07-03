@@ -1,7 +1,7 @@
 import {IDonorConfigs} from "./DonorConfigsController";
 import {FileManager} from "../../utils/FileManager";
 import {ServerConfig} from "../../server/ServerConfig";
-import {IItemConfig} from "./IData";
+import {IItemConfig} from "./IConfig";
 import {IResult} from "../../utils/IUtils";
 
 

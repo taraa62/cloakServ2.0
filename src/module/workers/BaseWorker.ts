@@ -1,4 +1,4 @@
-import {parentPort} from "worker_threads";
+import {parentPort, workerData} from "worker_threads";
 import {WorkerMessage} from "./WorkerMessage";
 import {BLogger} from "../logger/BLogger";
 
@@ -9,12 +9,13 @@ import {BLogger} from "../logger/BLogger";
 export class BaseWorker {
 
     protected logger: BLogger;
+    protected workerData: any;
 
     constructor() {
         this.logger = new BLogger();
         this.logger.info('create new Worker Test');
 
-
+        this.workerData = (workerData) ? workerData.data : {};
         // parentPort.postMessage( {msg:"hello init"})
         parentPort.on("message", this.newMessage.bind(this));
         this.init();
@@ -50,7 +51,7 @@ export class BaseWorker {
                     console.log(data);
                     parentPort.postMessage("hello from parentPort");
                     res();
-                }, 2000, "time use worker")            });
+                }, 2000, "time use workers")            });
 
         }
        /* private port: MessagePort;

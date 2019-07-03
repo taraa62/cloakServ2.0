@@ -1,12 +1,14 @@
 import {IResult} from "../../utils/IUtils";
 
+;
+
 export class BLogger {
 
     private localLogger: any;
     private remoteLogger: any;
     private isShowCallClass: boolean = true;
     private isShowCallClassOnlyError: boolean = true;
-
+    private ansiParser = require("ansi-parser");
 
     constructor(localLogger: any = null, remoteLogger: any = null) {
         this.localLogger = localLogger;
@@ -33,12 +35,14 @@ export class BLogger {
     }
 
     private print(mess: any, type: string = "error" || "info" || "debug"): void {
+        mess = this.ansiParser.removeAnsi(mess);   //TODO може потім пофіксять цей баг !!!!
         if (this.localLogger && this.localLogger[type]) this.localLogger[type](mess);
-        else (console as any)[type](mess);
+        else (<any>console)[type](mess);
         if (this.remoteLogger) {
             this.remoteLogger[type](mess);
         }
     }
+
 
     private getLogCallClasses(type: string): string {
 
@@ -118,6 +122,7 @@ export class BLogger {
         }
 
         return mess;
+
     }
 
 

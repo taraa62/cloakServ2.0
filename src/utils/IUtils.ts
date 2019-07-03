@@ -36,7 +36,7 @@ export class IResult implements IResult {
         let res: string = "IResult: ";
         if (obj.error) {
             if (obj.error instanceof Error) {
-                `[ERROR]: message: ${obj.error.message}  stack: \n ${obj.error.stack}`;
+                res += `[ERROR]: message: ${obj.error.message}  stack: \n ${obj.error.stack}`;
             } else {
                 res += `[ERROR]: ${obj.error.toString()}`
             }

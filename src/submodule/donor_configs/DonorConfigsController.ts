@@ -3,7 +3,7 @@ import {ReadConfFile} from "./ReadConfFile";
 import {MongoDBModule} from "../../module/db/mongo/MongoDBModule";
 import {configSchema} from "./configSchema";
 import {Model} from "mongoose";
-import {IItemConfig} from "./IData";
+import {IItemConfig} from "./IConfig";
 import {IResult} from "../../utils/IUtils";
 import {ObjectId} from "bson";
 
@@ -21,7 +21,7 @@ export interface IDonorConfigs extends IBaseDonorConfig {
 export class DonorConfigsController extends BaseDonorController {
 
 
-    //private worker: ItemWorker;
+    //private workers: ItemWorker;
     private sConfig: IDonorConfigs;
     private db: MongoDBModule;
     private confSchema = configSchema;
@@ -135,7 +135,7 @@ export class DonorConfigsController extends BaseDonorController {
 
 
     /*  private testWorker() {
-          const workPath = FileManager.getSimplePath(__dirname, "/dict/submodule/donor_configs") + "/worker/WorkerController.js";
+          const workPath = FileManager.getSimplePath(__dirname, "/dict/submodule/donor_configs") + "/workers/WorkerController.js";
 
           const opt: WorkerOption = <WorkerOption>{
               isMessageChannel: true,
@@ -150,7 +150,7 @@ export class DonorConfigsController extends BaseDonorController {
           }
 
 
-          this.worker = this.parent.getWorkersModule().addWorker(workPath, data, opt);
+          this.workers = this.parent.getWorkersModule().addWorker(workPath, data, opt);
 
       }
   */

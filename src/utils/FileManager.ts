@@ -78,14 +78,15 @@ export class FileManager {
 
     static async writeToFile(path: string, text: string, isRewritefile: boolean = true, isCreateFile: boolean = true): Promise<IResult> {
         const info = await FileManager.getInfoFile(path).catch((er: Error) => null);
-        if (!info.isFile) return {error: "file is directory"} as IResult;
         if (info) {
+            if (!info.isFile) return {error: "file is directory"} as IResult;
             if (!info.isBlockDevice) {
                 if (isRewritefile) return await FileManager.rewriteFile(path, text);
                 else return FileManager.writeFile(path, text);
             } else return {error: "file is blocker device"} as IResult;
         } else {
-            return await FileManager.writeToNewFile(path, text);
+            if (isCreateFile) return await FileManager.writeToNewFile(path, text);
+            return IResult.error("file isn't exist");
         }
     }
 

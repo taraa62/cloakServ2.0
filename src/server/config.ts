@@ -78,7 +78,11 @@ export const config = {
             },
             WORKER_DONOR: {
                 name: "donorWorker",
-                jsFile: "./workers/WorkWithDonor.js"
+                jsFile: "./donor_workers/workers/WorkWithDonor.js"
+            },
+            EDITOR: {
+                name: "editWorker",
+                jsFile: "./donor_editor/workers/WorkEditPage.js"
             }
         },
     }],

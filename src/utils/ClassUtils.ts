@@ -25,7 +25,7 @@ export class ClassUtils {
         const list: Promise<any>[] = [];
 
         classList.forEach(v => {
-            list.push((state === "init") ? v.init() : v.endInit());
+            list.push((state === "init") ? v.init.call(v) : v.endInit.call(v));
         })
         return list;
     }

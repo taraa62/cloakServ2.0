@@ -3,7 +3,6 @@ import {Signals} from "../const/Signals";
 import {BModule} from "../module/BModule";
 import {BLogger} from "../module/logger/BLogger";
 import {LoggerModule} from "../module/logger/LoggerModule";
-import {FileManager} from "../utils/FileManager";
 import {ILoggerConfig, IModuleConfig} from "./IConfig";
 import {IServer} from "./IServer";
 import {ServerConfig} from "./ServerConfig";
@@ -149,6 +148,7 @@ export abstract class BaseServer implements IServer {
             const res: IResult = await v.endInit();
             if (res.error) {
                 this.logger.error(res);
+
                 if (!this.isStopInit) {
                     this.isStopInit = true;
                     process.nextTick(() => {
@@ -170,7 +170,7 @@ export abstract class BaseServer implements IServer {
                 isInit = await this.initModules(this.conf.getInitModuleAfter()).then((v) => true).catch((er) => false);
                 if (isInit) {
                     await this.endInitModules();
-                    if(!this.isStopInit) console.log("----- all module initialization----------");
+                    if (!this.isStopInit) console.log("----- all module initialization----------");
                     else console.log("----- error initialization module in endInit ----------");
                 } else {
                     process.nextTick(() => {

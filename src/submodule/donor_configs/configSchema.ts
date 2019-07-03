@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IItemConfig} from "./IData";
+import { IItemConfig} from "./IConfig";
 import {ObjectId} from "bson";
 
 const _configSchema = new mongoose.Schema<IItemConfig>({
