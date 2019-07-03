@@ -35,7 +35,7 @@ export class BLogger {
     }
 
     private print(mess: any, type: string = "error" || "info" || "debug"): void {
-        mess = this.ansiParser.removeAnsi(mess);   //TODO може потім пофіксять цей баг !!!!
+        // mess = this.ansiParser.removeAnsi(mess);   //TODO може потім пофіксять цей баг !!!!
         if (this.localLogger && this.localLogger[type]) this.localLogger[type](mess);
         else (<any>console)[type](mess);
         if (this.remoteLogger) {

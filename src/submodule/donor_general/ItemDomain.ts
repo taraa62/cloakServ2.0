@@ -32,7 +32,7 @@ export class ItemDomain {
             this.donorURl = this.updUrl(this.conf.data.donorOrigin);
             this.ourURL = this.updUrl(this.ngixConf.configDomain.protocol + "://" + this.conf.data.ourHost);
 
-            this.workersMap = new Map<EItemDomainController, BWorker>()
+            this.workersMap = new Map<EItemDomainController, BWorker>();
             this.workersMap.set(EItemDomainController.CONTROLLER, new WorkerController(this, this.logger));
             this.workersMap.set(EItemDomainController.HEADER, new WorkerHeaders(this, this.logger));
             this.workersMap.set(EItemDomainController.ACTION, new WorkerActions(this, this.logger));
@@ -69,10 +69,13 @@ export class ItemDomain {
     }
 
     //*** get controller */
-    public getWorker(worker:EItemDomainController): BWorker {
+    public getWorker(worker: EItemDomainController): BWorker {
         return this.workersMap.get(worker);
     }
 
+    public getDomainConfig(): IItemConfig {
+        return this.conf;
+    }
 
 
     private updUrl(stUrl: string): IItemDomainInfo {
@@ -91,7 +94,6 @@ export class ItemDomain {
             domain: domain
         };
     }
-
 
 
 }

@@ -34,4 +34,5 @@ export class HeadersUtils {
         }
         return this.contentTypes.getContentTypeWithPath(url);
     }
+
 }

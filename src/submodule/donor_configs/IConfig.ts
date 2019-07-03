@@ -18,6 +18,8 @@ export interface IConfig {
     ourHost: string;
     nameResourceFolder: string;
     canDoRequestToDonor: string;
+    blackParamForSave?: string[];
+    prioritySaveParam?: string[];
     cleaner: ICleaner;
     regulations: IRegulations[]
 }

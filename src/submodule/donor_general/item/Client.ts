@@ -29,7 +29,7 @@ export class Client {
             this.normalizeReqURL();
 
             this.contentType = HeadersUtils.getContentTypeFromRequest(this.req);
-            this.action = (<WorkerActions>this.workController.parent.getWorker(EItemDomainController.ACTION)).getAction(this.req);
+            (<WorkerActions>this.workController.parent.getWorker(EItemDomainController.ACTION)).updAction(this);
         } catch (e) {
             return IResult.error(e);
         }
