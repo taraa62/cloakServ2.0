@@ -3,7 +3,7 @@ import {ReadConfFile} from "./ReadConfFile";
 import {MongoDBModule} from "../../module/db/mongo/MongoDBModule";
 import {configSchema} from "./configSchema";
 import {Model} from "mongoose";
-import {IItemConfig} from "./IConfig";
+import {IItemConfig} from "../interface/configs/IConfig";
 import {IResult} from "../../utils/IUtils";
 import {ObjectId} from "bson";
 

@@ -119,7 +119,7 @@ export class ItemWorker {
         return this.id;
     }
 
-    protected callParentDeadWorker(er: number|string | Error): void {
+    protected callParentDeadWorker(er: number | string | Error): void {
         if (this.parent) {
             this.isDead = true;
             this.parent.workerDead(this.key, er);

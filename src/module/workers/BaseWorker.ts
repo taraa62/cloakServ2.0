@@ -35,7 +35,7 @@ export class BaseWorker {
     }
 
     public sendTaskComplitError(error: any): void {
-        const resp = new WorkerMessage("endError", error);
+        const resp = new WorkerMessage("endError", error.message || error);
         parentPort.postMessage(resp);
     }
 

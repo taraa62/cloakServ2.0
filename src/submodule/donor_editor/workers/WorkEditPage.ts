@@ -1,9 +1,10 @@
 import {BasePoolWorker} from "../../../module/workers/pool/workers/BasePoolWorker";
 import {FileManager} from "../../../utils/FileManager";
 import {IResult} from "../../../utils/IUtils";
-import {EProcessEdit, IMessageWorkerEditTextReq} from "./EEditText";
-import {IItemConfig, IRegular, IRegulations} from "../../donor_configs/IConfig";
+import {IMessageWorkerEditTextReq, IMessageWorkerEditTextResp} from "../../interface/IMessageWorkers";
+import {IItemConfig, IRegular, IRegulations} from "../../interface/configs/IConfig";
 import {EditText} from "./EditText";
+import {EProcessEdit} from "../../interface/EGlobal";
 
 export class WorkEditPage extends BasePoolWorker {
 
@@ -21,7 +22,7 @@ export class WorkEditPage extends BasePoolWorker {
 
     }
 
-    private async editFile(item: IMessageWorkerEditTextReq): Promise<void> {
+    private async editFile(item: IMessageWorkerEditTextReq): Promise<any> {
         let text: string = <string>await ((item.text) ? item.text : (item.pathToFile) ? this.getTextFromDisk(item.pathToFile) : "");
 
         const regulations: IRegulations[] = this.getRegulation(item.host);
@@ -31,7 +32,11 @@ export class WorkEditPage extends BasePoolWorker {
         if (!list) return super.sendTaskComplitSuccess(text);
         else {
             const iRes: IResult = <IResult>await this.editText.edit(list, item, text);
-            (iRes.error) ? super.sendTaskComplitError(iRes.error) : super.sendTaskComplitSuccess(iRes.data);
+            const resp: IMessageWorkerEditTextResp = {}
+            if (iRes.error) resp.error = iRes.error;
+            if (iRes.data) resp.text = iRes.data || text;
+
+            (iRes.error) ? super.sendTaskComplitError(resp) : super.sendTaskComplitSuccess(resp);
         }
     }
 

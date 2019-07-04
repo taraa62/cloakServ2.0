@@ -1,8 +1,7 @@
 import {BWorker} from "./BWorker";
-import {IncomingMessage} from "http";
 import {Client} from "../item/Client";
 import {HeadersUtils} from "../../../utils/HeadersUtils";
-import {IBaseConfig} from "../../donor_configs/IBaseConfig";
+import {IBaseConfig} from "../../interface/configs/IBaseConfig";
 
 export class WorkerActions extends BWorker {
 
@@ -12,6 +11,9 @@ export class WorkerActions extends BWorker {
 
     public init(): void {
         try {
+            this.blackParamForSave = [];
+            this.priorityParamForSave = [];
+
             const baseConf: IBaseConfig = this.parent.getBaseConf();
             this.maxUseParamToSave = baseConf.maxUseParamForSaveFile || 2;
 
@@ -89,6 +91,8 @@ export class WorkerActions extends BWorker {
         client.action = url;
         client.isFile = isFile;
     }
+
+
 
 
 }

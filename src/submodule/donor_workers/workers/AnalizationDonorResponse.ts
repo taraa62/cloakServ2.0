@@ -2,6 +2,7 @@ import {WorkWithDonor} from "./WorkWithDonor";
 import {IncomingMessage} from "http";
 import {BLogger} from "../../../module/logger/BLogger";
 import {IResult} from "../../../utils/IUtils";
+import {IMessageWorkerDonorReq, IMessageWorkerDonorResp} from "../../interface/IMessageWorkers";
 
 
 /*
@@ -19,36 +20,40 @@ export class AnalizationDonorResponse {
     constructor(private controller: WorkWithDonor, private logger: BLogger) {
     }
 
-    public analize(response: IncomingMessage): void {
-        if (response.statusCode < 200) this.respCode100(response);
-        else if (response.statusCode >= 200 && response.statusCode < 300) this.respCode200(response);
-        else if (response.statusCode >= 300 && response.statusCode < 400) this.respCode300(response);
-        else if (response.statusCode >= 400 && response.statusCode < 500) this.respCode400(response);
-        else this.respCode500(response);
+    public analize(response: IncomingMessage, data: IMessageWorkerDonorReq): void {
+        if (response.statusCode < 200) this.respCode100(response, data).catch(er => this.controller.sendTaskComplitError(er));
+        else if (response.statusCode >= 200 && response.statusCode < 300) this.respCode200(response, data).catch(er => this.controller.sendTaskComplitError(er));
+        else if (response.statusCode >= 300 && response.statusCode < 400) this.respCode300(response, data).catch(er => this.controller.sendTaskComplitError(er));
+        else if (response.statusCode >= 400 && response.statusCode < 500) this.respCode400(response, data).catch(er => this.controller.sendTaskComplitError(er));
+        else this.respCode500(response, data).catch(er => this.controller.sendTaskComplitError(er));
     }
 
 
-    private respCode100(response: IncomingMessage): void {
+    private async respCode100(response: IncomingMessage, data: IMessageWorkerDonorReq): Promise<any> {
         this.controller.sendTaskComplitError("RESPONSE CODE 100");
+        return IResult.error("swdq")
     }
 
-    private async respCode200(response: IncomingMessage): Promise<void> {
-        const iRes: IResult = await this.controller.workerFiles.saveFileOnDisk(response);
+    private async respCode200(response: IncomingMessage, data: IMessageWorkerDonorReq): Promise<any> {
+        const iRes: IResult = await this.controller.workerFiles.saveFileOnDisk(response, data).catch(e => IResult.error(e));
 
         if (iRes.error) return this.controller.sendTaskComplitError(iRes.error);
-        return this.controller.sendTaskComplitSuccess(iRes.success)
+        const mess: IMessageWorkerDonorResp = {
+            pathToFile: iRes.data
+        }
+        return this.controller.sendTaskComplitSuccess(mess);
     }
 
-    private respCode300(response: IncomingMessage): void {
-
+    private async respCode300(response: IncomingMessage, data: IMessageWorkerDonorReq): Promise<any> {
+        return IResult.error("swdq")
     }
 
-    private respCode400(response: IncomingMessage): void {
-
+    private async respCode400(response: IncomingMessage, data: IMessageWorkerDonorReq): Promise<any> {
+        return IResult.error("swdq")
     }
 
-    private respCode500(response: IncomingMessage): void {
-
+    private async respCode500(response: IncomingMessage, data: IMessageWorkerDonorReq): Promise<any> {
+        return IResult.error("swdq")
     }
 
 }

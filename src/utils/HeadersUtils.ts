@@ -10,7 +10,7 @@ export class HeadersUtils {
     public static getContentTypeFromRequest(req: IncomingMessage): string {
         let ct: string = this.getContentTypeOrAcceptHTTP(req.headers);
         if (!ct) return this.getContentTypeFromOriginalUrl((<any>req).originalUrl);
-        return null;
+        return ct;
     }
 
     public static getContentTypeOrAcceptHTTP(headers: IncomingHttpHeaders): string {
@@ -32,7 +32,7 @@ export class HeadersUtils {
         if (url.indexOf("?") > -1) {
             url = url.substr(0, url.indexOf("?"));
         }
-        return this.contentTypes.getContentTypeWithPath(url);
+        return this.contentTypes.contType.getContentTypeWithPath(url);
     }
 
 }

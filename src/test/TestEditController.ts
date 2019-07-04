@@ -1,5 +1,6 @@
 import {DonorEditController} from "../submodule/donor_editor/DonorEditController";
-import {EProcessEdit, IMessageWorkerEditTextReq} from "../submodule/donor_editor/workers/EEditText";
+import { IMessageWorkerEditTextReq} from "../submodule/interface/IMessageWorkers";
+import {EProcessEdit} from "../submodule/interface/EGlobal";
 
 export class TestEditController {
 

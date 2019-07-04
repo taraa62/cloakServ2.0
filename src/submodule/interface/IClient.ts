@@ -7,7 +7,3 @@ export interface IItemDomainInfo {
 }
 
 
-
-export interface IFraudeFilter {
-
-}

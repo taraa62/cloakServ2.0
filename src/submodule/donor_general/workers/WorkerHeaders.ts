@@ -21,7 +21,7 @@ export class WorkerHeaders extends BWorker {
             host: this.parent.getDonorURL().host,
             hostname: this.parent.getDonorURL().host,
             method: client.req.method,
-            path: client.req.originalUrl
+            path: client.req.path
         }
         Object.assign(opt.headers, client.req.headers);
 

@@ -1,5 +1,5 @@
-import {IMessageWorkerEditTextReq} from "./EEditText";
-import {IRegulations, IWhere} from "../../donor_configs/IConfig";
+import {IMessageWorkerEditTextReq} from "../../interface/IMessageWorkers";
+import {IRegulations, IWhere} from "../../interface/configs/IConfig";
 import {IResult} from "../../../utils/IUtils";
 
 export class EditText {

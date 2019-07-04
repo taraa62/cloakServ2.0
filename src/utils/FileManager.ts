@@ -34,13 +34,13 @@ export class FileManager {
      * @param isCreateFolder -
      * returm - is create folder.
      */
-    static checkPathToFolder(pathTo: string, pathParent: string = null, isCreateFolder: boolean = false): Promise<any> {
+    static checkPathToFolder(pathTo: string, pathParent: string = null, isCreateFolder: boolean = false): Promise<IResult> {
         return new Promise(async (res, rj) => {
             const path = this.getSimplePath(pathTo, pathParent);
 
-            if (await this.isExist(path)) res(path);
+            if (await this.isExist(path)) res(IResult.succData(path));
             else {
-                if (!isCreateFolder) rj("folder is not Founde");
+                if (!isCreateFolder) rj(IResult.error("folder is not Founde"));
                 else {
                     const arr = path.split(this._path.sep);
                     let _cD = "";
@@ -48,13 +48,13 @@ export class FileManager {
                         if (f) {
                             _cD += this._path.sep + f;
 
-                            if (!this.isExist(_cD)) {
+                            if (!await this.isExist(_cD)) {
                                 await fs.mkdirSync(_cD);
                             }
                         }
                     }
-                    if (_cD === path) res(path);
-                    rj("error create folder => " + _cD);
+                    if (_cD === path) res(IResult.succData(path));
+                    rj(IResult.error("error create folder => " + _cD));
                 }
             }
         });
@@ -130,7 +130,7 @@ export class FileManager {
 
 
     static async readLineText(path: string, callback: Function): Promise<any> {
-        if (!this.isExist(path)) callback("path is invalid!!!", null, null);
+        if (!await this.isExist(path)) callback("path is invalid!!!", null, null);
         await this.getInfoFile(path).then((v) => {
             if (v.isFile) {
                 const instream = fs.createReadStream(path);

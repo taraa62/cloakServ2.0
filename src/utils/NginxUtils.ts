@@ -3,7 +3,7 @@ import {CDMCommand, CMDResult} from "./cmd/CMDResult";
 import {CMDUtils} from "./cmd/CMDUtils";
 import {BLogger} from "../module/logger/BLogger";
 import {StringUtils} from "./StringUtils";
-import {IConfigNginx, IItemConfigNginx} from "../submodule/donor_configs/INginxConfig";
+import {IConfigNginx, IItemConfigNginx} from "../submodule/interface/configs/INginxConfig";
 import {IResult} from "./IUtils";
 
 export class NginxUtils {

@@ -1,14 +1,14 @@
 import {BaseDonorController, IBaseDonorConfig} from "../BaseDonorController";
 import {IResult} from "../../utils/IUtils";
-import {IBaseConfig} from "../donor_configs/IBaseConfig";
+import {IBaseConfig} from "../interface/configs/IBaseConfig";
 import {FileManager} from "../../utils/FileManager";
 import {CONTROLLERS} from "../DonorModule";
 import {DonorConfigsController} from "../donor_configs/DonorConfigsController";
-import {IItemConfig} from "../donor_configs/IConfig";
+import {IItemConfig} from "../interface/configs/IConfig";
 import {ItemDomain} from "./ItemDomain";
 import {ClassUtils} from "../../utils/ClassUtils";
 import {BLogger} from "../../module/logger/BLogger";
-import {IItemNginxConfig, INginxConfig} from "../donor_configs/INginxConfig";
+import {IItemNginxConfig, INginxConfig} from "../interface/configs/INginxConfig";
 import {BWorker} from "./workers/BWorker";
 
 

@@ -1,10 +1,8 @@
 import {Request, Response} from "express";
 import {WorkerController} from "../workers/WorkerController";
-import {IItemDomainInfo} from "./IClient";
+import {IItemDomainInfo} from "../../interface/IClient";
 import {IResult} from "../../../utils/IUtils";
 import {HeadersUtils} from "../../../utils/HeadersUtils";
-import {EItemDomainController} from "../workers/IWorkerGeneral";
-import {WorkerActions} from "../workers/WorkerActions";
 
 export class Client {
     public clientIp: string;
@@ -20,6 +18,7 @@ export class Client {
 
     public domainInfo: IItemDomainInfo;
 
+
     constructor(public workController: WorkerController, public req: Request, public res: Response) {
     }
 
@@ -27,9 +26,9 @@ export class Client {
         try {
             this.domainInfo = this.workController.getDomainConfig();
             this.normalizeReqURL();
-
+            this.workController.workerAction.updAction(this);
             this.contentType = HeadersUtils.getContentTypeFromRequest(this.req);
-            (<WorkerActions>this.workController.parent.getWorker(EItemDomainController.ACTION)).updAction(this);
+
         } catch (e) {
             return IResult.error(e);
         }

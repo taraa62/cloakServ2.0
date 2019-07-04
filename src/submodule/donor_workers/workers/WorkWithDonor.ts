@@ -3,6 +3,7 @@ import https from "https";
 import {AnalizationDonorResponse} from "./AnalizationDonorResponse";
 import {IncomingMessage} from "http";
 import {WorkerFiles} from "./WorkerFiles";
+import {IMessageWorkerDonorReq} from "../../interface/IMessageWorkers";
 
 
 export class WorkWithDonor extends BasePoolWorker {
@@ -19,24 +20,29 @@ export class WorkWithDonor extends BasePoolWorker {
 
     }
 
-    private setRequest(data: any): void {
-        this.logger.debug("server send to donor HTTPS->" + data.options.path);
-        this.logger.debug(JSON.stringify(data.options));
+    private setRequest(data: IMessageWorkerDonorReq): void {
+        try {
+            this.logger.debug("server send to donor HTTPS->" + data.options.path);
+            //    this.logger.debug(JSON.stringify(data.options));
 
-        this.setHTTPS_GET(data.options);
+            this.setHTTPS_GET(data);
+        } catch (e) {
+            this.sendTaskComplitError({error: e})
+        }
+
     }
 
 
-    private setHTTPS_GET(opt: any): void {
+    private setHTTPS_GET(data: IMessageWorkerDonorReq): void {
 
-        https.get(opt, (resp: IncomingMessage) => {
-            this.logger.debug("donor response to server ->" + JSON.stringify(resp.headers));
-            this.analizator.analize(resp);
+        https.get(data.options, (resp: IncomingMessage) => {
+            // this.logger.debug("donor response to server ->" + JSON.stringify(resp.headers));
+            this.logger.debug("donor response to server ->" + resp.headers.host);
+            this.analizator.analize(resp, data);
 
         }).on("error", (err) => {
             super.sendTaskComplitError(err);
         });
-        super.sendTaskComplitSuccess({"dse": 111})
     }
 }
 

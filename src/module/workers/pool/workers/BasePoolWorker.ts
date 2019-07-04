@@ -19,11 +19,18 @@ export abstract class BasePoolWorker extends BaseWorker {
 
     protected abstract resetWorker(data: any): void;
 
-    protected checkCommand(data: any): void {
+    protected async checkCommand(data: any): Promise<any> {
         if (data && data.command) {
             const _f = (this as any)[data.command];
-            if (_f && _f instanceof Function) {
-                _f.call(this, data);
+            if (_f) {
+                if (_f.constructor.name == "AsyncFunction") {
+                    await (_f.call(this, data) as Promise<any>).catch(er => {
+                        this.logger.error(er);
+                        this.sendTaskComplitError(er);
+                    })
+                } else {
+                    _f.call(this, data);
+                }
             }
         }
     }

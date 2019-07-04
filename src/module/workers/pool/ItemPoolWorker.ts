@@ -27,19 +27,26 @@ export class ItemPoolWorker extends ItemWorker {
 
     private createListener(): void {
         this.addListenerWorker("online", () => {
+
             // if (this.task) this.task.setRunDataWorker(null, {status: "online"});
         })
         this.addListenerWorker("message", (data: WorkerMessage) => {
-            if (this.task) this.task.setRunDataWorker(null, data);
-            this.checkType(data);
+            try {
+                this.checkType(data);
+            } finally {
+                this.isRun = false;
+                this.parent.workerEndRun(this.key);
+            }
+            // if (this.task) this.task.setRunDataWorker(null, data.data);
+
         })
         this.addListenerWorker("error", (data: any) => {
             // if (this.task) this.task.setRunDataWorker(data);
-            this.checkType({type:"error"}as WorkerMessage);
+            this.checkType({type: "error"} as WorkerMessage);
         })
         this.addListenerWorker("exit", (data: any) => {
             // if (this.task) this.task.setRunDataWorker(data);
-            this.checkType({type:"exit"}as WorkerMessage);
+            this.checkType({type: "exit"} as WorkerMessage);
 
         })
     }
@@ -47,13 +54,9 @@ export class ItemPoolWorker extends ItemWorker {
     private checkType(data: WorkerMessage): void {
         switch (data.type) {
             case "end":
-                this.isRun = false;
-                this.parent.workerEndRun(this.key);
-                this.task.setRunDataWorker(null, data);
+                this.task.setRunDataWorker(null, data.data);
             case "endError":
-                this.isRun = false;
-                this.parent.workerEndRun(this.key);
-                this.task.setRunDataWorker(data);
+                this.task.setRunDataWorker(data.data);
                 break;
             case "error":
             case "exit":
