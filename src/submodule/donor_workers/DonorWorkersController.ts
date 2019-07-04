@@ -27,7 +27,7 @@ export class DonorWorkersController extends BaseDonorController {
     public async init(): Promise<IResult> {
         this.sConf = <IDonorWorkersControllerConfig>this.config;
 
-        super.createPool(this.sConf.jsFile, this.sConf.name);
+        super.createPool(this.sConf.jsFile, this.sConf.name, null, "plural");
 
         // TestPool.testSizePool();
 

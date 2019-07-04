@@ -1,13 +1,15 @@
-export interface IWorkerMessage {
+import {IMessageWorkerBaseReq} from "../../submodule/interface/IMessageWorkers";
 
+export interface IWorkerMessage {
+    key: string;
     type: string;
-    data: any;
+    data: IMessageWorkerBaseReq;
 
 }
 
 export class WorkerMessage implements IWorkerMessage {
 
-    constructor(public type: string, public data: any) {
+    constructor(public key: string, public type: string, public data: IMessageWorkerBaseReq) {
 
     }
 }

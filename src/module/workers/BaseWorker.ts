@@ -29,18 +29,18 @@ export class BaseWorker {
 
     }
 
-    public sendTaskComplitSuccess(mess: any): void {
-        const resp = new WorkerMessage("end", mess);
+    public sendTaskComplitSuccess(mess: any, key: string = null): void {
+        const resp = new WorkerMessage(key, "end", mess);
         parentPort.postMessage(resp);
     }
 
-    public sendTaskComplitError(error: any): void {
-        const resp = new WorkerMessage("endError", error.message || error);
+    public sendTaskComplitError(error: any, key: string = null): void {
+        const resp = new WorkerMessage(key, "endError", error.message || error);
         parentPort.postMessage(resp);
     }
 
-    public sendMessage(type: string, mess: any): void {
-        const resp = new WorkerMessage(type, mess);
+    public sendMessage(type: string, mess: any, key: string = null): void {
+        const resp = new WorkerMessage(key, type, mess);
         parentPort.postMessage(resp);
     }
 

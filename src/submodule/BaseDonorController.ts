@@ -4,6 +4,7 @@ import {BLogger} from "../module/logger/BLogger";
 import {PoolOptions} from "../module/workers/pool/PoolOptions";
 import {FileManager} from "../utils/FileManager";
 import {WorkerPoolController} from "../module/workers/pool/WorkerPoolController";
+import {ModeThread} from "../module/workers/WorkerOption";
 
 export interface IBaseDonorConfig {
 
@@ -33,10 +34,10 @@ export class BaseDonorController {
 
 
     //********POOLS*****//
-    protected async createPool(pathWorker: string, namePool: string, data: any = null): Promise<void> {
+    protected async createPool(pathWorker: string, namePool: string, data: any = null, mode: ModeThread = "single"): Promise<void> {
         const poolOpt: PoolOptions = new PoolOptions();
         poolOpt.jsFile = FileManager.getSimplePath(pathWorker, __dirname);
-        poolOpt.initData = {msg: "hello"};
+        poolOpt.mode = mode;
         poolOpt.name = namePool;
         poolOpt.initData = data;
 

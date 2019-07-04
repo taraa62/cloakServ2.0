@@ -1,6 +1,8 @@
-import {WorkerOption} from "../WorkerOption";
+import {ModeThread, WorkerOption} from "../WorkerOption";
+
 
 export class PoolOptions {
+    public mode: ModeThread = "single";
     public name: string;
     public jsFile: string;
     private _workerOption: WorkerOption;

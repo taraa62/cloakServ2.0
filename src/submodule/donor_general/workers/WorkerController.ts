@@ -63,9 +63,7 @@ export class WorkerController extends BWorker {
             } else {
                 res.status(404).send(IResult.resultToString(iRes));
             }
-
         }
-
     }
 
     public getDomainConfig(): IItemDomainInfo {

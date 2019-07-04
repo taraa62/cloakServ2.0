@@ -7,6 +7,12 @@ import {BLogger} from "../../logger/BLogger";
 import {Signals} from "../../../const/Signals";
 import {IWorkerController} from "../WorkerOption";
 
+
+/**
+ *
+ * для сінглетона потрібно перевіряти чи не помер запит і якщо ні, тоді пердавати воркеру.
+ * незабути очистити чергу.
+ */
 export class WorkerPoolController implements IWorkerController {
 
     private workers: Map<string, ItemPoolWorker>;
@@ -36,33 +42,64 @@ export class WorkerPoolController implements IWorkerController {
         }
     }
 
-    public newTask(data: any): Promise<IResult> {
-        const task: ItemTask = new ItemTask(data);
-        this.awaitTasks.push(task);
-        this.checkRunTask();
-        return task.getResult();
+    public async newTask(data: any): Promise<IResult> {
+        try {
+            const task: ItemTask = new ItemTask(data);
+            this.awaitTasks.push(task);
+            this.checkRunTask();
+            return await task.getResult();
+        } catch (e) {
+            return IResult.error(e);
+        }
     }
 
     private checkRunTask(): void {
         if (this.awaitTasks.length > 0) {
-            const list: ItemPoolWorker[] = this.getFreeWorkers();
-            if (list.length >= 1) {
-                for (let t = 0; t < list.length; t++) {
-                    const task = this.awaitTasks.shift();
-                    if (!task) return;
-                    list[t].run(task);
+            if (this.opt.mode === "single") {
+
+                const list: ItemPoolWorker[] = this.getFreeWorkers();
+                if (list.length >= 1) {
+                    for (let t = 0; t < list.length; t++) {
+                        const task = this.awaitTasks.shift();
+                        if (!task) return;
+                        list[t].run(task);
+                    }
                 }
+                if (this.awaitTasks.length > this.opt.maxPoolTaskForUpWorker) {
+                    this.checkListPool();
+                }
+            } else {
+                for (let t = 0; t < this.awaitTasks.length; t++) {
+                    let worker: ItemPoolWorker;
+                    for (let s of this.workers.values()) {
+                        if (!s.isDead) {
+                            if (!worker) worker = s;
+                            else {
+                                if (s.getSizeTasks() < worker.getSizeTasks()) {
+                                    worker = s;
+                                }
+                            }
+                        }
+                    }
+                    if (worker) {
+                        if (worker.getSizeTasks() > 200) {
+                            this.checkListPool();
+                        }
+                        worker.run(this.awaitTasks.shift());
+                    } else {
+                        throw new Error("workers not found!!");
+                    }
+                }
+
             }
-            if (this.awaitTasks.length > this.opt.maxPoolTaskForUpWorker) {
-                this.checkListPool();
-            }
+
         }
     }
 
     private getFreeWorkers(): ItemPoolWorker[] {
         const list: ItemPoolWorker[] = [];
         for (let s of this.workers.values()) {
-            if (!s.isRun) list.push(s);
+            if (!s.isRun && !s.isDead) list.push(s);
         }
         return list;
     }
@@ -71,11 +108,11 @@ export class WorkerPoolController implements IWorkerController {
         this.checkRunTask();
     }
 
-    public workerDead(key: string, er: number|string | Error): void {
-        this.logger.error((er instanceof Error) ? er : (Number(er))? "workers exit with code " + er : er);
+    public workerDead(key: string, er: number | string | Error): void {
+        this.logger.error((er instanceof Error) ? er : (Number(er)) ? "workers exit with code " + er : er);
         const task: ItemTask = this.workers.get(key).task;
         if (task && task.isRunTask()) {
-            this.awaitTasks.unshift(task)
+            this.awaitTasks.unshift(task);
         }
         this.destroyWorker(key).catch(error => this.logger.error(error));
     }

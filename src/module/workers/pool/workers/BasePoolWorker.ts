@@ -13,15 +13,15 @@ export abstract class BasePoolWorker extends BaseWorker {
 
             }
         }
-        this.checkCommand(data.data);
+        this.checkCommand(data);
     }
 
 
     protected abstract resetWorker(data: any): void;
 
-    protected async checkCommand(data: any): Promise<any> {
-        if (data && data.command) {
-            const _f = (this as any)[data.command];
+    protected async checkCommand(data: IWorkerMessage): Promise<any> {
+        if (data && data.data.command) {
+            const _f = (this as any)[data.data.command];
             if (_f) {
                 if (_f.constructor.name == "AsyncFunction") {
                     await (_f.call(this, data) as Promise<any>).catch(er => {

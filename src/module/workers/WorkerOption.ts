@@ -9,6 +9,8 @@ export interface IWorkerData {
 
 }
 
+export type ModeThread = "single" | "plural";
+
 
 export interface IWorkerController {
 

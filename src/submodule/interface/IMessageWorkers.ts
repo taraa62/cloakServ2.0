@@ -1,10 +1,15 @@
 /** Main to worker*/
 import {EProcessEdit} from "./EGlobal";
 import {IncomingHttpHeaders as Http1IncomingHttpHeaders} from "http";
+import {IResult} from "../../utils/IUtils";
 
 
 export interface IMessageWorkerBaseReq {
     command: string
+}
+
+export interface IMessageWorkerBaseResp {
+    error?: Error | IResult | string
 }
 
 //*  Donor request */
@@ -12,10 +17,10 @@ export interface IMessageWorkerBaseReq {
 export interface IMessageWorkerDonorReq extends IMessageWorkerBaseReq {
     options: Http1IncomingHttpHeaders;
     action: string;
-    resourceFolder:string
+    resourceFolder: string
 }
 
-export interface IMessageWorkerDonorResp {
+export interface IMessageWorkerDonorResp extends IMessageWorkerBaseResp {
     pathToFile: string;
 }
 
@@ -32,7 +37,8 @@ export interface IMessageWorkerEditTextReq extends IMessageWorkerBaseReq {
 }
 
 /**worker to main*/
-export interface IMessageWorkerEditTextResp {
+export interface IMessageWorkerEditTextResp extends IMessageWorkerBaseResp {
+    key: string;
     text?: string
-    error?:any;
+
 }

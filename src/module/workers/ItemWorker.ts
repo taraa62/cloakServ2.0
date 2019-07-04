@@ -71,7 +71,7 @@ export class ItemWorker {
     private listenerListenerWorker(): void {
         const dispath = (list: Set<Function>, data: any = null) => {
             if (list) Array.from(list).map(v => v(data));
-        }
+        };
 
         this.worker.on("error", (er: Error) => {
             if (this.isDead) return;
@@ -85,7 +85,7 @@ export class ItemWorker {
         });
         this.worker.on("online", () => {
             if (this.isDead) return;
-            dispath(this.listenersWorker.get("online"))
+            dispath(this.listenersWorker.get("online"));
 
         });
         this.worker.on("message", (val: WorkerMessage) => {
@@ -128,6 +128,7 @@ export class ItemWorker {
 
 
     public async destroy(): Promise<IResult> {
+        this.isDead = true;
         this.worker = null;
         this.option = null;
 

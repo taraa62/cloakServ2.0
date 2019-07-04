@@ -25,7 +25,7 @@ export class ItemTask {
         return this.workerKey;
     }
 
-    public getKeyCurrentTask(): string {
+    public getKeyTask(): string {
         return this.keyCurrentTask;
     }
 
