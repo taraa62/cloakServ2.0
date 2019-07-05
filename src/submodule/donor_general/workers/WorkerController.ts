@@ -11,6 +11,7 @@ import {WorkerHeaders} from "./WorkerHeaders";
 import {DonorEditController} from "../../donor_editor/DonorEditController";
 import {IMessageWorkerDonorReq, IMessageWorkerEditTextReq} from "../../interface/IMessageWorkers";
 import {WorkerActions} from "./WorkerActions";
+import {FileManager} from "../../../utils/FileManager";
 
 export class WorkerController extends BWorker {
 
@@ -44,6 +45,13 @@ export class WorkerController extends BWorker {
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
 
             if (IResult.success) {
+
+
+                res.writeHead(200, {"content-type": client.contentType});
+                FileManager._fs.createReadStream(iRes.data.pathToFile).pipe(res);
+                return ;
+
+
                 const task: IMessageWorkerEditTextReq = {
                     command: "editFile",
                     url: req.path,

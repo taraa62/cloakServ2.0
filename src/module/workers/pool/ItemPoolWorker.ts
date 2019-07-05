@@ -6,27 +6,29 @@ import {IResult} from "../../../utils/IUtils";
 export class ItemPoolWorker extends ItemWorker {
 
     public isRun: boolean = false;
-    public task: ItemTask;
 
-    private _sizeTask = 0;
+    private mapTask: Map<string, ItemTask>;
+
+
+    protected init(data: any): void {
+        this.mapTask = new Map<string, ItemTask>();
+        super.init(data);
+        this.createListener();
+    }
 
     public run(task: ItemTask): void {
         if (this.isDead) return;
+
+        this.mapTask.set(task.getKeyTask(), task);
         this.isRun = true;
-        this.task = task;
-        this._sizeTask++;
+
         task.run(this.key);
-        this.runNewTask();
+        this.runNewTask(task);
 
     }
 
-    private runNewTask(): void {
-        this.worker.postMessage(new WorkerMessage(this.task.getKeyTask(), "init", this.task.data));
-    }
-
-    protected init(data: any): void {
-        super.init(data);
-        this.createListener();
+    private runNewTask(task: ItemTask): void {
+        this.worker.postMessage(new WorkerMessage(task.getKeyTask(), "init", task.data));
     }
 
     private createListener(): void {
@@ -56,26 +58,44 @@ export class ItemPoolWorker extends ItemWorker {
     }
 
     private checkType(data: WorkerMessage): void {
+        const checkIsRunWorker = () => {
+            if (this.mapTask.size > 0) this.isRun = false;
+            else this.isRun = true;
+        }
+
         switch (data.type) {
             case "end":
-                this._sizeTask--;
-                this.task.setRunDataWorker(null, data.data);
+                if (data.key && this.mapTask.has(data.key)) {
+                    this.mapTask.get(data.key).setRunDataWorker(null, data.data);
+                    this.mapTask.delete(data.key);
+                }
+                checkIsRunWorker();
+                break;
             case "endError":
-                this._sizeTask--;
-                this.task.setRunDataWorker(data.data);
+                if (data.key && this.mapTask.has(data.key)) {
+                    this.mapTask.get(data.key).setRunDataWorker(data.data);
+                    this.mapTask.delete(data.key);
+                }
+                checkIsRunWorker();
                 break;
             case "error":
             case "exit":
                 this.isRun = true;
+                if (data.key) this.mapTask.delete(data.key);
                 break;
         }
     }
 
+    public getListTasks(): ItemTask[] {
+        return Array.from(this.mapTask.values());
+    }
+
     public getSizeTasks(): number {
-        return this._sizeTask;
+        return this.mapTask.size;
     }
 
     public async destroy(): Promise<IResult> {
+        this.mapTask.clear();  //Maybe,  destroy itemTask?
         return super.destroy();
     }
 }

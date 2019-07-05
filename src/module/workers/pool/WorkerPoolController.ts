@@ -72,7 +72,7 @@ export class WorkerPoolController implements IWorkerController {
                 for (let t = 0; t < this.awaitTasks.length; t++) {
                     let worker: ItemPoolWorker;
                     for (let s of this.workers.values()) {
-                        if (!s.isDead) {
+                        if (!s.isDead && s.isOnline) {
                             if (!worker) worker = s;
                             else {
                                 if (s.getSizeTasks() < worker.getSizeTasks()) {
@@ -90,16 +90,14 @@ export class WorkerPoolController implements IWorkerController {
                         throw new Error("workers not found!!");
                     }
                 }
-
             }
-
         }
     }
 
     private getFreeWorkers(): ItemPoolWorker[] {
         const list: ItemPoolWorker[] = [];
         for (let s of this.workers.values()) {
-            if (!s.isRun && !s.isDead) list.push(s);
+            if (!s.isRun && !s.isDead && s.isOnline) list.push(s);
         }
         return list;
     }
@@ -110,9 +108,9 @@ export class WorkerPoolController implements IWorkerController {
 
     public workerDead(key: string, er: number | string | Error): void {
         this.logger.error((er instanceof Error) ? er : (Number(er)) ? "workers exit with code " + er : er);
-        const task: ItemTask = this.workers.get(key).task;
-        if (task && task.isRunTask()) {
-            this.awaitTasks.unshift(task);
+        const task: ItemTask[] = this.workers.get(key).getListTasks();
+        if (task) {
+            this.awaitTasks.unshift(...task);
         }
         this.destroyWorker(key).catch(error => this.logger.error(error));
     }

@@ -21,6 +21,7 @@
     "@types/recursive-readdir": "^2.2.0",
     "@types/shelljs": "^0.8.5",
     "ansi-parser": "^3.2.9",
+    "crypto": "^1.0.1",
     "express": "^5.0.0-alpha.7",
     "http2": "^3.3.7",
     "mongoose": "^5.6.1",

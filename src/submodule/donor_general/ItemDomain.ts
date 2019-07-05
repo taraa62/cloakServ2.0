@@ -11,7 +11,7 @@ import {IBaseConfig} from "../interface/configs/IBaseConfig";
 import {WorkerHeaders} from "./workers/WorkerHeaders";
 import {WorkerActions} from "./workers/WorkerActions";
 import {BWorker} from "./workers/BWorker";
-import {EItemDomainController, EResourceFolder} from "../interface/EGlobal";
+import {EDomainType, EItemDomainController, EResourceFolder} from "../interface/EGlobal";
 import {FileManager} from "../../utils/FileManager";
 import {ClassUtils} from "../../utils/ClassUtils";
 
@@ -21,6 +21,7 @@ export class ItemDomain {
     private donorURl: IItemDomainInfo;
     private ourURL: IItemDomainInfo;
     private ngixConf: IItemNginxConfig;
+    private type: EDomainType = EDomainType.super;
 
     private resourceFolderMap: Map<EResourceFolder, string>;
 
@@ -120,5 +121,10 @@ export class ItemDomain {
         return this.resourceFolderMap.get(type) || null;
     }
 
+    public getMainHost(): string {
+        if (this.type === EDomainType.super) return this.ourURL.host;
+        //TODO create logic for subDomain
+        return null;
+    }
 
 }

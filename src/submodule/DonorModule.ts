@@ -10,9 +10,10 @@ import {CloakerController} from "../module/route/HttpControllers/CloakerControll
 import {ItemController} from "./donor_general/ItemController";
 import {DonorWorkersController} from "./donor_workers/DonorWorkersController";
 import {ClassUtils} from "../utils/ClassUtils";
-import {WorkerController} from "./donor_general/workers/WorkerController";
 import {BWorker} from "./donor_general/workers/BWorker";
 import {DonorEditController} from "./donor_editor/DonorEditController";
+import {DonorLinksController} from "./donor_links/DonorLinksController";
+import {DonorRequestController} from "./donor_request/DonorRequestController";
 
 
 export class DonorModule extends BModule {
@@ -31,6 +32,8 @@ export class DonorModule extends BModule {
     public async endInit(): Promise<IResult> {
         this.donorControllers.set(CONTROLLERS.CONFIGS, new DonorConfigsController(this, this.getConfigForController(CONTROLLERS.CONFIGS)));
         this.donorControllers.set(CONTROLLERS.WORKER_DONOR, new DonorWorkersController(this, this.getConfigForController(CONTROLLERS.WORKER_DONOR)));
+        this.donorControllers.set(CONTROLLERS.LINKS, new DonorLinksController(this, this.getConfigForController(CONTROLLERS.LINKS)));
+        this.donorControllers.set(CONTROLLERS.REQUEST, new DonorRequestController(this, this.getConfigForController(CONTROLLERS.REQUEST)));
         this.donorControllers.set(CONTROLLERS.ITEM, new ItemController(this, this.getConfigForController(CONTROLLERS.ITEM)));
         this.donorControllers.set(CONTROLLERS.EDITOR, new DonorEditController(this, this.getConfigForController(CONTROLLERS.EDITOR)));
 
@@ -77,6 +80,8 @@ export enum CONTROLLERS {
     CONFIGS = 'CONFIGS',
     ITEM = 'ITEM',
     WORKER_DONOR = 'WORKER_DONOR',
-    EDITOR = 'EDITOR'
+    EDITOR = 'EDITOR',
+    LINKS = 'LINKS',
+    REQUEST = 'REQUEST'
 
 }

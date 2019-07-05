@@ -10,13 +10,16 @@ export class ItemWorker {
 
     public readonly key = Random.randomString();
 
+    public isOnline: boolean = false;
+    public isDead: boolean = false;
+
     protected parent: IWorkerController;
     protected worker: Worker;
     protected _path: string;
     protected readonly id: string = Random.randomString();
     protected listenersWorker: Map<string | symbol, Set<Function>> = new Map<string, Set<Function>>();
     protected listenersChannel: Map<string | symbol, Set<Function>> = new Map<string, Set<Function>>();
-    public isDead: boolean = false;
+
 
     constructor(_path: string, data: any, protected option: WorkerOption) {
         this._path = FileManager.getSimplePath(_path, __dirname);
@@ -74,17 +77,20 @@ export class ItemWorker {
         };
 
         this.worker.on("error", (er: Error) => {
+            this.isOnline = false;
             if (this.isDead) return;
             dispath(this.listenersWorker.get("error"), er);
             this.callParentDeadWorker(er);
         });
         this.worker.on("exit", (ex: number) => {
+            this.isOnline = false;
             if (this.isDead) return;
             dispath(this.listenersWorker.get("exit"), ex);
             this.callParentDeadWorker(`worker exit with code => ${ex}, path=> ${this._path}`);
         });
         this.worker.on("online", () => {
             if (this.isDead) return;
+            this.isOnline = true;
             dispath(this.listenersWorker.get("online"));
 
         });

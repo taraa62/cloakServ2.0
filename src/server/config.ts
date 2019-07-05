@@ -83,7 +83,12 @@ export const config = {
             EDITOR: {
                 name: "editWorker",
                 jsFile: "./donor_editor/workers/WorkEditPage.js"
-            }
+            },
+            LINKS: {
+                dbTable: "LinksModel",
+                linkKey: "t64"
+            },
+            REQUEST: {}
         },
     }],
 };

@@ -21,6 +21,7 @@ export class WorkWithDonor extends BasePoolWorker {
 
     }
 
+    //*init command
     private setRequest(data: IWorkerMessage): void {
         try {
             this.logger.debug("server send to donor HTTPS->" + (<IMessageWorkerDonorReq>data.data).options.path);
@@ -30,7 +31,6 @@ export class WorkWithDonor extends BasePoolWorker {
         } catch (e) {
             this.sendTaskComplitError({error: e}, data.key);
         }
-
     }
 
 

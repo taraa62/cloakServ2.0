@@ -3,10 +3,12 @@ import {WorkerController} from "../workers/WorkerController";
 import {IItemDomainInfo} from "../../interface/IClient";
 import {IResult} from "../../../utils/IUtils";
 import {HeadersUtils} from "../../../utils/HeadersUtils";
+import {Link} from "../../donor_links/Link";
 
 export class Client {
     public clientIp: string;
     public action: string;  //originalUrl - before edition
+    public originalLink: Link;  //originalLink - link from original page
 
     public isFile: boolean;
 

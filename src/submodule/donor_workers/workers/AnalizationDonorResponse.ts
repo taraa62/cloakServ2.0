@@ -40,8 +40,8 @@ export class AnalizationDonorResponse {
 
         if (iRes.error) return this.controller.sendTaskComplitError(iRes.error, data.key);
         const mess: IMessageWorkerDonorResp = {
-            pathToFile: iRes.data
-    }
+                pathToFile: iRes.data
+            }
         ;
         return this.controller.sendTaskComplitSuccess(mess, data.key);
     }

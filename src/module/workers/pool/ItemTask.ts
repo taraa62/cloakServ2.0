@@ -1,7 +1,8 @@
 import {IResult} from "../../../utils/IUtils";
+import {Random} from "../../../utils/Random";
 
 export class ItemTask {
-    private keyCurrentTask: string; //key, for stop run current task;
+    private keyTask: string = Random.randomString(7); //key, for stop run current task;
     private isRun: boolean = false;
     private endRunTask: Date = new Date(); //TODO !! it's not use
     private workerKey: string;
@@ -26,7 +27,7 @@ export class ItemTask {
     }
 
     public getKeyTask(): string {
-        return this.keyCurrentTask;
+        return this.keyTask;
     }
 
     public isRunTask(): boolean {

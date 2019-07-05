@@ -38,7 +38,6 @@ export interface IMessageWorkerEditTextReq extends IMessageWorkerBaseReq {
 
 /**worker to main*/
 export interface IMessageWorkerEditTextResp extends IMessageWorkerBaseResp {
-    key: string;
     text?: string
 
 }

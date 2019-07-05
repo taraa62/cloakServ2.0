@@ -14,3 +14,8 @@ export enum EResourceFolder {
     "html" = "__html",
     "sub" = "__subDomains"
 }
+
+export enum EDomainType {
+    super = 'mainDomain',
+    child = 'subDomain'
+}
