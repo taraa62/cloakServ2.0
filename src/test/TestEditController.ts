@@ -6,7 +6,7 @@ export class TestEditController {
 
 
     public static test1(controller: DonorEditController) {
-        setTimeout(() => {
+        /*setTimeout(() => {
             const task: IMessageWorkerEditTextReq = {
                 command: "editFile",
                 url: "/",
@@ -17,7 +17,7 @@ export class TestEditController {
             }
 
             controller.getPool().newTask(task);
-        }, 2000)
+        }, 2000)*/
 
 
     }

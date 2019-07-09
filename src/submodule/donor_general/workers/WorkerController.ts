@@ -68,7 +68,8 @@ export class WorkerController extends BWorker {
             url: client.req.path,
             pathToFile: resp.pathToFile,
             contentType: client.contentType,
-            host: client.domainInfo.host,
+            ourInfo: this.getDomainConfig(),
+            donorInfo: this.getDonorConfig(),
             process: EProcessEdit.POST
         };
 

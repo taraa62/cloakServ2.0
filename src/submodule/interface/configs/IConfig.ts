@@ -38,6 +38,7 @@ export interface IRegulations {
 }
 
 export interface IRegular {
+    isUse?: boolean;
     process: string;
     event: string;
     reg?: IReg;
@@ -45,7 +46,8 @@ export interface IRegular {
 }
 
 export interface IReg {
-    innerHTML: string;
+    innerHTML?: string;
+    selector?: string;
 }
 
 export interface IWhere {
@@ -54,4 +56,5 @@ export interface IWhere {
     endsWith?: string;
     indexOf?: string;
     exactly?: string;
+    param?: string;
 }

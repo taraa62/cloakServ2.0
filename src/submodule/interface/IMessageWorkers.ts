@@ -2,6 +2,7 @@
 import {EProcessEdit} from "./EGlobal";
 import {IncomingHttpHeaders as Http1IncomingHttpHeaders} from "http";
 import {IResult} from "../../utils/IUtils";
+import {IItemDomainInfo} from "./IClient";
 
 
 export interface IMessageWorkerBaseReq {
@@ -30,7 +31,8 @@ export interface IMessageWorkerDonorResp extends IMessageWorkerBaseResp {
 export interface IMessageWorkerEditTextReq extends IMessageWorkerBaseReq {
     process: EProcessEdit;
     url: string;  //req.path
-    host: string;
+    ourInfo: IItemDomainInfo;
+    donorInfo: IItemDomainInfo;
     contentType: string;
     pathToFile?: string;
     text?: string;

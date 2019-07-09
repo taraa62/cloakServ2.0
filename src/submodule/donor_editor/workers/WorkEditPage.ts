@@ -6,6 +6,7 @@ import {IItemConfig, IRegular, IRegulations} from "../../interface/configs/IConf
 import {EditText} from "./EditText";
 import {EProcessEdit} from "../../interface/EGlobal";
 import {IWorkerMessage} from "../../../module/workers/WorkerMessage";
+import {IBaseConfig} from "../../interface/configs/IBaseConfig";
 
 
 /*
@@ -19,7 +20,7 @@ export class WorkEditPage extends BasePoolWorker {
 
     protected init() {
         this.configs = this.workerData.configs;
-        this.editText = new EditText();
+        this.editText = new EditText(this, this.logger);
         super.init();
     }
 
@@ -32,7 +33,7 @@ export class WorkEditPage extends BasePoolWorker {
         const item: IMessageWorkerEditTextReq = data.data as IMessageWorkerEditTextReq;
         let text: string = <string>await ((item.text) ? item.text : (item.pathToFile) ? this.getTextFromDisk(item.pathToFile) : "");
 
-        const regulations: IRegulations[] = this.getRegulation(item.host);
+        const regulations: IRegulations[] = this.getRegulation(item.ourInfo.host);
         if (!regulations) super.sendTaskComplitSuccess(text, data.key);
 
         const list: IRegulations[] = this.isEditText(item, regulations);
@@ -85,6 +86,11 @@ export class WorkEditPage extends BasePoolWorker {
 
         return []
     }
+
+    public getBaseConfig():IBaseConfig{
+        return this.workerData.baseConfig;
+    }
+
 
 
 }
