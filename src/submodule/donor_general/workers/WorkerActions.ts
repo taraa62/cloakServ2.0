@@ -3,6 +3,11 @@ import {Client} from "../item/Client";
 import {HeadersUtils} from "../../../utils/HeadersUtils";
 import {IBaseConfig} from "../../interface/configs/IBaseConfig";
 
+
+/**
+ * TODO
+ * перепровірити чи працює логіка для чорного списку параметрів і кількості .
+ */
 export class WorkerActions extends BWorker {
 
     private blackParamForSave: string[];

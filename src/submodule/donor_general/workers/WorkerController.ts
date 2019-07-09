@@ -9,7 +9,12 @@ import {IResult} from "../../../utils/IUtils";
 import {EItemDomainController, EProcessEdit, EResourceFolder} from "../../interface/EGlobal";
 import {WorkerHeaders} from "./WorkerHeaders";
 import {DonorEditController} from "../../donor_editor/DonorEditController";
-import {IMessageWorkerDonorReq, IMessageWorkerEditTextReq} from "../../interface/IMessageWorkers";
+import {
+    IMessageWorkerDonorReq,
+    IMessageWorkerDonorResp,
+    IMessageWorkerEditTextReq,
+    IMessageWorkerEditTextResp
+} from "../../interface/IMessageWorkers";
 import {WorkerActions} from "./WorkerActions";
 import {FileManager} from "../../../utils/FileManager";
 
@@ -40,39 +45,64 @@ export class WorkerController extends BWorker {
                 command: "setRequest",
                 options: this.workerHeaders.getBodyForRequestDonor(client),
                 action: client.action,
-                resourceFolder: this.getResourceFolderByContentType(client.contentType)
+                resourceFolder: this.getResourceFolderByContentType(client.contentType),
+                isEditData: client.isEditBeforeSend
             };
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
 
             if (IResult.success) {
-
-
-                res.writeHead(200, {"content-type": client.contentType});
-                FileManager._fs.createReadStream(iRes.data.pathToFile).pipe(res);
-                return ;
-
-
-                const task: IMessageWorkerEditTextReq = {
-                    command: "editFile",
-                    url: req.path,
-                    pathToFile: iRes.data.pathToFile,
-                    contentType: client.contentType,
-                    host: client.domainInfo.host,
-                    process: EProcessEdit.POST
-                };
-
-                const iR: IResult = await this.donorEditController.getPool().newTask(task).catch(er => IResult.error(er));
-                if (iR.error) res.status(404).send(IResult.resultToString(iRes));
-                else {
-                    res.writeHead(200, {"content-type": client.contentType});
-                    res.write(iR.data.text);
-                    res.end();
-                }
+                if (client.isEditBeforeSend) {
+                    this.responseData(client, iRes.data);
+                } else this.responseFile(client, iRes.data);
             } else {
-                res.status(404).send(IResult.resultToString(iRes));
+                this.responseError(client, IResult.resultToString(iRes), 500);
             }
         }
     }
+
+    private async responseData(client: Client, resp: IMessageWorkerDonorResp): Promise<any> {
+        if (!resp.pathToFile) return this.responseError404(client);
+
+        const task: IMessageWorkerEditTextReq = {
+            command: "editFile",
+            url: client.req.path,
+            pathToFile: resp.pathToFile,
+            contentType: client.contentType,
+            host: client.domainInfo.host,
+            process: EProcessEdit.POST
+        };
+
+        const iR: IResult = await this.donorEditController.getPool().newTask(task).catch(er => IResult.error(er));
+        if (iR.error) this.responseErrorIResult(client, iR);
+        else {
+            const data: IMessageWorkerEditTextResp = iR.data;
+            client.res.writeHead(200, {"content-type": client.contentType});
+            client.res.write(data.text);
+            client.res.end();
+        }
+    }
+
+    private responseFile(client: Client, resp: IMessageWorkerDonorResp): void {
+        client.res.writeHead(200, {"content-type": client.contentType});
+        FileManager._fs.createReadStream(resp.pathToFile).pipe(client.res).on("error", (er: Error) => {
+
+            //TODO remove file and clear request info!!!!!!!
+            this.responseError(client, er.message, 500);
+        });
+    }
+
+    private responseError404(client: Client): void {
+        client.res.status(404);
+    }
+
+    private responseError(client: Client, msg: string, code: number = 404): void {
+        client.res.status(code).send(msg);
+    }
+
+    private responseErrorIResult(client: Client, iRes: IResult): void {
+        client.res.status(500).send(IResult.resultToString(iRes));
+    }
+
 
     public getDomainConfig(): IItemDomainInfo {
         return this.parent.getOurURL();

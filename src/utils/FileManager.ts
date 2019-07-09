@@ -4,6 +4,8 @@ import readline from "readline";
 import {Stream} from "stream";
 import {IFileInfo, IResult} from "./IUtils";
 import recursive from "recursive-readdir";
+import rimraf from "rimraf";
+
 
 export class FileManager {
 
@@ -222,4 +224,26 @@ export class FileManager {
             });
         });
     }
+
+    //* for only file
+    static removeFile(path: string): Promise<IResult> {
+        return new Promise((res, rej) => {
+            if (!this.isExist(path)) rej(IResult.error("file not found"));
+            else {
+                fs.unlink(path, er => {
+                    (er) ? rej(IResult.error(er)) : res(IResult.success);
+                })
+            }
+        })
+    }
+
+    // for all files and folder ad recursive
+    static removeFileRecursive(path: string): Promise<IResult> {
+        return new Promise((res, rej) => {
+            rimraf(path, (er) => {
+                (er) ? rej(IResult.error(er)) : res(IResult.success);
+            })
+        })
+    }
+
 }

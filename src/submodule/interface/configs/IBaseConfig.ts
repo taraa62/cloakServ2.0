@@ -6,7 +6,6 @@ export interface IBaseConfig {
 
     maskAcceptContentType: string[];
     maskEditContentType: string[];
-    maskEditBeforeSendToClient: string[];
     maskTextReplaceBeforeSafe: string[];
     maskAutoRedirectResponse: string[];
     blackWordStarts: string[];

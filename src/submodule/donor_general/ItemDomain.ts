@@ -14,6 +14,7 @@ import {BWorker} from "./workers/BWorker";
 import {EDomainType, EItemDomainController, EResourceFolder} from "../interface/EGlobal";
 import {FileManager} from "../../utils/FileManager";
 import {ClassUtils} from "../../utils/ClassUtils";
+import {Cleaner} from "./Cleaner";
 
 export class ItemDomain {
 
@@ -76,6 +77,8 @@ export class ItemDomain {
     private async checkResourceFolders(list: EResourceFolder[]): Promise<IResult> {
         const def: string = FileManager.getSimplePath(this.conf.data.nameResourceFolder, FileManager.backFolder(__dirname, 3));
         this.resourceFolderMap.set(EResourceFolder.def, def);
+        const iRes: IResult = await Cleaner.check(this).catch(er => IResult.error(er));
+        if (iRes.error) this.logger.error(iRes);
 
         for (let a = 0; a < list.length; a++) {
             const subP = "./" + list[a];

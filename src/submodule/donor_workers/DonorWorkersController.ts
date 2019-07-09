@@ -3,6 +3,8 @@ controller for work with donor.
  */
 import {BaseDonorController, IBaseDonorConfig} from "../BaseDonorController";
 import {IResult} from "../../utils/IUtils";
+import {CONTROLLERS} from "../DonorModule";
+import {ItemController} from "../donor_general/ItemController";
 
 
 /**
@@ -27,7 +29,11 @@ export class DonorWorkersController extends BaseDonorController {
     public async init(): Promise<IResult> {
         this.sConf = <IDonorWorkersControllerConfig>this.config;
 
-        super.createPool(this.sConf.jsFile, this.sConf.name, null, "plural");
+        const workerData = {
+            baseConfig: (this.getDonorController(CONTROLLERS.ITEM) as ItemController).getBaseConfig()
+        }
+
+        super.createPool(this.sConf.jsFile, this.sConf.name, workerData, "plural");
 
         // TestPool.testSizePool();
 

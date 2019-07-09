@@ -9,7 +9,7 @@ import {IRequestSchema} from "../interface/ISchema";
 export class DonorRequestController extends BaseDonorController {
 
     private db: MongoDBModule;
-    private requestModel: Model<any>
+    private requestModel: Model<any>;
 
     public async endInit(): Promise<IResult> {
         this.db = this.getModule("mongodb") as MongoDBModule;

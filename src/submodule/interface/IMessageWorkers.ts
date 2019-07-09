@@ -17,7 +17,8 @@ export interface IMessageWorkerBaseResp {
 export interface IMessageWorkerDonorReq extends IMessageWorkerBaseReq {
     options: Http1IncomingHttpHeaders;
     action: string;
-    resourceFolder: string
+    resourceFolder: string;
+    isEditData: boolean;
 }
 
 export interface IMessageWorkerDonorResp extends IMessageWorkerBaseResp {

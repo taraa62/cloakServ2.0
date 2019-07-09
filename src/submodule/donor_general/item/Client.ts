@@ -13,9 +13,9 @@ export class Client {
     public isFile: boolean;
 
     public contentType: string;
-    public isSaveFile: boolean = true;
-    public isEditFileBeforeSaveToDisk: boolean = true;
-    public isEditTextBeforeSaveToDisk: boolean = false;
+
+    private _isEditBeforeSend: boolean = false;
+
     public fileName: string;
 
     public domainInfo: IItemDomainInfo;
@@ -30,7 +30,7 @@ export class Client {
             this.normalizeReqURL();
             this.workController.workerAction.updAction(this);
             this.contentType = HeadersUtils.getContentTypeFromRequest(this.req);
-
+            this.checkIsEditData();
         } catch (e) {
             return IResult.error(e);
         }
@@ -43,5 +43,14 @@ export class Client {
         this.req.originalUrl = u2.pathname + u2.search;
     }
 
+    private checkIsEditData(): void {
+        if (!this.contentType) return;
+        const arr: Array<string> = this.workController.parent.getBaseConf().maskEditContentType.filter(v => this.contentType.indexOf(v) > -1);
+        this._isEditBeforeSend = arr.length > 0;
+    }
+
+    public get isEditBeforeSend(): boolean {
+        return this._isEditBeforeSend;
+    }
 
 }
