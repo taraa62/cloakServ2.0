@@ -57,13 +57,13 @@ export class EditText {
                         this.xpath.install(dom1.window);
 
                         this.checkDefault(dom1, item);
-                        this.checkSubDomain(dom1);
-                        this.editTextLevelDom(dom1, sList);
-                        this._deleteElementPage(dom1, sList);
-                        this._createBlock(dom1, sList);
+                        this.checkLinks(dom1);
+                        this.editElemenLevelDom(dom1, sList);
+                        this.deleteElementLevelDom(dom1, sList);
+                        this.createElementLevelDom(dom1, sList);
                         text = dom1.serialize();
 
-                        this.xpath
+                        this.xpath;
                     }
                 }
             }
@@ -73,7 +73,7 @@ export class EditText {
 
     private stripHtmlComments(html: string): string {
         return html.replace(/<!--(.*?)-->|(<!--[^]{0,10})|(-->[^]{0,10})/g,
-            function (m0, cmt, open, close) {
+            function(m0, cmt, open, close) {
                 if (cmt && cmt.startsWith("[if")) return m0;
                 if (open || close) return m0;
                 // if (open) throw 'Illegal HTML - no closing comment sequence ("-->") for open at "' + open + '"';
@@ -227,7 +227,7 @@ export class EditText {
                     append: {
                         text: this.parent.getBaseConfig().topGoogleManager
                     }
-                }
+                };
                 const bottomGoogle: IRegular = {
                     isUse: true,
                     process: "pre",
@@ -240,7 +240,7 @@ export class EditText {
                         text: this.parent.getBaseConfig().bottomGoogleManager
                     }
 
-                }
+                };
                 topGoogle.append.text = StringUtils.replaceAll(topGoogle.append.text, "{GOOGLE_ID}", googleID);
                 bottomGoogle.append.text = StringUtils.replaceAll(bottomGoogle.append.text, "{GOOGLE_ID}", googleID);
 
@@ -250,7 +250,7 @@ export class EditText {
         return null;
     }
 
-   private checkNodeElemByAttribute(elm:any, attr:any, typeSearch:string, search:string):boolean {
+    private checkNodeElemByAttribute(elm: any, attr: any, typeSearch: string, search: string): boolean {
         if (elm && attr && typeSearch && search) {
             if (elm.attributes && elm.attributes[attr]) {
                 const text = elm.attributes[attr].value;
@@ -273,11 +273,10 @@ export class EditText {
     }
 
 
-
     //**************EDIT************//
 
 
-    private async checkSubDomain(dom: JSDOM): Promise<void> {
+    private async checkLinks(dom: JSDOM): Promise<void> {
         const doc = dom.window.document;
 
         const checkList = this.parent.getBaseConfig().htmlTagWishLinkUrl;
@@ -293,7 +292,7 @@ export class EditText {
                             const path = await this.linkModule.checkLink(this.parent, val);
                             await x.setAttribute(v, path);
                         } catch (e) {
-                            console.log(e)
+                            console.log(e);
                         }
                     }
                 }
@@ -302,16 +301,17 @@ export class EditText {
     }
 
 
-    private editTextLevelDom(dom1: JSDOM, sList: IRegular[]) {
+    private editElemenLevelDom(dom1: JSDOM, sList: IRegular[]): void {
         const doc = dom1.window.document;
 
         const editXpath = (reg: IReg) => {
+            if (!reg.replaceTo) return;
             const body = doc.evaluate(reg.xpath, doc.documentElement,
                 null, dom1.window.XPathResult.FIRST_ORDERED_NODE_TYPE, null);
             if (body.singleNodeValue) {
                 if (reg.replaceAttr) {
-                    if (body.singleNodeValue.attributes) {
-                        body.singleNodeValue.attributes[reg.replaceAttr].value = reg.replaceTo;
+                    if ((<any>body.singleNodeValue).attributes) {
+                        (<any>body.singleNodeValue).attributes[reg.replaceAttr].value = reg.replaceTo;
                     }
                 } else {
                     body.singleNodeValue.textContent = reg.replaceTo;
@@ -319,25 +319,25 @@ export class EditText {
             }
         };
 
-        const editWhere = (where:IWhere, reg:IReg)=>{
-            let nodes = doc.querySelectorAll(where.selector||where.queryAll);
+        const editWhere = (where: IWhere, reg: IReg) => {
+            let nodes = doc.querySelectorAll(where.selector || where.queryAll);
             let typeSearch = this.getTypeSearch(where);
             if (nodes && nodes.length && typeSearch) {
                 for (let node of nodes) {
                     if (this.checkNodeElemByAttribute(node, where.attr, typeSearch, (<any>where)[typeSearch])) {
                         if (reg.outerHTML) {
-                            node.outerHTML = reg.outerHTML
+                            node.outerHTML = reg.outerHTML;
                         } else {
                             if (reg.attr) {
                                 Object.keys(reg.attr).map(v => {
                                     node.setAttribute(v, reg.attr[v]);
-                                })
+                                });
                             }
                             if (reg.innerHTML) {
                                 node.innerHTML = reg.innerHTML;
                             }
                         }
-                    }else {
+                    } else {
                         if (reg.outerHTML) node.outerHTML = reg.outerHTML;
                         if (reg.innerHTML) node.innerHTML = reg.innerHTML;
 
@@ -349,7 +349,7 @@ export class EditText {
         for (let t = 0; t < sList.length; t++) {
             try {
                 const ed = sList[t];
-                if (ed.event == "e" && ed.reg && ed.reg.replaceTo) {
+                if (ed.event == "e" && ed.reg) {
                     if (ed.reg.xpath) editXpath(ed.reg);
                     else editWhere(ed.where, ed.reg);
                 }
@@ -359,6 +359,33 @@ export class EditText {
         }
     }
 
+
+    private deleteElementLevelDom(dom1: JSDOM, sList: IRegular[]): void {
+        const doc = dom1.window.document;
+
+        const delXPath = (reg: IReg) => {
+            const body = doc.evaluate(reg.xpath, doc.documentElement,
+                null, dom1.window.XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+            body.singleNodeValue.parentElement.removeChild(body.singleNodeValue);
+        };
+
+        const delWhere = (where: IWhere, reg: IReg) => {
+
+        };
+
+
+        for (let t = 0; t < sList.length; t++) {
+            try {
+                const ed = sList[t];
+                if (ed.event == "d") {
+                    if (ed.reg.xpath) delXPath(ed.reg);
+                    else delWhere(ed.where, ed.reg);
+                }
+            } catch (e) {
+                // console.log(e)
+            }
+        }
+    }
 
 }
 
