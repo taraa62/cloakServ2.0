@@ -16,6 +16,7 @@ export interface IBaseConfig {
     maxUseParamForSaveFile: number;
     blackParamForSave: string[];
     prioritySaveParam: string[];
+    htmlTagWishLinkUrl: string[];
     proxy: IProxyConf;
     defListInvAutoTime: string[];
     defInvTime: IDefInvalidationTime;

@@ -21,7 +21,8 @@ export interface IConfig {
     blackParamForSave?: string[];
     prioritySaveParam?: string[];
     cleaner: ICleaner;
-    regulations: IRegulations[]
+    regulations: IRegulations[];
+    googleManagerID?: string;
 }
 
 export interface ICleaner {
@@ -42,12 +43,24 @@ export interface IRegular {
     process: string;
     event: string;
     reg?: IReg;
+    append?: IAppend;
     where: IWhere;
 }
 
+export interface IAppend {
+    text?: string;
+}
+
 export interface IReg {
-    innerHTML?: string;
     selector?: string;
+    regText?: string;
+    replaceTo?: string;
+    isReplAll?: string;
+    xpath?: string;
+    replaceAttr?: string;
+    innerHTML?: string;
+    outerHTML?: string;
+    attr?: any;
 }
 
 export interface IWhere {
@@ -57,4 +70,8 @@ export interface IWhere {
     indexOf?: string;
     exactly?: string;
     param?: string;
+    selector?: string;
+    beforeElm?: string;
+    attr?: any;
 }
+

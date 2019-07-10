@@ -1,16 +1,16 @@
 import {IMessageWorkerEditTextReq} from "../../interface/IMessageWorkers";
-import {IRegular, IRegulations, IWhere} from "../../interface/configs/IConfig";
+import {IReg, IRegular, IRegulations, IWhere} from "../../interface/configs/IConfig";
 import {IResult} from "../../../utils/IUtils";
 import {StringUtils} from "../../../utils/StringUtils";
 import {EProcessEdit} from "../../interface/EGlobal";
 import {WorkEditPage} from "./WorkEditPage";
 import {BLogger} from "../../../module/logger/BLogger";
-import {VirtualConsole, JSDOM} from "jsdom";
+import {JSDOM, VirtualConsole} from "jsdom";
 
 
 export class EditText {
 
-    private  xpath = require("wgxpath");
+    private xpath = require("wgxpath");
 
     constructor(private parent: WorkEditPage, private logger: BLogger) {
 
@@ -21,43 +21,44 @@ export class EditText {
         if (text) {
             text = this.replaceLevelText(text, item);
             if (text && this.isHtml(text)) {
+                text = this.stripHtmlComments(text);
 
-                let sList = this.regListToSimpleList(reqList, item.process);
+                let sList: IRegular[] = this.regListToSimpleList(reqList, item.process);
                 const defEdit = this.checkDefEdit(item.process, text);
                 if (defEdit) {
                     sList = sList.concat(defEdit);
                 }
 
                 if (sList.length > 0 || item.process === EProcessEdit.PRE) {
-                    text = this._editOnTextLevel(text, sList);
+                    text = this.editOnTextLevel(text, sList);
 
-                    const gList = this._createGoogleManager(item.process);
+                    const gList: IRegular[] = this.createGoogleManager(item);
                     if (gList) sList = sList.concat(gList);
 
 
-                    if (sList.length>0 && item.process === EProcessEdit.PRE) {
+                    if (sList.length > 0 && item.process === EProcessEdit.PRE) {
 
                         const virtualConsole = new VirtualConsole();
-                        virtualConsole.on("error", (er) => {
+                        virtualConsole.on("error", (er: Error) => {
                             this.logger.debug(er);
                         });
-                        virtualConsole.on("warn", (warm) => {
+                        virtualConsole.on("warn", (warm: any) => {
                             this.logger.debug(warm);
                         });
-                        virtualConsole.on("info", (info) => {
+                        virtualConsole.on("info", (info: any) => {
                             this.logger.debug(info);
                         });
-                        virtualConsole.on("dir", (dir) => {
+                        virtualConsole.on("dir", (dir: any) => {
                             this.logger.debug(dir);
                         });
 
-                        const dom1 = new JSDOM(text, {virtualConsole});
+                        const dom1: JSDOM = new JSDOM(text, {virtualConsole});
 
                         this.xpath.install(dom1.window);
 
-                        this._checkDefault(dom1, item.process);
-                        this._checkSubDomain(dom1, item.process);
-                        this._editTextLevelDom(dom1, sList);
+                        this.checkDefault(dom1, item);
+                        this.checkSubDomain(dom1);
+                        this.editTextLevelDom(dom1, sList);
                         this._deleteElementPage(dom1, sList);
                         this._createBlock(dom1, sList);
                         text = dom1.serialize();
@@ -65,13 +66,21 @@ export class EditText {
                         this.xpath
                     }
                 }
-
-
             }
         }
-
         return IResult.succData(text);
     }
+
+    private stripHtmlComments(html: string): string {
+        return html.replace(/<!--(.*?)-->|(<!--[^]{0,10})|(-->[^]{0,10})/g,
+            function (m0, cmt, open, close) {
+                if (cmt && cmt.startsWith("[if")) return m0;
+                if (open || close) return m0;
+                // if (open) throw 'Illegal HTML - no closing comment sequence ("-->") for open at "' + open + '"';
+                // if (close) throw 'Illegal HTML - unexpected close comment at "' + close + '"';
+                return '';
+            }).trim();
+    };
 
 
     private regListToSimpleList(regList: IRegulations[], cProcess: EProcessEdit): IRegular[] {
@@ -152,10 +161,21 @@ export class EditText {
     }
 
 
-
-
-
-
+    private editOnTextLevel(text: string, sList: IRegular[]): string {
+        for (let r = 0; r < sList.length; r++) {
+            try {
+                if (sList[r].event === "e") {
+                    const reg: IReg = sList[r].reg;
+                    if (reg.regText && reg.replaceTo) {
+                        text = (reg.isReplAll) ? StringUtils.replaceAll(text, reg.regText, reg.replaceTo)
+                            : text.replace(new RegExp(reg.regText), reg.replaceTo);
+                    }
+                }
+            } catch (e) {
+            }
+        }
+        return text;
+    }
 
 
     private getTypeSearch(where: IWhere) {
@@ -165,6 +185,180 @@ export class EditText {
         if (where.exactly) return "exactly";
         return null;
     }
+
+    /**
+     * Check document content charset.
+     * @param dom
+     * @param item
+     */
+    private checkDefault(dom: JSDOM, item: IMessageWorkerEditTextReq) {
+        if (item.process === EProcessEdit.PRE) {
+            const doc = dom.window.document;
+            const elem = doc.querySelectorAll("meta");
+            if (elem && elem.length > 0) {
+
+                for (let s = 0; s < elem.length; s++) {
+                    const x = elem[s];
+                    const val = x.getAttribute("content");
+                    if (val && val.indexOf("/html") > -1) {
+                        const _p = val.split(";")[0] + "; charset=utf8";
+                        x.setAttribute("content", _p);
+                    }
+                }
+
+            }
+
+        }
+    }
+
+    /*****CREATE AUTO GOOGLE SCRIPT */
+    private createGoogleManager(item: IMessageWorkerEditTextReq): IRegular[] {
+        if (item.process === EProcessEdit.PRE && item.googleManagerID) {
+            const googleID = item.googleManagerID;
+            if (googleID) {
+                const topGoogle: IRegular = {
+                    isUse: true,
+                    process: "pre",
+                    event: "c",
+                    where: {
+                        selector: "head",
+                        beforeElm: "firstChild"
+                    },
+                    append: {
+                        text: this.parent.getBaseConfig().topGoogleManager
+                    }
+                }
+                const bottomGoogle: IRegular = {
+                    isUse: true,
+                    process: "pre",
+                    event: "c",
+                    where: {
+                        selector: "body",
+                        beforeElm: "firstChild"
+                    },
+                    append: {
+                        text: this.parent.getBaseConfig().bottomGoogleManager
+                    }
+
+                }
+                topGoogle.append.text = StringUtils.replaceAll(topGoogle.append.text, "{GOOGLE_ID}", googleID);
+                bottomGoogle.append.text = StringUtils.replaceAll(bottomGoogle.append.text, "{GOOGLE_ID}", googleID);
+
+                return [topGoogle, bottomGoogle] as IRegular[];
+            }
+        }
+        return null;
+    }
+
+   private checkNodeElemByAttribute(elm:any, attr:any, typeSearch:string, search:string):boolean {
+        if (elm && attr && typeSearch && search) {
+            if (elm.attributes && elm.attributes[attr]) {
+                const text = elm.attributes[attr].value;
+                switch (typeSearch) {
+                    case "indexOf":
+                        return text.indexOf(search) > -1;
+                        break;
+                    case "startsWith":
+                        return text.startsWith(search);
+                        break;
+                    case "endsWith":
+                        return text.endsWith(search);
+                        break;
+                    case "exactly":
+                        return text === search;
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+    //**************EDIT************//
+
+
+    private async checkSubDomain(dom: JSDOM): Promise<void> {
+        const doc = dom.window.document;
+
+        const checkList = this.parent.getBaseConfig().htmlTagWishLinkUrl;
+
+        for await (let v of checkList) {
+            const elem = await doc.querySelectorAll(`[${v}]`);
+            if (elem && elem.length > 0) {
+                for (let s = 0; s < elem.length; s++) {
+                    const x = elem[s];
+                    const val = x.getAttribute(v);
+                    if (val) {
+                        try {
+                            const path = await this.linkModule.checkLink(this.parent, val);
+                            await x.setAttribute(v, path);
+                        } catch (e) {
+                            console.log(e)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    private editTextLevelDom(dom1: JSDOM, sList: IRegular[]) {
+        const doc = dom1.window.document;
+
+        const editXpath = (reg: IReg) => {
+            const body = doc.evaluate(reg.xpath, doc.documentElement,
+                null, dom1.window.XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+            if (body.singleNodeValue) {
+                if (reg.replaceAttr) {
+                    if (body.singleNodeValue.attributes) {
+                        body.singleNodeValue.attributes[reg.replaceAttr].value = reg.replaceTo;
+                    }
+                } else {
+                    body.singleNodeValue.textContent = reg.replaceTo;
+                }
+            }
+        };
+
+        const editWhere = (where:IWhere, reg:IReg)=>{
+            let nodes = doc.querySelectorAll(where.selector||where.queryAll);
+            let typeSearch = this.getTypeSearch(where);
+            if (nodes && nodes.length && typeSearch) {
+                for (let node of nodes) {
+                    if (this.checkNodeElemByAttribute(node, where.attr, typeSearch, (<any>where)[typeSearch])) {
+                        if (reg.outerHTML) {
+                            node.outerHTML = reg.outerHTML
+                        } else {
+                            if (reg.attr) {
+                                Object.keys(reg.attr).map(v => {
+                                    node.setAttribute(v, reg.attr[v]);
+                                })
+                            }
+                            if (reg.innerHTML) {
+                                node.innerHTML = reg.innerHTML;
+                            }
+                        }
+                    }else {
+                        if (reg.outerHTML) node.outerHTML = reg.outerHTML;
+                        if (reg.innerHTML) node.innerHTML = reg.innerHTML;
+
+                    }
+                }
+            }
+        };
+
+        for (let t = 0; t < sList.length; t++) {
+            try {
+                const ed = sList[t];
+                if (ed.event == "e" && ed.reg && ed.reg.replaceTo) {
+                    if (ed.reg.xpath) editXpath(ed.reg);
+                    else editWhere(ed.where, ed.reg);
+                }
+            } catch (e) {
+                // console.log(e)
+            }
+        }
+    }
+
 
 }
 

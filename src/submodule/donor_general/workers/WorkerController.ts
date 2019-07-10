@@ -70,7 +70,8 @@ export class WorkerController extends BWorker {
             contentType: client.contentType,
             ourInfo: this.getDomainConfig(),
             donorInfo: this.getDonorConfig(),
-            process: EProcessEdit.POST
+            process: EProcessEdit.POST,
+            googleManagerID: this.parent.getDomainConfig().data.googleManagerID
         };
 
         const iR: IResult = await this.donorEditController.getPool().newTask(task).catch(er => IResult.error(er));

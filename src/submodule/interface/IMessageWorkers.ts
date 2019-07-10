@@ -36,6 +36,7 @@ export interface IMessageWorkerEditTextReq extends IMessageWorkerBaseReq {
     contentType: string;
     pathToFile?: string;
     text?: string;
+    googleManagerID?:string;
 
 }
 

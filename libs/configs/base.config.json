@@ -76,6 +76,7 @@
     "name",
     "rev"
   ],
+  "htmlTagWishLinkUrl": ["data-src", "src", "url", "href", "data-original"],
   "proxy": {
     "proxyList": [
       [
