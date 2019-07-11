@@ -20,6 +20,7 @@ export interface IBaseConfig {
     proxy: IProxyConf;
     defListInvAutoTime: string[];
     defInvTime: IDefInvalidationTime;
+    linkKey: string;
     fraudfilter: IFraudfilter;
     topGoogleManager: string;
     bottomGoogleManager: string;

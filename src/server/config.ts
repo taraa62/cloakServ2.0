@@ -85,8 +85,7 @@ export const config = {
                 jsFile: "./donor_editor/workers/WorkEditPage.js"
             },
             LINKS: {
-                dbTable: "LinksModel",
-                linkKey: "t64"
+                dbTable: "LinksModel"
             },
             REQUEST: {}
         },

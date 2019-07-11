@@ -3,6 +3,7 @@ import {EProcessEdit} from "./EGlobal";
 import {IncomingHttpHeaders as Http1IncomingHttpHeaders} from "http";
 import {IResult} from "../../utils/IUtils";
 import {IItemDomainInfo} from "./IClient";
+import {ILink} from "../donor_links/Link";
 
 
 export interface IMessageWorkerBaseReq {
@@ -36,12 +37,12 @@ export interface IMessageWorkerEditTextReq extends IMessageWorkerBaseReq {
     contentType: string;
     pathToFile?: string;
     text?: string;
-    googleManagerID?:string;
+    googleManagerID?: string;
 
 }
 
 /**worker to main*/
 export interface IMessageWorkerEditTextResp extends IMessageWorkerBaseResp {
     text?: string
-
+    linksMap?: Map<string, ILink>;
 }

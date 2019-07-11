@@ -1,21 +1,55 @@
 import {WorkEditPage} from "./WorkEditPage";
 import {BLogger} from "../../../module/logger/BLogger";
 import {IMessageWorkerEditTextReq} from "../../interface/IMessageWorkers";
+import {ILink, Link} from "../../donor_links/Link";
+import url from "url";
+import {StringUtils} from "../../../utils/StringUtils";
 
 export class LinkEdit {
+
+    private domains: Map<string, ILink> = new Map<string, ILink>();
 
     constructor(private parent: WorkEditPage, private logger: BLogger) {
 
     }
 
-    public endEditCheckLinks(): void {
+    public reset(): void {
+        this.domains.clear();
+    }
 
+    public getLinks(): Map<string, ILink> {
+        return this.domains.size ? this.domains : null;
     }
 
     public checkLink(item: IMessageWorkerEditTextReq, link: string): string {
+        try {
+            if (link.startsWith("/")) return link;
 
+            const host = item.ourInfo.host;
+            if (!host) return "/";
+            if (this.domains.has(link)) return this.domains.get(link).nLink;
+
+            if (link.startsWith("http")) {
+                const {key, nLink} = this.getReplUrl(link);
+
+                this.domains.set(link, {key, original: link, nLink} as ILink);
+                return nLink;
+            }
+        } catch (e) {
+            this.logger.error(e);
+            // console.error(`-------------------ERROR ${e}-----------------`)
+        }
+        return link;
 
         return "";
+    }
+
+
+    private getReplUrl(link: string) {
+        const _url = url.parse(link);
+        const key = this.parent.getBaseConfig().linkKey + "=" + StringUtils.hashCode(link);
+        const nLink = `${_url.path}${_url.query ? _url.query + "&" + key : "?"}${key}`;
+        return {key, nLink};
     }
 
 }

@@ -55,7 +55,7 @@ export class EditText {
                             this.xpath.install(dom1.window);
 
                             this.checkDefault(dom1, item);
-                            this.checkLinks(dom1, item).catch(er => this.logger.error(er));
+                            await this.checkLinks(dom1, item).catch(er => this.logger.error(er));
                             this.editElemenLevelDom(dom1, sList);
                             this.deleteElementLevelDom(dom1, sList);
                             this.createElementLevelDom(dom1, sList);
@@ -69,14 +69,14 @@ export class EditText {
             this.logger.error(e.message || e);
             this.logger.error(e.stack);
         } finally {
-            this.parent.linkModule.endEditCheckLinks(); //don't await!!!
+            //   this.parent.linkModule.endEditCheckLinks(); //don't await!!!
         }
         return IResult.succData(text);
     }
 
     private stripHtmlComments(html: string): string {
         return html.replace(/<!--(.*?)-->|(<!--[^]{0,10})|(-->[^]{0,10})/g,
-            function (m0, cmt, open, close) {
+            function(m0, cmt, open, close) {
                 if (cmt && cmt.startsWith("[if")) return m0;
                 if (open || close) return m0;
                 // if (open) throw 'Illegal HTML - no closing comment sequence ("-->") for open at "' + open + '"';
@@ -433,7 +433,7 @@ export class EditText {
                     else delWhere(ed.where, ed.reg);
                 }
             } catch (e) {
-                console.log(e)
+                console.log(e);
             }
         }
     }
@@ -474,7 +474,7 @@ export class EditText {
             } catch (e) {
                 console.log(e);
             }
-        }
+        };
 
 
         const _createNode = (v: IRegular, elem: Element) => {
@@ -495,9 +495,9 @@ export class EditText {
                 (v.where.firstElm) ? elem.parentElement.insertBefore(nElem, elem.parentElement.firstChild) : elem.appendChild(nElem);
 
             } catch (e) {
-                console.log(e)
+                console.log(e);
             }
-        }
+        };
 
         const _runAppendObj = (v: IRegular) => {
             const nodes: Element[] = this.getNodes(doc, v.where);
@@ -518,7 +518,7 @@ export class EditText {
             } catch (e) {
                 console.log(e);
             }
-        })
+        });
 
     }
 }

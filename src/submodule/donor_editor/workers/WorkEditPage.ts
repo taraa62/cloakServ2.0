@@ -30,7 +30,7 @@ export class WorkEditPage extends BasePoolWorker {
 
 
     protected resetWorker(data: any): void {
-
+        this._linkModule.reset();
     }
 
     //*** for exit from main thread
@@ -45,10 +45,12 @@ export class WorkEditPage extends BasePoolWorker {
         if (!list) return super.sendTaskComplitSuccess(text, data.key);
         else {
             const iRes: IResult = <IResult>await this.editText.edit(list, item, text);
-            const resp: IMessageWorkerEditTextResp = {}
+            const resp: IMessageWorkerEditTextResp = {};
             if (iRes.error) resp.error = iRes.error;
-            if (iRes.data) resp.text = iRes.data || text;
-
+            if (iRes.data) {
+                resp.text = iRes.data || text;
+                resp.linksMap = this._linkModule.getLinks();
+            }
             (iRes.error) ? super.sendTaskComplitError(resp) : super.sendTaskComplitSuccess(resp, data.key);
         }
     }
@@ -89,7 +91,7 @@ export class WorkEditPage extends BasePoolWorker {
     private regsListToRegList(list: IRegulations[], process: EProcessEdit): IRegular[] {
         const sList = [...list];
 
-        return []
+        return [];
     }
 
     public getBaseConfig(): IBaseConfig {

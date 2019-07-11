@@ -8,7 +8,6 @@ import {IServer} from "./IServer";
 import {ServerConfig} from "./ServerConfig";
 import {IResult} from "../utils/IUtils";
 import {ClassUtils} from "../utils/ClassUtils";
-import {MLogger} from "../module/logger/MLogger";
 
 
 export abstract class BaseServer implements IServer {

@@ -5,7 +5,7 @@ import {configSchema} from "./configSchema";
 import {Model} from "mongoose";
 import {IItemConfig} from "../interface/configs/IConfig";
 import {IResult} from "../../utils/IUtils";
-import {ObjectId} from "bson";
+import {ObjectId} from "mongodb";
 
 
 export interface IDonorConfigs extends IBaseDonorConfig {

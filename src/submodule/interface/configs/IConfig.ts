@@ -1,4 +1,4 @@
-import {ObjectId} from "bson";
+import {ObjectId} from "mongodb";
 
 export interface IItemConfig {
     _id: string | ObjectId;

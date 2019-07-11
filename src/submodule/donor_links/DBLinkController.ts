@@ -2,49 +2,50 @@ import {DonorLinksController, IDonorLinksControllerConfig} from "./DonorLinksCon
 import {BLogger} from "../../module/logger/BLogger";
 import {MongoDBModule} from "../../module/db/mongo/MongoDBModule";
 import {Model} from "mongoose";
-import {configSchema} from "../donor_configs/configSchema";
+
 import {IResult} from "../../utils/IUtils";
 
 export class DBLinkController {
 
     private db: MongoDBModule;
-    private linkModel: Model<any>
+    private linkModel: Model<any>;
 
     constructor(private parent: DonorLinksController, private logger: BLogger, private sConf: IDonorLinksControllerConfig) {
         this.db = parent.getModule("mongodb") as MongoDBModule;
         const linkSchema = require("./linkSchema");
-        this.linkModel = this.db.getModel(sConf.dbTable, configSchema);
-        this.updateLinkInfo();
+        this.linkModel = this.db.getModel(sConf.dbTable, linkSchema);
+        // this.updateLinkInfo();
     }
-    private async updateLinkInfo():Promise<void> {
-        const links:IResult = await this.db.query(this.linkModel, {});
+
+    private async updateLinkInfo(): Promise<void> {
+        const links: IResult = await this.db.query(this.linkModel, {});
 
         if (links.success && links.data.length > 0) {
             const domains = this.parent.getDomains();
 
-            const arr:any[] = links.data;
-            arr.map((v:any) => {
+            const arr: any[] = links.data;
+            arr.map((v: any) => {
                 const links = {};
                 Object.entries(v.info).forEach((v) => {
                     arr[(<any>v[1]).original] = v[1];
-                })
-           //     domains.set(v.domain, arr);
-            })
+                });
+                //     domains.set(v.domain, arr);
+            });
             console.log(11);
         }
     }
 
-   public async updLinkDB():Promise<IResult> {
+    public async updLinkDB(): Promise<IResult> {
         if (this.parent.isBlockUpdDB) return;
 
         const domains = this.parent.getDomains();
         if (domains) {
             for (const [key, val] of domains.entries()) {
                 /**check exist domain*/
-                const exist = await this.db.update(this.linkModel, {domain: key}, {
+                const exist = await this.db.update(this.linkModel, {domain: key} as any, {
                     domain: key,
-                    links: {}
-                }, {upsert: true}).catch(err => {
+                    info: {}
+                }, {upsert: true, strict: false}).catch(err => {
                     this.logger.error(err);
                     return null;
                 });
@@ -61,10 +62,9 @@ export class DBLinkController {
                             info.isCreateDB = false;
                         });
                     }
-                })
+                });
             }
         }
-
 
     }
 

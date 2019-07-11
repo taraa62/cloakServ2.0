@@ -152,6 +152,7 @@
   "defInvTime": {
     "def": "none"
   },
+  "linkKey": "t64",
   "fraudfilter": {
     "nameCookies": "watchT62",
     "authExpirationTime": "1m"

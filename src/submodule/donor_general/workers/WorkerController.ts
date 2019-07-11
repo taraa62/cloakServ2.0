@@ -17,6 +17,7 @@ import {
 } from "../../interface/IMessageWorkers";
 import {WorkerActions} from "./WorkerActions";
 import {FileManager} from "../../../utils/FileManager";
+import {DonorLinksController} from "../../donor_links/DonorLinksController";
 
 export class WorkerController extends BWorker {
 
@@ -25,12 +26,14 @@ export class WorkerController extends BWorker {
     public workerAction: WorkerActions;
     public workerHeaders: WorkerHeaders;
     public donorEditController: DonorEditController;
+    public donorLinkController: DonorLinksController;
 
 
     public init(): void {
         this.workerAction = (<WorkerActions>this.parent.getWorker(EItemDomainController.ACTION));
         this.workerHeaders = (<WorkerHeaders>this.parent.getWorker(EItemDomainController.HEADER));
         this.donorEditController = <DonorEditController>this.parent.getDonorController(CONTROLLERS.EDITOR);
+        this.donorLinkController = <DonorLinksController>this.parent.getDonorController(CONTROLLERS.LINKS);
 
         this.poolWorkWithDonor = (<DonorWorkersController>this.parent.getDonorController(CONTROLLERS.WORKER_DONOR)).getPool();
     }
@@ -70,7 +73,7 @@ export class WorkerController extends BWorker {
             contentType: client.contentType,
             ourInfo: this.getDomainConfig(),
             donorInfo: this.getDonorConfig(),
-            process: EProcessEdit.POST,
+            process: EProcessEdit.PRE,
             googleManagerID: this.parent.getDomainConfig().data.googleManagerID
         };
 
@@ -81,6 +84,8 @@ export class WorkerController extends BWorker {
             client.res.writeHead(200, {"content-type": client.contentType});
             client.res.write(data.text);
             client.res.end();
+
+            if (data.linksMap) this.donorLinkController.updateNewLinks(this.getDomainConfig().host, data.linksMap);
         }
     }
 

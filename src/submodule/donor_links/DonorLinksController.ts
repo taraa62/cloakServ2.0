@@ -1,16 +1,17 @@
 import {BaseDonorController, IBaseDonorConfig} from "../BaseDonorController";
 import {IResult} from "../../utils/IUtils";
 import {DBLinkController} from "./DBLinkController";
-import {Link} from "./Link";
+import {ILink, Link} from "./Link";
 import {ItemDomain} from "../donor_general/ItemDomain";
 import url from "url";
 import {StringUtils} from "../../utils/StringUtils";
 import {Client} from "../donor_general/item/Client";
+import {CONTROLLERS} from "../DonorModule";
+import {ItemController} from "../donor_general/ItemController";
 
 
 export interface IDonorLinksControllerConfig extends IBaseDonorConfig {
     dbTable: string;
-    linkKey: string;
 }
 
 export class DonorLinksController extends BaseDonorController {
@@ -19,7 +20,7 @@ export class DonorLinksController extends BaseDonorController {
 
     private domains: Map<string, Map<string, Link>>;
     private dbController: DBLinkController;
-
+    private linkKey: string;
     private _isBlockUpdDB: boolean = false;
 
     public async init(): Promise<IResult> {
@@ -32,6 +33,11 @@ export class DonorLinksController extends BaseDonorController {
         return IResult.success;
     }
 
+    public async endInit(): Promise<IResult> {
+        this.linkKey = (this.getDonorController(CONTROLLERS.ITEM) as ItemController).getBaseConfig().linkKey;
+        return super.endInit();
+    }
+
     public getDomains(): Map<string, Map<string, Link>> {
         return this.domains;
     }
@@ -39,6 +45,24 @@ export class DonorLinksController extends BaseDonorController {
     public get isBlockUpdDB(): boolean {
         return this._isBlockUpdDB;
     }
+
+
+    public updateNewLinks(host: string, list: Map<string, ILink>): void {
+        if (list) {
+            this._isBlockUpdDB = true;
+            if (!this.domains.has(host)) {
+                this.domains.set(host, new Map<string, Link>());
+            }
+            const map:Map<string, Link> = this.domains.get(host);
+            for(let v of list){
+                if (!this.domains.has(v[1].original)) {
+                    map.set(v[1].original, new Link(v[1].key, v[1].original, v[1].nLink));
+                }
+            };
+            this.endEditCheckLinks()
+        }
+    }
+
 
     /**
      * перевіряємо чи є незбережені лінки в бд.
@@ -48,7 +72,7 @@ export class DonorLinksController extends BaseDonorController {
         this._isBlockUpdDB = false;
         const res: Promise<IResult> = this.dbController.updLinkDB().catch(er => IResult.error(er));
         res.then(v => {
-            if (v.error) this.logger.error(v.error)
+            if (v.error) this.logger.error(v.error);
         }).catch(er => this.logger.error(er));
     }
 
@@ -73,7 +97,7 @@ export class DonorLinksController extends BaseDonorController {
                 }
                 return link;
             } else {
-                if ( link.startsWith("http")) {
+                if (link.startsWith("http")) {
                     if (linkInfo) {
                         return linkInfo.nLink;
                     }
@@ -94,14 +118,14 @@ export class DonorLinksController extends BaseDonorController {
 
     private getReplUrl(link: string) {
         const _url = url.parse(link);
-        const key = this.sConf.linkKey + "=" + StringUtils.hashCode(link);
+        const key = this.linkKey + "=" + StringUtils.hashCode(link);
         const nLink = `${_url.path}${_url.query ? _url.query + "&" + key : "?"}${key}`;
         return {key, nLink};
     }
 
-    public getLinkInfo(client:Client, host:string) {
-        if (client.req.query[this.sConf.linkKey]) {
-            const key = this.sConf.linkKey+"=" + client.req.query[this.sConf.linkKey];
+    public getLinkInfo(client: Client, host: string) {
+        if (client.req.query[this.linkKey]) {
+            const key = this.linkKey + "=" + client.req.query[this.linkKey];
             if (this.domains.has(host)) {
                 // client.url.searchParams.delete(this.sConf.linkKey);
                 client.originalLink = this.domains.get(host).get(key);
