@@ -7,6 +7,7 @@ import {EditText} from "./EditText";
 import {EProcessEdit} from "../../interface/EGlobal";
 import {IWorkerMessage} from "../../../module/workers/WorkerMessage";
 import {IBaseConfig} from "../../interface/configs/IBaseConfig";
+import {LinkEdit} from "./LinkEdit";
 
 
 /*
@@ -17,10 +18,13 @@ export class WorkEditPage extends BasePoolWorker {
 
     private configs: IItemConfig[];
     private editText: EditText;
+    private _linkModule: LinkEdit;
+
 
     protected init() {
         this.configs = this.workerData.configs;
         this.editText = new EditText(this, this.logger);
+        this._linkModule = new LinkEdit(this, this.logger);
         super.init();
     }
 
@@ -29,7 +33,8 @@ export class WorkEditPage extends BasePoolWorker {
 
     }
 
-    private async editFile(data: IWorkerMessage): Promise<any> {
+    //*** for exit from main thread
+    public async editFile(data: IWorkerMessage): Promise<any> {
         const item: IMessageWorkerEditTextReq = data.data as IMessageWorkerEditTextReq;
         let text: string = <string>await ((item.text) ? item.text : (item.pathToFile) ? this.getTextFromDisk(item.pathToFile) : "");
 
@@ -87,10 +92,13 @@ export class WorkEditPage extends BasePoolWorker {
         return []
     }
 
-    public getBaseConfig():IBaseConfig{
+    public getBaseConfig(): IBaseConfig {
         return this.workerData.baseConfig;
     }
 
+    public get linkModule(): LinkEdit {
+        return this._linkModule;
+    }
 
 
 }

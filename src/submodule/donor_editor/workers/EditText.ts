@@ -13,67 +13,70 @@ export class EditText {
     private xpath = require("wgxpath");
 
     constructor(private parent: WorkEditPage, private logger: BLogger) {
-
     }
 
-
     public async edit(reqList: IRegulations[], item: IMessageWorkerEditTextReq, text: string): Promise<IResult> {
-        if (text) {
-            text = this.replaceLevelText(text, item);
-            if (text && this.isHtml(text)) {
-                text = this.stripHtmlComments(text);
+        try {
+            if (text) {
+                if (text && this.isHtml(text)) {
+                    text = this.stripHtmlComments(text);
 
-                let sList: IRegular[] = this.regListToSimpleList(reqList, item.process);
-                const defEdit = this.checkDefEdit(item.process, text);
-                if (defEdit) {
-                    sList = sList.concat(defEdit);
-                }
+                    let sList: IRegular[] = this.regListToSimpleList(reqList, item.process);
+                    const defEdit = this.checkDefEdit(item.process, text);
+                    if (defEdit) {
+                        sList = sList.concat(defEdit);
+                    }
 
-                if (sList.length > 0 || item.process === EProcessEdit.PRE) {
-                    text = this.editOnTextLevel(text, sList);
+                    if (sList.length > 0 || item.process === EProcessEdit.PRE) {
+                        text = this.editOnTextLevel(text, sList);
 
-                    const gList: IRegular[] = this.createGoogleManager(item);
-                    if (gList) sList = sList.concat(gList);
+                        const gList: IRegular[] = this.createGoogleManager(item);
+                        if (gList) sList = sList.concat(gList);
 
 
-                    if (sList.length > 0 && item.process === EProcessEdit.PRE) {
+                        if (sList.length > 0 && item.process === EProcessEdit.PRE) {
 
-                        const virtualConsole = new VirtualConsole();
-                        virtualConsole.on("error", (er: Error) => {
-                            this.logger.debug(er);
-                        });
-                        virtualConsole.on("warn", (warm: any) => {
-                            this.logger.debug(warm);
-                        });
-                        virtualConsole.on("info", (info: any) => {
-                            this.logger.debug(info);
-                        });
-                        virtualConsole.on("dir", (dir: any) => {
-                            this.logger.debug(dir);
-                        });
+                            const virtualConsole = new VirtualConsole();
+                            virtualConsole.on("error", (er: Error) => {
+                                this.logger.debug(er);
+                            });
+                            virtualConsole.on("warn", (warm: any) => {
+                                this.logger.debug(warm);
+                            });
+                            virtualConsole.on("info", (info: any) => {
+                                this.logger.debug(info);
+                            });
+                            virtualConsole.on("dir", (dir: any) => {
+                                this.logger.debug(dir);
+                            });
 
-                        const dom1: JSDOM = new JSDOM(text, {virtualConsole});
+                            const dom1: JSDOM = new JSDOM(text, {virtualConsole});
 
-                        this.xpath.install(dom1.window);
+                            this.xpath.install(dom1.window);
 
-                        this.checkDefault(dom1, item);
-                        this.checkLinks(dom1);
-                        this.editElemenLevelDom(dom1, sList);
-                        this.deleteElementLevelDom(dom1, sList);
-                        this.createElementLevelDom(dom1, sList);
-                        text = dom1.serialize();
-
-                        this.xpath;
+                            this.checkDefault(dom1, item);
+                            this.checkLinks(dom1, item).catch(er => this.logger.error(er));
+                            this.editElemenLevelDom(dom1, sList);
+                            this.deleteElementLevelDom(dom1, sList);
+                            this.createElementLevelDom(dom1, sList);
+                            text = dom1.serialize();
+                        }
                     }
                 }
+                text = this.replaceLevelText(text, item);
             }
+        } catch (e) {
+            this.logger.error(e.message || e);
+            this.logger.error(e.stack);
+        } finally {
+            this.parent.linkModule.endEditCheckLinks(); //don't await!!!
         }
         return IResult.succData(text);
     }
 
     private stripHtmlComments(html: string): string {
         return html.replace(/<!--(.*?)-->|(<!--[^]{0,10})|(-->[^]{0,10})/g,
-            function(m0, cmt, open, close) {
+            function (m0, cmt, open, close) {
                 if (cmt && cmt.startsWith("[if")) return m0;
                 if (open || close) return m0;
                 // if (open) throw 'Illegal HTML - no closing comment sequence ("-->") for open at "' + open + '"';
@@ -81,7 +84,6 @@ export class EditText {
                 return '';
             }).trim();
     };
-
 
     private regListToSimpleList(regList: IRegulations[], cProcess: EProcessEdit): IRegular[] {
         const sList: IRegular[] = [];
@@ -113,7 +115,7 @@ export class EditText {
                                             selector: tag
                                         },
                                         where: {
-                                            param: "outerHTML",
+                                            elemParam: "outerHTML",
                                             indexOf: v
                                         }
                                     });
@@ -128,17 +130,13 @@ export class EditText {
                 _check(this.parent.getBaseConfig().listBlackScripts, "scripts");
                 _check(this.parent.getBaseConfig().listBlackNoScript, "noscript");
                 _check(this.parent.getBaseConfig().listMeta, "meta");
-
-
             } catch (e) {
                 console.log(e);
             }
             if (listEdit.length > 0) return listEdit;
-
         }
         return null;
     }
-
 
     private replaceLevelText(text: string, item: IMessageWorkerEditTextReq): string {
         text = text.normalize();
@@ -151,7 +149,6 @@ export class EditText {
         return text;
     }
 
-
     private isHtml(text: string): boolean {
         const defCheckList = ["</html>", "</body>", "</head>"];
         for (let i of defCheckList) {
@@ -159,7 +156,6 @@ export class EditText {
         }
         return true;
     }
-
 
     private editOnTextLevel(text: string, sList: IRegular[]): string {
         for (let r = 0; r < sList.length; r++) {
@@ -176,7 +172,6 @@ export class EditText {
         }
         return text;
     }
-
 
     private getTypeSearch(where: IWhere) {
         if (where.startsWith) return "startsWith";
@@ -205,9 +200,7 @@ export class EditText {
                         x.setAttribute("content", _p);
                     }
                 }
-
             }
-
         }
     }
 
@@ -221,11 +214,11 @@ export class EditText {
                     process: "pre",
                     event: "c",
                     where: {
-                        selector: "head",
-                        beforeElm: "firstChild"
+                        queryAll: "head",
+                        firstElm: true,
                     },
                     append: {
-                        text: this.parent.getBaseConfig().topGoogleManager
+                        outerHTML: this.parent.getBaseConfig().topGoogleManager
                     }
                 };
                 const bottomGoogle: IRegular = {
@@ -233,16 +226,16 @@ export class EditText {
                     process: "pre",
                     event: "c",
                     where: {
-                        selector: "body",
-                        beforeElm: "firstChild"
+                        queryAll: "body",
+                        firstElm: true,
                     },
                     append: {
-                        text: this.parent.getBaseConfig().bottomGoogleManager
+                        outerHTML: this.parent.getBaseConfig().bottomGoogleManager
                     }
 
                 };
-                topGoogle.append.text = StringUtils.replaceAll(topGoogle.append.text, "{GOOGLE_ID}", googleID);
-                bottomGoogle.append.text = StringUtils.replaceAll(bottomGoogle.append.text, "{GOOGLE_ID}", googleID);
+                topGoogle.append.outerHTML = StringUtils.replaceAll(topGoogle.append.outerHTML, "{GOOGLE_ID}", googleID);
+                bottomGoogle.append.outerHTML = StringUtils.replaceAll(bottomGoogle.append.outerHTML, "{GOOGLE_ID}", googleID);
 
                 return [topGoogle, bottomGoogle] as IRegular[];
             }
@@ -250,33 +243,80 @@ export class EditText {
         return null;
     }
 
-    private checkNodeElemByAttribute(elm: any, attr: any, typeSearch: string, search: string): boolean {
+    private checkNodeElemByAttribute(elm: Element, attr: any, typeSearch: string, search: string): boolean {
         if (elm && attr && typeSearch && search) {
             if (elm.attributes && elm.attributes[attr]) {
                 const text = elm.attributes[attr].value;
-                switch (typeSearch) {
-                    case "indexOf":
-                        return text.indexOf(search) > -1;
-                        break;
-                    case "startsWith":
-                        return text.startsWith(search);
-                        break;
-                    case "endsWith":
-                        return text.endsWith(search);
-                        break;
-                    case "exactly":
-                        return text === search;
-                }
+                return this.checkOutherText(text, typeSearch, search);
             }
         }
         return false;
     }
 
+    private checkNodeElemParam(elm: any, paramElem: string, typeSearch: string, search: string): boolean {
+        if (elm[paramElem]) {
+            const val = elm[paramElem];
+            return this.checkOutherText(val, typeSearch, search);
+        }
+        return false;
+    }
+
+    private checkOutherText(text: string, typeSearch: string, search: string): boolean {
+        if (text) {
+            switch (typeSearch) {
+                case "indexOf":
+                    return text.indexOf(search) > -1;
+                    break;
+                case "startsWith":
+                    return text.startsWith(search);
+                    break;
+                case "endsWith":
+                    return text.endsWith(search);
+                    break;
+                case "exactly":
+                    return text === search;
+            }
+        }
+        return false;
+    }
+
+    private getNodes(doc: Document, where: IWhere): Element[] {
+        if (!where.queryAll || !where.id) return [] as any;
+        const nodesResult: Element[] = [];
+
+        if (where.id) {
+            const node = doc.getElementById(where.id);
+            return node ? [] : [node];
+        }
+
+        const nodeList: NodeListOf<Element> = doc.querySelectorAll(where.queryAll);
+
+        const typeSearch: string = this.getTypeSearch(where);
+        if (!typeSearch) return [...nodeList];
+
+        if (!where.attr && !where.elemParam) return [...nodeList];
+
+        for (let node of nodeList) {
+            let _node: Element;
+            if (where.attr) {
+                if (this.checkNodeElemByAttribute(node, where.attr, typeSearch, (<any>where)[typeSearch])) {
+                    _node = node;
+                }
+            }
+
+            if (where.elemParam) {
+                const _n: Element = _node || node;
+                if (this.checkNodeElemParam(_n, where.elemParam, typeSearch, (<any>where)[typeSearch])) {
+                    _node = _n;
+                } else _node = null;
+            }
+            if (_node) nodesResult.push(_node);
+        }
+        return nodesResult;
+    }
 
     //**************EDIT************//
-
-
-    private async checkLinks(dom: JSDOM): Promise<void> {
+    private async checkLinks(dom: JSDOM, item: IMessageWorkerEditTextReq): Promise<void> {
         const doc = dom.window.document;
 
         const checkList = this.parent.getBaseConfig().htmlTagWishLinkUrl;
@@ -289,7 +329,7 @@ export class EditText {
                     const val = x.getAttribute(v);
                     if (val) {
                         try {
-                            const path = await this.linkModule.checkLink(this.parent, val);
+                            const path = await this.parent.linkModule.checkLink(item, val);
                             await x.setAttribute(v, path);
                         } catch (e) {
                             console.log(e);
@@ -299,7 +339,6 @@ export class EditText {
             }
         }
     }
-
 
     private editElemenLevelDom(dom1: JSDOM, sList: IRegular[]): void {
         const doc = dom1.window.document;
@@ -320,27 +359,21 @@ export class EditText {
         };
 
         const editWhere = (where: IWhere, reg: IReg) => {
-            let nodes = doc.querySelectorAll(where.selector || where.queryAll);
-            let typeSearch = this.getTypeSearch(where);
-            if (nodes && nodes.length && typeSearch) {
-                for (let node of nodes) {
-                    if (this.checkNodeElemByAttribute(node, where.attr, typeSearch, (<any>where)[typeSearch])) {
-                        if (reg.outerHTML) {
-                            node.outerHTML = reg.outerHTML;
-                        } else {
-                            if (reg.attr) {
-                                Object.keys(reg.attr).map(v => {
-                                    node.setAttribute(v, reg.attr[v]);
-                                });
-                            }
-                            if (reg.innerHTML) {
-                                node.innerHTML = reg.innerHTML;
-                            }
-                        }
-                    } else {
-                        if (reg.outerHTML) node.outerHTML = reg.outerHTML;
-                        if (reg.innerHTML) node.innerHTML = reg.innerHTML;
+            let nodes: Element[] = this.getNodes(doc, where);
 
+            if (nodes && nodes.length) {
+                for (let node of nodes) {
+                    if (reg.outerHTML) {
+                        node.outerHTML = reg.outerHTML;
+                    } else {
+                        if (reg.attr) {
+                            Object.keys(reg.attr).map(v => {
+                                node.setAttribute(v, reg.attr[v]);
+                            });
+                        }
+                        if (reg.innerHTML) {
+                            node.innerHTML = reg.innerHTML;
+                        }
                     }
                 }
             }
@@ -359,7 +392,6 @@ export class EditText {
         }
     }
 
-
     private deleteElementLevelDom(dom1: JSDOM, sList: IRegular[]): void {
         const doc = dom1.window.document;
 
@@ -370,7 +402,26 @@ export class EditText {
         };
 
         const delWhere = (where: IWhere, reg: IReg) => {
+            const nodes: Element[] = this.getNodes(doc, where);
+            for (let node of nodes) {
+                try {
+                    let parent = node.parentElement;
+                    if (where.delParentNum) {
+                        const num = (typeof where.delParentNum == "string") ? Number.parseInt(where.delParentNum) : where.delParentNum;
+                        for (let ind = 0; ind < num; ind++) {
+                            parent = (parent.parentElement) ? parent.parentElement : null;
+                        }
+                        node = parent;
+                        if (node.parentElement) parent = node.parentElement;
+                        parent.removeChild(node);
 
+                    } else {
+                        parent.removeChild(node);
+                    }
+                } catch (e) {
+                    this.logger.error(e);
+                }
+            }
         };
 
 
@@ -382,11 +433,92 @@ export class EditText {
                     else delWhere(ed.where, ed.reg);
                 }
             } catch (e) {
-                // console.log(e)
+                console.log(e)
             }
         }
     }
 
+    private createElementLevelDom(dom1: JSDOM, sList: IRegular[]): void {
+        const doc = dom1.window.document;
+
+        const _createOuterHTLM = (v: IRegular, elem: Element) => {
+            try {
+                if (!elem) return;
+
+                let numCopy: number = (!v.append.numCreate) ? 1 : (typeof v.append.numCreate == "string") ? Number.parseInt(v.append.numCreate) : v.append.numCreate;
+                if (numCopy < 1 || isNaN(numCopy)) numCopy = 1;
+
+                let newHtml = '';
+                for (let t = 0; t < numCopy; t++) {
+                    newHtml += v.append.outerHTML;
+                }
+
+                if (v.append.type === 'parent') {
+                    elem = elem.parentElement;
+                }
+                elem.outerHTML = (v.where.firstElm) ? newHtml + elem.outerHTML : elem.outerHTML + newHtml;
+
+            } catch (e) {
+                console.log(e);
+            }
+        };
+
+        const _runAppendString = (v: IRegular) => {
+            try {
+                const nodes: Element[] = this.getNodes(doc, v.where);
+
+                if (!v.where.lastElm && !v.where.firstElm) return _createOuterHTLM(v, nodes[0]);
+                for (let node of nodes) {
+                    _createOuterHTLM(v, node);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+
+        const _createNode = (v: IRegular, elem: Element) => {
+            try {
+                const nElem = doc.createElement(v.append.selector);
+                if (v.append.attr) {
+                    Object.keys(v.append.attr).map(c => nElem.setAttribute(c, v.append.attr[c]));
+                }
+
+                if (v.append.innerHtml) {
+                    nElem.innerHTML = v.append.innerHtml;
+                } else if (v.append.innerText) {
+                    const content = doc.createTextNode(v.append.innerText);
+                    nElem.appendChild(content);
+                }
+
+                const _elem = (v.append.type === "parent") ? elem.parentElement : elem;
+                (v.where.firstElm) ? elem.parentElement.insertBefore(nElem, elem.parentElement.firstChild) : elem.appendChild(nElem);
+
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
+        const _runAppendObj = (v: IRegular) => {
+            const nodes: Element[] = this.getNodes(doc, v.where);
+            for (let s = 0; s < nodes.length; s++) {
+                const x = nodes[s];
+                _createNode(v, x);
+            }
+        };
+
+        sList.map(v => {
+            try {
+                if (v.event === 'c' && v.where && v.append) {
+                    if (!v.append.type) v.append.type = "child";
+
+                    if (v.append.outerHTML) _runAppendString(v);
+                    else _runAppendObj(v);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        })
+
+    }
 }
-
-

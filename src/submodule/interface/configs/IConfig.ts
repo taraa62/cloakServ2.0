@@ -48,7 +48,13 @@ export interface IRegular {
 }
 
 export interface IAppend {
-    text?: string;
+    outerHTML?: string;
+    numCreate?: number
+    selector?: string;
+    type?: string;  //"child" or "parent" default = "child"
+    attr?: any;
+    innerHtml?: string;  //only innerHtml or innerText
+    innerText?: string;
 }
 
 export interface IReg {
@@ -65,13 +71,19 @@ export interface IReg {
 
 export interface IWhere {
     queryAll?: string;
+    firstElm?: boolean;
+    lastElm?: boolean;
+    delParentNum?: number | string;
+    /*
+        if(elemParam != undefined && attr != undefined)
+        filter = (attr + startsWith|endsWith|indexOf|exactly) + (elemParam + startsWith|endsWith|indexOf|exactly)
+     */
+    id?: string;
+    elemParam?: string    //outerHTML + startsWith|endsWith|indexOf|exactly
+    attr?: any;           //attr + startsWith|endsWith|indexOf|exactly
     startsWith?: string;
     endsWith?: string;
     indexOf?: string;
     exactly?: string;
-    param?: string;
-    selector?: string;
-    beforeElm?: string;
-    attr?: any;
 }
 
