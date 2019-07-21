@@ -4,7 +4,7 @@ import {IResult} from "../../../utils/IUtils";
 import {WorkWithDonor} from "./WorkWithDonor";
 import {BLogger} from "../../../module/logger/BLogger";
 import fs from "fs";
-import {IMessageWorkerDonorReq} from "../../interface/IMessageWorkers";
+import {TMessageWorkerDonorReq} from "../../interface/TMessageWorkers";
 import {StringUtils} from "../../../utils/StringUtils";
 import {HeadersUtils} from "../../../utils/HeadersUtils";
 import {FileManager} from "../../../utils/FileManager";
@@ -19,7 +19,7 @@ export class WorkerFiles {
     }
 
 
-    public saveFileOnDisk(resp: IncomingMessage, data: IMessageWorkerDonorReq): Promise<IResult> {
+    public saveFileOnDisk(resp: IncomingMessage, data: TMessageWorkerDonorReq): Promise<IResult> {
         return new Promise<IResult>(async (res, rej) => {
                 const iRes: IResult = await this.getNameForFile(resp, data);
                 if (iRes.error) return rej(iRes);
@@ -61,7 +61,7 @@ export class WorkerFiles {
     }
 
 
-    private async getNameForFile(resp: IncomingMessage, data: IMessageWorkerDonorReq): Promise<IResult> {
+    private async getNameForFile(resp: IncomingMessage, data: TMessageWorkerDonorReq): Promise<IResult> {
         try {
             /*if (client.subDomain) {
                 return await this.parent.workSubDomain.getNameForFile(client);

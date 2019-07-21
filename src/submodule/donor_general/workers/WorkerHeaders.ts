@@ -8,10 +8,25 @@ export class WorkerHeaders extends BWorker {
 
 
     public getBodyForRequestDonor(client: Client): IncomingHttpHeaders {
-        const opt = this.getHeaderForRequestDonor(client);
-
+        let opt = (client.originalLink) ? this.getHeaderForOriginalLink(client) : this.getHeaderForRequestDonor(client);
         return opt;
     }
+
+
+    private getHeaderForOriginalLink(client: Client): any {
+        const url: URL = new URL(client.originalLink.original);
+        const opt: any = {
+            headers: {},
+            host: url.host,
+            hostname: url.host,
+            method: client.req.method,
+            path: url.pathname
+        };
+        Object.assign(opt.headers, client.req.headers);
+        opt.headers.host = url.host;
+        return this.replaceHeaderForDonor(opt, client);
+    }
+
 
     private getHeaderForRequestDonor(client: Client): any {
         const opt: any = {
@@ -22,9 +37,14 @@ export class WorkerHeaders extends BWorker {
             hostname: this.parent.getDonorURL().host,
             method: client.req.method,
             path: client.req.path
-        }
+        };
         Object.assign(opt.headers, client.req.headers);
 
+
+        return this.replaceHeaderForDonor(opt, client);
+    }
+
+    private replaceHeaderForDonor<T>(opt: any, client: Client): T {
         this.replaceObjParam(opt.headers, true);
         delete opt.headers['if-none-match'];
         delete opt.headers['if-modified-since'];
@@ -36,7 +56,7 @@ export class WorkerHeaders extends BWorker {
         const accept = opt.headers['accept'];
         if (accept && accept.indexOf("webp")) {
             const arr = accept.split(",");
-            const list = arr.filter((v: any) => v.indexOf("webp") < 0)
+            const list = arr.filter((v: any) => v.indexOf("webp") < 0);
 
             opt.headers['accept'] = list.join(',');
         }
@@ -48,7 +68,6 @@ export class WorkerHeaders extends BWorker {
             opt.headers.cookie = Object.entries(cookie).map(v => v.join("=")).join("; ");
             this.replaceObjParam(opt.headers, true);
         }
-
         return opt;
     }
 
@@ -62,19 +81,19 @@ export class WorkerHeaders extends BWorker {
             } else {
                 return checkObj(v);
             }
-        }
+        };
         const checkObj = (_ob: any) => {
             Object.keys(_ob).map(key => {
                 _ob[key] = check(_ob[key]);
-            })
+            });
             return _ob;
-        }
+        };
         const checkArr = (_arr: any[]) => {
             _arr.map((v, v1) => {
-                _arr[v1] = check(v)
+                _arr[v1] = check(v);
             });
-            return _arr
-        }
+            return _arr;
+        };
         check(obj);
 
     }
@@ -85,7 +104,7 @@ export class WorkerHeaders extends BWorker {
                 return StringUtils.replaceAll(text, search, toText);
             }
             return text;
-        }
+        };
         const numb = Number(str);
         if (!isNaN(numb)) return str;
         if (isReverse) {

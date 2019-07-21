@@ -1,7 +1,7 @@
 import {BasePoolWorker} from "../../../module/workers/pool/workers/BasePoolWorker";
 import {FileManager} from "../../../utils/FileManager";
 import {IResult} from "../../../utils/IUtils";
-import {IMessageWorkerEditTextReq, IMessageWorkerEditTextResp} from "../../interface/IMessageWorkers";
+import {TMessageWorkerEditTextReq, TMessageWorkerEditTextResp} from "../../interface/TMessageWorkers";
 import {IItemConfig, IRegular, IRegulations} from "../../interface/configs/IConfig";
 import {EditText} from "./EditText";
 import {EProcessEdit} from "../../interface/EGlobal";
@@ -35,7 +35,7 @@ export class WorkEditPage extends BasePoolWorker {
 
     //*** for exit from main thread
     public async editFile(data: IWorkerMessage): Promise<any> {
-        const item: IMessageWorkerEditTextReq = data.data as IMessageWorkerEditTextReq;
+        const item: TMessageWorkerEditTextReq = data.data as TMessageWorkerEditTextReq;
         let text: string = <string>await ((item.text) ? item.text : (item.pathToFile) ? this.getTextFromDisk(item.pathToFile) : "");
 
         const regulations: IRegulations[] = this.getRegulation(item.ourInfo.host);
@@ -45,7 +45,7 @@ export class WorkEditPage extends BasePoolWorker {
         if (!list) return super.sendTaskComplitSuccess(text, data.key);
         else {
             const iRes: IResult = <IResult>await this.editText.edit(list, item, text);
-            const resp: IMessageWorkerEditTextResp = {};
+            const resp: TMessageWorkerEditTextResp = {};
             if (iRes.error) resp.error = iRes.error;
             if (iRes.data) {
                 resp.text = iRes.data || text;
@@ -71,7 +71,7 @@ export class WorkEditPage extends BasePoolWorker {
         return iRes.error ? "" : iRes.data;
     }
 
-    private isEditText(item: IMessageWorkerEditTextReq, regulations: IRegulations[]): IRegulations[] {
+    private isEditText(item: TMessageWorkerEditTextReq, regulations: IRegulations[]): IRegulations[] {
         if (!regulations || regulations.length < 1) return null;
 
         const listReg: IRegulations[] = [];

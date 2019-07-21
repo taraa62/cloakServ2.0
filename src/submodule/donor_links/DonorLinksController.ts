@@ -53,13 +53,14 @@ export class DonorLinksController extends BaseDonorController {
             if (!this.domains.has(host)) {
                 this.domains.set(host, new Map<string, Link>());
             }
-            const map:Map<string, Link> = this.domains.get(host);
-            for(let v of list){
-                if (!this.domains.has(v[1].original)) {
+            const map: Map<string, Link> = this.domains.get(host);
+            for (let v of list) {
+                if (!this.domains.get(host).has(v[1].original)) {
                     map.set(v[1].original, new Link(v[1].key, v[1].original, v[1].nLink));
                 }
-            };
-            this.endEditCheckLinks()
+            }
+            ;
+            this.endEditCheckLinks();
         }
     }
 
@@ -72,48 +73,21 @@ export class DonorLinksController extends BaseDonorController {
         this._isBlockUpdDB = false;
         const res: Promise<IResult> = this.dbController.updLinkDB().catch(er => IResult.error(er));
         res.then(v => {
-            if (v.error) this.logger.error(v.error);
+            if (v && v.error) this.logger.error(v.error);
         }).catch(er => this.logger.error(er));
     }
 
-    public checkLink(item: ItemDomain, link: string): string {
+    public async checkLink(client: Client): Promise<void> {
         try {
-            this._isBlockUpdDB = true;
-            // return link; //TODO remove
-            const host = item.getMainHost();
-            if (!host) return "/";
+            if (client.req.url.indexOf(this.linkKey) > -1) {
+             client.originalLink = await this.dbController.getInfoByLink(client, this.linkKey);
 
-            if (!this.domains.has(host)) {
-                this.domains.set(host, new Map<string, Link>());
-            }
-            const linkInfo = this.domains.get(host).get(link);
-
-            if (!link) return link;
-            if (link.startsWith("/")) {
-                if (link.startsWith("//")) {
-                    if (link.indexOf("http") > -1) {
-                        // throw new Error(link);
-                    }
-                }
-                return link;
-            } else {
-                if (link.startsWith("http")) {
-                    if (linkInfo) {
-                        return linkInfo.nLink;
-                    }
-                    const {key, nLink} = this.getReplUrl(link);
-
-                    this.domains.get(host).set(link, new Link(key, link, nLink));
-                    return nLink;
-
-                }
             }
         } catch (e) {
             this.logger.error(e);
             // console.error(`-------------------ERROR ${e}-----------------`)
         }
-        return link;
-
+        return null;
     }
 
     private getReplUrl(link: string) {

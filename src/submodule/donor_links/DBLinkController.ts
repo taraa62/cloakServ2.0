@@ -4,6 +4,8 @@ import {MongoDBModule} from "../../module/db/mongo/MongoDBModule";
 import {Model} from "mongoose";
 
 import {IResult} from "../../utils/IUtils";
+import {Client} from "../donor_general/item/Client";
+import {ILink, Link} from "./Link";
 
 export class DBLinkController {
 
@@ -14,7 +16,7 @@ export class DBLinkController {
         this.db = parent.getModule("mongodb") as MongoDBModule;
         const linkSchema = require("./linkSchema");
         this.linkModel = this.db.getModel(sConf.dbTable, linkSchema);
-        // this.updateLinkInfo();
+        this.updateLinkInfo();
     }
 
     private async updateLinkInfo(): Promise<void> {
@@ -31,7 +33,6 @@ export class DBLinkController {
                 });
                 //     domains.set(v.domain, arr);
             });
-            console.log(11);
         }
     }
 
@@ -42,22 +43,25 @@ export class DBLinkController {
         if (domains) {
             for (const [key, val] of domains.entries()) {
                 /**check exist domain*/
-                const exist = await this.db.update(this.linkModel, {domain: key} as any, {
-                    domain: key,
-                    info: {}
-                }, {upsert: true, strict: false}).catch(err => {
-                    this.logger.error(err);
-                    return null;
-                });
-                if (!exist) return null;
+                /*              const exist = await this.db.update(this.linkModel, {domain: key} as any, {
+                                  domain: key,
+                                  info: {}
+                              }, {upsert: true, strict: false}).catch(err => {
+                                  this.logger.error(err);
+                                  return null;
+                              });
+                              if (!exist) return null;
+              */
 
-                Object.values(val).map(async info => {
+                val.forEach(async info => {
                     if (!info.isCreateDB) {
                         info.isCreateDB = true;
                         const _data = `info.${info.key}`;
                         const data = {[_data]: info};
 
-                        await this.db.update(this.linkModel, {domain: key}, data, {upsert: true}).catch(err => {
+                        const find: any = {domain: key};
+
+                        await this.db.update(this.linkModel, find, data, {upsert: true, strict: false}).catch(err => {
                             this.logger.error(err);
                             info.isCreateDB = false;
                         });
@@ -65,7 +69,39 @@ export class DBLinkController {
                 });
             }
         }
-
     }
 
+    public async getInfoByLink(client: Client, linkKey: string): Promise<ILink> {
+        const params: string[] = (Object.keys(client.req.query).length > 0) ? Object.values(client.req.query) : Object.values(client.req.params);
+        let key;
+        let check = linkKey + "=";
+        for (let i = 0; i < params.length; i++) {
+            if (params[i].includes(linkKey)) {
+                key = params[i].substr(1, params[i].length);
+                if (!key.startsWith(check)) key = null;
+            }
+        }
+        if (key) {
+            const _data = `info.${key}.key`;
+            //  const data = {[_data]: key};
+
+            const find = {
+                domain: client.domainInfo.host,
+                [_data]: key
+            };
+            const keyOpt = `info.${key}`;
+            const opt: any = {[keyOpt]: 1};
+            const res: IResult = await this.db.query(this.linkModel, find, opt)
+                .then(v => {
+                    if (v.data instanceof Array && v.data.length < 1) return IResult.succData(null);
+                    return v;
+                }).catch(er => {
+                    return IResult.succData(null);
+                });
+            if (res.data) {
+                return res.data[0].info[key];
+            }
+        }
+        return null;
+    }
 }

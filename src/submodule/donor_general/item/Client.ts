@@ -4,6 +4,7 @@ import {IItemDomainInfo} from "../../interface/IClient";
 import {IResult} from "../../../utils/IUtils";
 import {HeadersUtils} from "../../../utils/HeadersUtils";
 import {Link} from "../../donor_links/Link";
+import {RequestInfo} from "../../donor_request/RequestInfo";
 
 export class Client {
     public clientIp: string;
@@ -14,12 +15,11 @@ export class Client {
 
     public contentType: string;
 
-    private _isEditBeforeSend: boolean = false;
-
-    public fileName: string;
+    public pathToFile: string;
 
     public domainInfo: IItemDomainInfo;
-
+    public requestInfo: RequestInfo;
+    private _isEditBeforeSend: boolean = false;
 
     constructor(public workController: WorkerController, public req: Request, public res: Response) {
     }

@@ -2,7 +2,7 @@ import {WorkWithDonor} from "./WorkWithDonor";
 import {IncomingMessage} from "http";
 import {BLogger} from "../../../module/logger/BLogger";
 import {IResult} from "../../../utils/IUtils";
-import {IMessageWorkerDonorReq, IMessageWorkerDonorResp} from "../../interface/IMessageWorkers";
+import {TMessageWorkerDonorReq, TMessageWorkerDonorResp} from "../../interface/TMessageWorkers";
 import {IWorkerMessage} from "../../../module/workers/WorkerMessage";
 
 
@@ -36,10 +36,10 @@ export class AnalizationDonorResponse {
     }
 
     private async respCode200(response: IncomingMessage, data: IWorkerMessage): Promise<any> {
-        const iRes: IResult = await this.controller.workerFiles.saveFileOnDisk(response, <IMessageWorkerDonorReq>data.data).catch(e => IResult.error(e));
+        const iRes: IResult = await this.controller.workerFiles.saveFileOnDisk(response, <TMessageWorkerDonorReq>data.data).catch(e => IResult.error(e));
 
         if (iRes.error) return this.controller.sendTaskComplitError(iRes.error, data.key);
-        const mess: IMessageWorkerDonorResp = {
+        const mess: TMessageWorkerDonorResp = {
                 pathToFile: iRes.data
             }
         ;

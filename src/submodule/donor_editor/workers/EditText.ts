@@ -1,4 +1,4 @@
-import {IMessageWorkerEditTextReq} from "../../interface/IMessageWorkers";
+import {TMessageWorkerEditTextReq} from "../../interface/TMessageWorkers";
 import {IReg, IRegular, IRegulations, IWhere} from "../../interface/configs/IConfig";
 import {IResult} from "../../../utils/IUtils";
 import {StringUtils} from "../../../utils/StringUtils";
@@ -15,7 +15,7 @@ export class EditText {
     constructor(private parent: WorkEditPage, private logger: BLogger) {
     }
 
-    public async edit(reqList: IRegulations[], item: IMessageWorkerEditTextReq, text: string): Promise<IResult> {
+    public async edit(reqList: IRegulations[], item: TMessageWorkerEditTextReq, text: string): Promise<IResult> {
         try {
             if (text) {
                 if (text && this.isHtml(text)) {
@@ -138,7 +138,7 @@ export class EditText {
         return null;
     }
 
-    private replaceLevelText(text: string, item: IMessageWorkerEditTextReq): string {
+    private replaceLevelText(text: string, item: TMessageWorkerEditTextReq): string {
         text = text.normalize();
         // text = text.replaceAll("http:\\\\/\\\\/", "https://");
         // text = text.replaceAll("http:\\\\/\\\\/", "https://");
@@ -186,7 +186,7 @@ export class EditText {
      * @param dom
      * @param item
      */
-    private checkDefault(dom: JSDOM, item: IMessageWorkerEditTextReq) {
+    private checkDefault(dom: JSDOM, item: TMessageWorkerEditTextReq) {
         if (item.process === EProcessEdit.PRE) {
             const doc = dom.window.document;
             const elem = doc.querySelectorAll("meta");
@@ -205,7 +205,7 @@ export class EditText {
     }
 
     /*****CREATE AUTO GOOGLE SCRIPT */
-    private createGoogleManager(item: IMessageWorkerEditTextReq): IRegular[] {
+    private createGoogleManager(item: TMessageWorkerEditTextReq): IRegular[] {
         if (item.process === EProcessEdit.PRE && item.googleManagerID) {
             const googleID = item.googleManagerID;
             if (googleID) {
@@ -316,7 +316,7 @@ export class EditText {
     }
 
     //**************EDIT************//
-    private async checkLinks(dom: JSDOM, item: IMessageWorkerEditTextReq): Promise<void> {
+    private async checkLinks(dom: JSDOM, item: TMessageWorkerEditTextReq): Promise<void> {
         const doc = dom.window.document;
 
         const checkList = this.parent.getBaseConfig().htmlTagWishLinkUrl;

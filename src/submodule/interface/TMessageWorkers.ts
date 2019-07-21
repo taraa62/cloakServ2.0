@@ -3,33 +3,34 @@ import {EProcessEdit} from "./EGlobal";
 import {IncomingHttpHeaders as Http1IncomingHttpHeaders} from "http";
 import {IResult} from "../../utils/IUtils";
 import {IItemDomainInfo} from "./IClient";
-import {ILink} from "../donor_links/Link";
+import {ILink, Link} from "../donor_links/Link";
 
 
-export interface IMessageWorkerBaseReq {
+export type TMessageWorkerBaseReq = {
     command: string
 }
 
-export interface IMessageWorkerBaseResp {
+export type TMessageWorkerBaseResp = {
     error?: Error | IResult | string
 }
 
 //*  Donor request */
 
-export interface IMessageWorkerDonorReq extends IMessageWorkerBaseReq {
+export type TMessageWorkerDonorReq = TMessageWorkerBaseReq & {
     options: Http1IncomingHttpHeaders;
     action: string;
     resourceFolder: string;
     isEditData: boolean;
+    originalLink: ILink;
 }
 
-export interface IMessageWorkerDonorResp extends IMessageWorkerBaseResp {
+export type TMessageWorkerDonorResp = TMessageWorkerBaseResp & {
     pathToFile: string;
 }
 
 
 //* EDIT**/
-export interface IMessageWorkerEditTextReq extends IMessageWorkerBaseReq {
+export type TMessageWorkerEditTextReq = TMessageWorkerBaseReq & {
     process: EProcessEdit;
     url: string;  //req.path
     ourInfo: IItemDomainInfo;
@@ -42,7 +43,7 @@ export interface IMessageWorkerEditTextReq extends IMessageWorkerBaseReq {
 }
 
 /**worker to main*/
-export interface IMessageWorkerEditTextResp extends IMessageWorkerBaseResp {
+export type TMessageWorkerEditTextResp = TMessageWorkerBaseResp & {
     text?: string
     linksMap?: Map<string, ILink>;
 }

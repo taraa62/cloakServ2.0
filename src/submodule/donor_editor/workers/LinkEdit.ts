@@ -1,6 +1,6 @@
 import {WorkEditPage} from "./WorkEditPage";
 import {BLogger} from "../../../module/logger/BLogger";
-import {IMessageWorkerEditTextReq} from "../../interface/IMessageWorkers";
+import {TMessageWorkerEditTextReq} from "../../interface/TMessageWorkers";
 import {ILink, Link} from "../../donor_links/Link";
 import url from "url";
 import {StringUtils} from "../../../utils/StringUtils";
@@ -21,7 +21,7 @@ export class LinkEdit {
         return this.domains.size ? this.domains : null;
     }
 
-    public checkLink(item: IMessageWorkerEditTextReq, link: string): string {
+    public checkLink(item: TMessageWorkerEditTextReq, link: string): string {
         try {
             if (link.startsWith("/")) return link;
 
@@ -48,7 +48,7 @@ export class LinkEdit {
     private getReplUrl(link: string) {
         const _url = url.parse(link);
         const key = this.parent.getBaseConfig().linkKey + "=" + StringUtils.hashCode(link);
-        const nLink = `${_url.path}${_url.query ? _url.query + "&" + key : "?"}${key}`;
+        const nLink = `/${key}`;
         return {key, nLink};
     }
 

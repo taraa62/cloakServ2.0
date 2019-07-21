@@ -10,14 +10,14 @@ import {EItemDomainController, EProcessEdit, EResourceFolder} from "../../interf
 import {WorkerHeaders} from "./WorkerHeaders";
 import {DonorEditController} from "../../donor_editor/DonorEditController";
 import {
-    IMessageWorkerDonorReq,
-    IMessageWorkerDonorResp,
-    IMessageWorkerEditTextReq,
-    IMessageWorkerEditTextResp
-} from "../../interface/IMessageWorkers";
+    TMessageWorkerDonorReq, TMessageWorkerDonorResp,
+    TMessageWorkerEditTextReq,
+    TMessageWorkerEditTextResp
+} from "../../interface/TMessageWorkers";
 import {WorkerActions} from "./WorkerActions";
 import {FileManager} from "../../../utils/FileManager";
 import {DonorLinksController} from "../../donor_links/DonorLinksController";
+import {DonorRequestController} from "../../donor_request/DonorRequestController";
 
 export class WorkerController extends BWorker {
 
@@ -27,46 +27,67 @@ export class WorkerController extends BWorker {
     public workerHeaders: WorkerHeaders;
     public donorEditController: DonorEditController;
     public donorLinkController: DonorLinksController;
+    public donorRequestController: DonorRequestController;
 
+    private countRequest = 0;
+    private countResponse = 0;
 
     public init(): void {
         this.workerAction = (<WorkerActions>this.parent.getWorker(EItemDomainController.ACTION));
         this.workerHeaders = (<WorkerHeaders>this.parent.getWorker(EItemDomainController.HEADER));
         this.donorEditController = <DonorEditController>this.parent.getDonorController(CONTROLLERS.EDITOR);
         this.donorLinkController = <DonorLinksController>this.parent.getDonorController(CONTROLLERS.LINKS);
+        this.donorRequestController = <DonorRequestController>this.parent.getDonorController(CONTROLLERS.REQUEST);
 
         this.poolWorkWithDonor = (<DonorWorkersController>this.parent.getDonorController(CONTROLLERS.WORKER_DONOR)).getPool();
     }
 
     public async run(req: Request, res: Response, next: Function): Promise<any> {
+        console.log(`-----request-${++this.countRequest}`);
+
         const client: Client = new Client(this, req, res);
         const iRes: IResult = client.init();
         if (iRes.error) return res.status(500).send(IResult.resultToString(iRes));
 
+        await this.donorLinkController.checkLink(client);
+        await this.donorRequestController.checkRequest(client);  //питання про те чи потрібно нам потім перевіряти на оригінальний лінк
+        if (client.requestInfo) return this.responseFile(client, iRes.data);
         if (this.poolWorkWithDonor) {
-            const donorReq: IMessageWorkerDonorReq = {
+            const donorReq: TMessageWorkerDonorReq = {
                 command: "setRequest",
                 options: this.workerHeaders.getBodyForRequestDonor(client),
                 action: client.action,
                 resourceFolder: this.getResourceFolderByContentType(client.contentType),
-                isEditData: client.isEditBeforeSend
+                isEditData: client.isEditBeforeSend,
+                originalLink: client.originalLink
             };
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
 
             if (IResult.success) {
                 if (client.isEditBeforeSend) {
                     this.responseData(client, iRes.data);
-                } else this.responseFile(client, iRes.data);
+                } else {
+                    client.pathToFile = iRes.data ? iRes.data.pathToFile : null;
+                    this.donorRequestController.createNewRequestInfo(client);
+                    this.responseFile(client, iRes.data);
+                }
             } else {
                 this.responseError(client, IResult.resultToString(iRes), 500);
             }
+        } else {
+            this.responseError(client, "WorkController:error pool!", 500);
         }
     }
 
-    private async responseData(client: Client, resp: IMessageWorkerDonorResp): Promise<any> {
+    private async responseData(client: Client, resp: TMessageWorkerDonorResp): Promise<any> {
+        if (!resp) return this.responseError(client, "close");
+
+        console.log(`-----response-${++this.countResponse}`);
+
+
         if (!resp.pathToFile) return this.responseError404(client);
 
-        const task: IMessageWorkerEditTextReq = {
+        const task: TMessageWorkerEditTextReq = {
             command: "editFile",
             url: client.req.path,
             pathToFile: resp.pathToFile,
@@ -80,7 +101,7 @@ export class WorkerController extends BWorker {
         const iR: IResult = await this.donorEditController.getPool().newTask(task).catch(er => IResult.error(er));
         if (iR.error) this.responseErrorIResult(client, iR);
         else {
-            const data: IMessageWorkerEditTextResp = iR.data;
+            const data: TMessageWorkerEditTextResp = iR.data;
             client.res.writeHead(200, {"content-type": client.contentType});
             client.res.write(data.text);
             client.res.end();
@@ -89,7 +110,11 @@ export class WorkerController extends BWorker {
         }
     }
 
-    private responseFile(client: Client, resp: IMessageWorkerDonorResp): void {
+    private responseFile(client: Client, resp: TMessageWorkerDonorResp): void {
+        if (!resp) return this.responseError(client, "close");
+        console.log(`-----response-${++this.countResponse}`);
+
+
         client.res.writeHead(200, {"content-type": client.contentType});
         FileManager._fs.createReadStream(resp.pathToFile).pipe(client.res).on("error", (er: Error) => {
 
@@ -99,14 +124,17 @@ export class WorkerController extends BWorker {
     }
 
     private responseError404(client: Client): void {
+        console.log(`-----response-${++this.countResponse}`);
         client.res.status(404);
     }
 
     private responseError(client: Client, msg: string, code: number = 404): void {
+        console.log(`-----response-${++this.countResponse}`);
         client.res.status(code).send(msg);
     }
 
     private responseErrorIResult(client: Client, iRes: IResult): void {
+        console.log(`-----response-${++this.countResponse}`);
         client.res.status(500).send(IResult.resultToString(iRes));
     }
 

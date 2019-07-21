@@ -83,7 +83,7 @@ export class MongoDBModule extends BaseDB {
      * @param isSpreadOut - нужно ли нам перебрать ответ и выбрать только обьект с данными, по дефолту  - да
      * @return {Promise<any>}
      */
-    query<T>(model: Model<any>, find: T, isSpreadOut = true, opt = {}): Promise<IResult> {
+    query<T>(model: Model<any>, find: T, opt:any = null, isSpreadOut = true): Promise<IResult> {
         return new Promise((resolve, reject) => {
             model.find(find, opt, (err, doc) => {
                 if (err) reject({error: err});

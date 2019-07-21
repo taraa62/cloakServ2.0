@@ -5,7 +5,7 @@ export class StringUtils {
 
     public static hashCode (target:string):number {
         let hash = 0, i, chr;
-        if (this.length === 0) return hash;
+        if (target.length === 0) return hash;
         for (i = 0; i < target.length; i++) {
             chr = target.charCodeAt(i);
             hash = ((hash << 5) - hash) + chr;

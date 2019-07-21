@@ -3,7 +3,7 @@ import https from "https";
 import {AnalizationDonorResponse} from "./AnalizationDonorResponse";
 import {IncomingMessage} from "http";
 import {WorkerFiles} from "./WorkerFiles";
-import {IMessageWorkerDonorReq} from "../../interface/IMessageWorkers";
+import {TMessageWorkerDonorReq} from "../../interface/TMessageWorkers";
 import {IWorkerMessage} from "../../../module/workers/WorkerMessage";
 
 
@@ -24,8 +24,9 @@ export class WorkWithDonor extends BasePoolWorker {
     //*init command
     private setRequest(data: IWorkerMessage): void {
         try {
-            this.logger.debug("server send to donor HTTPS->" + (<IMessageWorkerDonorReq>data.data).options.path);
+            this.logger.debug("server send to donor HTTPS->" + (<TMessageWorkerDonorReq>data.data).options.path);
             //    this.logger.debug(JSON.stringify(data.options));
+
 
             this.setHTTPS_GET(data);
         } catch (e) {
@@ -35,15 +36,20 @@ export class WorkWithDonor extends BasePoolWorker {
 
 
     private setHTTPS_GET(data: IWorkerMessage): void {
-        const options: IMessageWorkerDonorReq = data.data as IMessageWorkerDonorReq;
+        const options: TMessageWorkerDonorReq = data.data as TMessageWorkerDonorReq;
+
         https.get(options.options, (resp: IncomingMessage) => {
             // this.logger.debug("donor response to server ->" + JSON.stringify(resp.headers));
-            this.logger.debug("donor response to server ->" + resp.headers.host);
+            this.logger.debug("donor response to server ->" + resp.headers);
             this.analizator.analize(resp, data);
 
         }).on("error", (err) => {
+            this.logger.debug("donor response to server error->" );
             super.sendTaskComplitError(err, data.key);
-        });
+        }).on("close", (val:any)=>{
+            this.logger.debug("donor response to server close->" );
+            super.sendTaskComplitError("close", data.key);
+        })
     }
 }
 
