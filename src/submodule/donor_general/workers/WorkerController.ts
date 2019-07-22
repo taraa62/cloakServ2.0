@@ -60,7 +60,7 @@ export class WorkerController extends BWorker {
                 originalLink: client.originalLink
             };
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
-
+        //    if (donorReq.action.indexOf("t64") > -1) debugger;
             if (IResult.success) {
                 this.donorRequestController.createNewRequestInfo(client, iRes.data as TMessageWorkerDonorResp);
                 if (client.isEditBeforeSend) {

@@ -48,15 +48,15 @@ export class AnalizationDonorResponse {
     }
 
     private async respCode300(response: IncomingMessage, data: IWorkerMessage): Promise<any> {
-        return IResult.error("swdq");
+        return this.controller.sendTaskComplitError("error300", data.key);
     }
 
     private async respCode400(response: IncomingMessage, data: IWorkerMessage): Promise<any> {
-        return IResult.error("swdq");
+        return this.controller.sendTaskComplitError("error404", data.key);
     }
 
     private async respCode500(response: IncomingMessage, data: IWorkerMessage): Promise<any> {
-        return IResult.error("swdq");
+        return this.controller.sendTaskComplitError("error500", data.key);
     }
 
 }

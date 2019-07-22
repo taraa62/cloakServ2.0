@@ -57,20 +57,21 @@ export class WorkerFiles {
                     else resp.pipe(iconv).pipe(writeableStream);
                 }
             }
-        )
+        );
     }
 
 
     private async getNameForFile(resp: IncomingMessage, data: TMessageWorkerDonorReq): Promise<IResult> {
         try {
-            /*if (client.subDomain) {
-                return await this.parent.workSubDomain.getNameForFile(client);
-            }*/
+
+            if (data.originalLink) {
+                data.action = data.options.path as string;
+            }
             let url = data.action;
             let path;
             const ctResp = HeadersUtils.getContentTypeOrAcceptHTTP(resp.headers);
             if (ctResp) {
-                const form = ctResp.split("/")
+                const form = ctResp.split("/");
                 if (form.length > 1) {
                     if (!data.action.endsWith(form[1])) {
                         const ind = data.action.indexOf(".");
@@ -84,21 +85,21 @@ export class WorkerFiles {
             if (url.length > 150) {
                 url = this.minimizeUlr(url);
             }
-            url = StringUtils.replaceAll(url, "\\?", "")
-            url = StringUtils.replaceAll(url, ":", "")
-            url = StringUtils.replaceAll(url, "\\\\", "")
-            path = `${data.resourceFolder}/${url}`;
+            url = StringUtils.replaceAll(url, "\\?", "");
+            url = StringUtils.replaceAll(url, ":", "");
+            url = StringUtils.replaceAll(url, "\\\\", "");
+            path = (!data.originalLink) ? `${data.resourceFolder}/${url}` : `${data.resourceFolder}/${data.options.host}/${url}`;
             path = FileManager._path.normalize(path);
 
 
             if (await FileManager.isExist(path)) return IResult.succMess(path);
             const iRes: IResult = await FileManager.checkPathToFolder(FileManager.backFolder(path, 1), null, true).catch(e => {
-                throw e
+                throw e;
             });
             if (iRes.error) return iRes;
             return IResult.succData(path);
         } catch (e) {
-            return IResult.error(e)
+            return IResult.error(e);
         }
     }
 
@@ -122,7 +123,7 @@ export class WorkerFiles {
         let encod;
         const ct = headers['content-type'];
         if (ct && ct.indexOf("charset") > -1) {
-            encod = ct.substring(ct.indexOf("charset") + "charset=".length, ct.length)
+            encod = ct.substring(ct.indexOf("charset") + "charset=".length, ct.length);
         }
         return encod || "utf8";
     }
