@@ -21,7 +21,10 @@ export class Client {
     public requestInfo: RequestInfo;
     private _isEditBeforeSend: boolean = false;
 
+    private timeInitClient: number = new Date().getTime();
+
     constructor(public workController: WorkerController, public req: Request, public res: Response) {
+
     }
 
     public init(): IResult {
@@ -43,14 +46,19 @@ export class Client {
         this.req.originalUrl = u2.pathname + u2.search;
     }
 
-    private checkIsEditData(): void {
+    public checkIsEditData(): boolean {
         if (!this.contentType) return;
         const arr: Array<string> = this.workController.parent.getBaseConf().maskEditContentType.filter(v => this.contentType.indexOf(v) > -1);
         this._isEditBeforeSend = arr.length > 0;
+        return this._isEditBeforeSend;
     }
 
     public get isEditBeforeSend(): boolean {
         return this._isEditBeforeSend;
+    }
+
+    public getLifeTimeClient(): number {
+        return new Date().getTime() - this.timeInitClient;
     }
 
 }

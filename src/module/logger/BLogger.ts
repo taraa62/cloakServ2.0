@@ -1,5 +1,4 @@
 import {IResult} from "../../utils/IUtils";
-import {ClassKeys} from "../route/RouteDecorator";
 
 export class BLogger {
 
@@ -7,7 +6,8 @@ export class BLogger {
     private remoteLogger: any;
     private isShowCallClass: boolean = true;
     private isShowCallClassOnlyError: boolean = true;
-    private ansiParser = require("ansi-parser");
+    private timeMess: string = '';
+    private startTimeMess: number = -1;
 
     constructor(localLogger: any = null, remoteLogger: any = null) {
         this.localLogger = localLogger;
@@ -16,21 +16,41 @@ export class BLogger {
 
     public debug(mess: any, obj?: any): void {
         mess = this.getMessage(mess, obj, this.getLogCallClasses("debug"));
-        if (mess.indexOf("UnhandledPromiseRejectionWarning") > -1)
-            this.error(mess, obj);
+        if (this.isError(mess) || this.isError(obj)) this.error(mess, obj);
         else this.print(mess, "debug");
     }
 
     public info(mess: any, obj?: any): void {
         mess = this.getMessage(mess, obj, this.getLogCallClasses("info"));
-        if (mess.indexOf("UnhandledPromiseRejectionWarning") > -1)
-            this.error(mess, obj);
+        if (this.isError(mess) || this.isError(obj)) this.error(mess, obj);
         else this.print(mess, "info");
     }
 
     public error(mess: any, error?: any): void {
         mess = this.getMessage(mess, error, this.getLogCallClasses("error"));
         this.print(mess, "error");
+    }
+
+    public startRun(mess: string): void {
+        this.timeMess = mess;
+        this.startTimeMess = new Date().getTime();
+    }
+
+    public stopRun(mess: string): void {
+        if (this.startTimeMess > 0) {
+            const time = new Date().getTime() - this.startTimeMess;
+            const text = `${this.timeMess} / ${mess}   + ${time}`;
+            this.print(text, "info");
+            this.timeMess = "";
+            this.startTimeMess = -1;
+        }
+    }
+
+
+    private isError(obj: any): boolean {
+        if (obj instanceof String && obj.indexOf("UnhandledPromiseRejectionWarning") > -1) return true;
+        if (obj instanceof Error) return true;
+        return false;
     }
 
     private print(mess: any, type: string = "error" || "info" || "debug"): void {

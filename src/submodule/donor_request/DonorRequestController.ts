@@ -7,6 +7,7 @@ import crypto from "crypto";
 import {IRequestSchema} from "../interface/ISchema";
 import {DonorRequestDbController} from "./DonorRequestDbController";
 import {Client} from "../donor_general/item/Client";
+import {TMessageWorkerDonorResp} from "../interface/TMessageWorkers";
 
 export class DonorRequestController extends BaseDonorController {
 
@@ -29,8 +30,9 @@ export class DonorRequestController extends BaseDonorController {
         }
     }
 
-    public createNewRequestInfo(client: Client): void {
-        this.dbController.createNewPath(client.domainInfo.host, new RequestInfo(client)).catch(er => this.logger.error(er));
+    public createNewRequestInfo(client: Client, resp:TMessageWorkerDonorResp = null): void {
+        const reqInfo = new RequestInfo(client, resp);
+        if(client.checkIsEditData()) this.dbController.createNewPath(client.domainInfo.host, reqInfo).catch(er => this.logger.error(er));
     }
 
 

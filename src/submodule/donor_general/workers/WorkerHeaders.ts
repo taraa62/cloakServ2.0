@@ -20,7 +20,8 @@ export class WorkerHeaders extends BWorker {
             host: url.host,
             hostname: url.host,
             method: client.req.method,
-            path: url.pathname
+            path: url.pathname,
+            protocol:url.protocol
         };
         Object.assign(opt.headers, client.req.headers);
         opt.headers.host = url.host;
@@ -36,7 +37,8 @@ export class WorkerHeaders extends BWorker {
             host: this.parent.getDonorURL().host,
             hostname: this.parent.getDonorURL().host,
             method: client.req.method,
-            path: client.req.path
+            path: client.req.path,
+            protocol:this.parent.getDonorURL().protocolFull
         };
         Object.assign(opt.headers, client.req.headers);
 

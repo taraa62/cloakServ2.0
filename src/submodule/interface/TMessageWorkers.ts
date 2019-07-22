@@ -1,9 +1,9 @@
 /** Main to worker*/
 import {EProcessEdit} from "./EGlobal";
-import {IncomingHttpHeaders as Http1IncomingHttpHeaders} from "http";
+import {IncomingHttpHeaders, IncomingHttpHeaders as Http1IncomingHttpHeaders} from "http";
 import {IResult} from "../../utils/IUtils";
 import {IItemDomainInfo} from "./IClient";
-import {ILink, Link} from "../donor_links/Link";
+import {ILink} from "../donor_links/Link";
 
 
 export type TMessageWorkerBaseReq = {
@@ -12,6 +12,7 @@ export type TMessageWorkerBaseReq = {
 
 export type TMessageWorkerBaseResp = {
     error?: Error | IResult | string
+    respHeaders?: IncomingHttpHeaders;
 }
 
 //*  Donor request */
@@ -26,6 +27,7 @@ export type TMessageWorkerDonorReq = TMessageWorkerBaseReq & {
 
 export type TMessageWorkerDonorResp = TMessageWorkerBaseResp & {
     pathToFile: string;
+
 }
 
 

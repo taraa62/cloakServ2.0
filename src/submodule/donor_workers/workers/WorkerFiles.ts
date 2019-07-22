@@ -36,7 +36,7 @@ export class WorkerFiles {
 
                 const enc = resp.headers['Content-Encoding'] || resp.headers['content-encoding'];
                 const charset: string = this.getCharset(resp.headers).toUpperCase().replace(/^"(.+(?="$))"$/, '$1');
-                const iconv: Iconv.Iconv = (charset == "UTF-8") ? null : (data.isEditData) ? new Iconv(charset, 'UTF-8') : null;
+                const iconv: Iconv.Iconv = (charset.startsWith("UTF")) ? null : (data.isEditData) ? new Iconv(charset, 'UTF-8') : null;
 
 
                 if (enc) {

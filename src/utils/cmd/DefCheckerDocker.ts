@@ -11,13 +11,15 @@ export class DefCheckerDocker {
 
     }
 
+
+
     private async checkRunnableDocker(): Promise<boolean> {
         if (this.isDocker) return true;
 
-        const iRes: CMDResult = await CMDUtils.runCommandFullResult("docker info");
-        // const iRes: IResult = await CMDUtils.runCommandFullResult("nautilus");
+        // const iRes: CMDResult = await CMDUtils.runCommandFullResult("docker info");
+        const iRes: CMDResult = await CMDUtils.runCommandFullResult("node -v");
 
-        if (iRes.exitCode==0) {
+        if (iRes.exitCode == 0) {
             this.isDocker = true;
             return true;
         }
@@ -25,7 +27,7 @@ export class DefCheckerDocker {
     }
 
     public async checkRunContainer(name: string): Promise<IResult> {
-        if (! await this.checkRunnableDocker()) return {error: "docker isn't run"};
+        if (!await this.checkRunnableDocker()) return {error: "docker isn't run"};
 
         const iRes: CMDResult = await CMDUtils.runCommandFullResult(`docker inspect --format '{{json .State}}' ${name}`);
         if (iRes.exitCode == 0 && iRes.data) {

@@ -44,7 +44,7 @@ export class RouteController {
 
 
     public async runHttp(controller: string, action: string, req: Request, res: Response, next: Function): Promise<any> {
-        this.logger.info(action);
+        // this.logger.info(action);
 
         if (this.controllers.has(controller)) {
             return await this.controllers.get(controller).run(action, req, res, next);

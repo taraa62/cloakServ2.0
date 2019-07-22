@@ -10,7 +10,8 @@ import {EItemDomainController, EProcessEdit, EResourceFolder} from "../../interf
 import {WorkerHeaders} from "./WorkerHeaders";
 import {DonorEditController} from "../../donor_editor/DonorEditController";
 import {
-    TMessageWorkerDonorReq, TMessageWorkerDonorResp,
+    TMessageWorkerDonorReq,
+    TMessageWorkerDonorResp,
     TMessageWorkerEditTextReq,
     TMessageWorkerEditTextResp
 } from "../../interface/TMessageWorkers";
@@ -29,8 +30,6 @@ export class WorkerController extends BWorker {
     public donorLinkController: DonorLinksController;
     public donorRequestController: DonorRequestController;
 
-    private countRequest = 0;
-    private countResponse = 0;
 
     public init(): void {
         this.workerAction = (<WorkerActions>this.parent.getWorker(EItemDomainController.ACTION));
@@ -43,7 +42,6 @@ export class WorkerController extends BWorker {
     }
 
     public async run(req: Request, res: Response, next: Function): Promise<any> {
-        console.log(`-----request-${++this.countRequest}`);
 
         const client: Client = new Client(this, req, res);
         const iRes: IResult = client.init();
@@ -64,11 +62,10 @@ export class WorkerController extends BWorker {
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
 
             if (IResult.success) {
+                this.donorRequestController.createNewRequestInfo(client, iRes.data as TMessageWorkerDonorResp);
                 if (client.isEditBeforeSend) {
-                    this.responseData(client, iRes.data);
+                    this.responseData(client, iRes.data).catch(er => this.logger.error(er));
                 } else {
-                    client.pathToFile = iRes.data ? iRes.data.pathToFile : null;
-                    this.donorRequestController.createNewRequestInfo(client);
                     this.responseFile(client, iRes.data);
                 }
             } else {
@@ -82,7 +79,7 @@ export class WorkerController extends BWorker {
     private async responseData(client: Client, resp: TMessageWorkerDonorResp): Promise<any> {
         if (!resp) return this.responseError(client, "close");
 
-        console.log(`-----response-${++this.countResponse}`);
+        this.logger.info(`-----response from data / time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
 
 
         if (!resp.pathToFile) return this.responseError404(client);
@@ -112,7 +109,7 @@ export class WorkerController extends BWorker {
 
     private responseFile(client: Client, resp: TMessageWorkerDonorResp): void {
         if (!resp) return this.responseError(client, "close");
-        console.log(`-----response-${++this.countResponse}`);
+        this.logger.info(`-----response from file / time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
 
 
         client.res.writeHead(200, {"content-type": client.contentType});
@@ -124,17 +121,17 @@ export class WorkerController extends BWorker {
     }
 
     private responseError404(client: Client): void {
-        console.log(`-----response-${++this.countResponse}`);
+        this.logger.info(`-----response error code: 404/ time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
         client.res.status(404);
     }
 
     private responseError(client: Client, msg: string, code: number = 404): void {
-        console.log(`-----response-${++this.countResponse}`);
+        this.logger.info(`-----response error code: ${code}/ time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
         client.res.status(code).send(msg);
     }
 
     private responseErrorIResult(client: Client, iRes: IResult): void {
-        console.log(`-----response-${++this.countResponse}`);
+        this.logger.info(`-----response error code: 500/ time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
         client.res.status(500).send(IResult.resultToString(iRes));
     }
 

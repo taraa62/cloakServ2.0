@@ -1,4 +1,5 @@
 import {Client} from "../donor_general/item/Client";
+import {TMessageWorkerDonorResp} from "../interface/TMessageWorkers";
 
 export class RequestInfo {
     public pathToFile: string;
@@ -10,12 +11,18 @@ export class RequestInfo {
     public shelfLifeType: string;
     public shelfLifeAutoIndex: number;
 
-    constructor(client: Client = null) {
+    constructor(client: Client = null, resp: TMessageWorkerDonorResp = null) {
+        if (resp) {
+            if (!resp.error) {
+                this.pathToFile = resp.pathToFile;
+                if (client.contentType !== resp.respHeaders["content-type"]) client.contentType = resp.respHeaders["content-type"];
+            }
+        }
+
         if (client) {
             this.action = client.action;
             this.contentType = client.contentType;
             this.originURL = client.req.url;     //якщо є параметри з чоного списку, то наступний запит може відрізнятись від цього
-            this.pathToFile = client.pathToFile;
         }
     }
 }
