@@ -36,7 +36,6 @@ export class WorkerActions extends BWorker {
 
 
     public updAction(client: Client): void {
-
         let url = client.req.url;
         if (url.length < 1) url = "/";
 

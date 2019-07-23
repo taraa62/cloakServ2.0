@@ -4,7 +4,7 @@ export interface IBaseConfig {
     canDoRequestToDonor: boolean;
     basePathToResourceFolder: string;
 
-    maskAcceptContentType: string[];
+    maskAcceptSaveContentType: string[];
     maskEditContentType: string[];
     maskTextReplaceBeforeSafe: string[];
     maskAutoRedirectResponse: string[];

@@ -23,6 +23,7 @@ export type TMessageWorkerDonorReq = TMessageWorkerBaseReq & {
     resourceFolder: string;
     isEditData: boolean;
     originalLink: ILink;
+    isSave:boolean;
 }
 
 export type TMessageWorkerDonorResp = TMessageWorkerBaseResp & {

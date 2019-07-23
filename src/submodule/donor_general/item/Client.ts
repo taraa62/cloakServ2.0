@@ -46,6 +46,16 @@ export class Client {
         this.req.originalUrl = u2.pathname + u2.search;
     }
 
+
+    public checkIsSaveFile(): boolean {
+        if (this.isFile) {
+            const arr: Array<string> = this.workController.parent.getBaseConf().maskAcceptSaveContentType.filter(v => this.contentType.indexOf(v) > -1);
+            return arr.length > 0;
+        }
+        return false;
+    }
+
+
     public checkIsEditData(): boolean {
         if (!this.contentType) return;
         const arr: Array<string> = this.workController.parent.getBaseConf().maskEditContentType.filter(v => this.contentType.indexOf(v) > -1);

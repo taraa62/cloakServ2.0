@@ -1,7 +1,7 @@
 {
   "canDoRequestToDonor": true,
   "basePathToResourceFolder": "./resource2/",
-  "maskAcceptContentType": [
+  "maskAcceptSaveContentType": [
     "images/",
     "image/",
     "application/",

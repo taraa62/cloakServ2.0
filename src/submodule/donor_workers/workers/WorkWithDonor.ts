@@ -24,7 +24,7 @@ export class WorkWithDonor extends BasePoolWorker {
     //*init command
     private setRequest(data: IWorkerMessage): void {
         try {
-            // this.logger.debug("server send to donor HTTPS->" + (<TMessageWorkerDonorReq>data.data).options.path);
+            this.logger.debug("server send to donor->" + (<TMessageWorkerDonorReq>data.data).options.path);
             //    this.logger.debug(JSON.stringify(data.options));
 
             const options: TMessageWorkerDonorReq = data.data as TMessageWorkerDonorReq;

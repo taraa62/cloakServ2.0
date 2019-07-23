@@ -48,7 +48,16 @@ export class WorkerController extends BWorker {
         if (iRes.error) return res.status(500).send(IResult.resultToString(iRes));
 
         await this.donorLinkController.checkLink(client);
-        await this.donorRequestController.checkRequest(client);  //питання про те чи потрібно нам потім перевіряти на оригінальний лінк
+        const info = await this.donorRequestController.checkRequest(client).catch(er => null);  //питання про те чи потрібно нам потім перевіряти на оригінальний лінк
+        if (info) {
+            if (await FileManager.isExist(info.pathToFile)) {
+                client.requestInfo = info;
+            } else {
+                await this.donorRequestController.removeRequestInfo(client.domainInfo.host, info.action).catch(er => null);
+            }
+        }
+
+
         if (client.requestInfo) return this.responseFile(client, iRes.data);
         if (this.poolWorkWithDonor) {
             const donorReq: TMessageWorkerDonorReq = {
@@ -57,11 +66,12 @@ export class WorkerController extends BWorker {
                 action: client.action,
                 resourceFolder: this.getResourceFolderByContentType(client.contentType),
                 isEditData: client.isEditBeforeSend,
-                originalLink: client.originalLink
+                originalLink: client.originalLink,
+                isSave:client.checkIsSaveFile()
             };
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
-        //    if (donorReq.action.indexOf("t64") > -1) debugger;
-            if (IResult.success) {
+            //    if (donorReq.action.indexOf("t64") > -1) debugger;
+            if (iRes.success) {
                 this.donorRequestController.createNewRequestInfo(client, iRes.data as TMessageWorkerDonorResp);
                 if (client.isEditBeforeSend) {
                     this.responseData(client, iRes.data).catch(er => this.logger.error(er));
@@ -108,12 +118,15 @@ export class WorkerController extends BWorker {
     }
 
     private responseFile(client: Client, resp: TMessageWorkerDonorResp): void {
-        if (!resp) return this.responseError(client, "close");
+        if (!resp && !client.requestInfo) return this.responseError(client, "close");
+
+
+        const pathToFile = resp? resp.pathToFile:client.requestInfo.pathToFile;
         this.logger.info(`-----response from file / time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
 
 
         client.res.writeHead(200, {"content-type": client.contentType});
-        FileManager._fs.createReadStream(resp.pathToFile).pipe(client.res).on("error", (er: Error) => {
+        FileManager._fs.createReadStream(pathToFile).pipe(client.res).on("error", (er: Error) => {
 
             //TODO remove file and clear request info!!!!!!!
             this.responseError(client, er.message, 500);

@@ -36,15 +36,22 @@ export class AnalizationDonorResponse {
     }
 
     private async respCode200(response: IncomingMessage, data: IWorkerMessage): Promise<any> {
-        const iRes: IResult = await this.controller.workerFiles.saveFileOnDisk(response, <TMessageWorkerDonorReq>data.data).catch(e => IResult.error(e));
+        if ((data.data as TMessageWorkerDonorReq).isSave) {
+            const iRes: IResult = await this.controller.workerFiles.saveFileOnDisk(response, <TMessageWorkerDonorReq>data.data).catch(e => IResult.error(e));
 
-        if (iRes.error) return this.controller.sendTaskComplitError(iRes.error, data.key);
-        const mess: TMessageWorkerDonorResp = {
-                pathToFile: iRes.data,
-                respHeaders:response.headers
-            }
-        ;
-        return this.controller.sendTaskComplitSuccess(mess, data.key);
+            if (iRes.error) return this.controller.sendTaskComplitError(iRes.error, data.key);
+            const mess: TMessageWorkerDonorResp = {
+                    pathToFile: iRes.data,
+                    respHeaders: response.headers
+                }
+            ;
+            return this.controller.sendTaskComplitSuccess(mess, data.key);
+        } else {
+            //TODO перепровірити розмір контенту, якщо великий, то придащити res, а ні, то вигрузити дані і віддати.
+
+            return this.respCode500(response, data);
+        }
+
     }
 
     private async respCode300(response: IncomingMessage, data: IWorkerMessage): Promise<any> {

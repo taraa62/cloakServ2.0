@@ -1,10 +1,6 @@
 import {BaseDonorController} from "../BaseDonorController";
 import {IResult} from "../../utils/IUtils";
-import {MongoDBModule} from "../../module/db/mongo/MongoDBModule";
-import {Model} from "mongoose";
 import {RequestInfo} from "./RequestInfo";
-import crypto from "crypto";
-import {IRequestSchema} from "../interface/ISchema";
 import {DonorRequestDbController} from "./DonorRequestDbController";
 import {Client} from "../donor_general/item/Client";
 import {TMessageWorkerDonorResp} from "../interface/TMessageWorkers";
@@ -22,17 +18,19 @@ export class DonorRequestController extends BaseDonorController {
     }
 
 
-    public async checkRequest(client: Client): Promise<any> {
+    public async checkRequest(client: Client): Promise<RequestInfo> {
         if (client.req.method !== "GET") return null;
-        else {
-            const info: RequestInfo = await this.dbController.getInfoFor(client.domainInfo.host, client.action).catch(er => null);
-            client.requestInfo = info;
-        }
+        else return await this.dbController.getInfoFor(client.domainInfo.host, client.action).catch(er => null);
     }
 
-    public createNewRequestInfo(client: Client, resp:TMessageWorkerDonorResp = null): void {
+    public createNewRequestInfo(client: Client, resp: TMessageWorkerDonorResp = null): void {
         const reqInfo = new RequestInfo(client, resp);
-        if(client.checkIsEditData()) this.dbController.createNewPath(client.domainInfo.host, reqInfo).catch(er => this.logger.error(er));
+        this.dbController.createNewPath(client.domainInfo.host, reqInfo).catch(er => this.logger.error(er));
+        client.checkIsEditData();
+    }
+
+    public removeRequestInfo(host: string, action: string): Promise<IResult> {
+        return this.dbController.removeRequest(host, action);
     }
 
 

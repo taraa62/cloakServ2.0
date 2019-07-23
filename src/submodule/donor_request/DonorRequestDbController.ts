@@ -19,12 +19,17 @@ export class DonorRequestDbController {
     }
 
     public async createNewPath(domain: string, requestInfo: RequestInfo): Promise<IResult> {
+        if(requestInfo.contentType === '*/*')debugger
+
         const action = this.getKeyForAction(requestInfo.action);
 
         const info = `info.${action}`;
         const upd = {[info]: requestInfo};
 
-        return await this.db.update(this.requestModel, <any>{domain: domain}, upd, {upsert: true, strict:false}).catch((er: Error) => {
+        return await this.db.update(this.requestModel, <any>{domain: domain}, upd, {
+            upsert: true,
+            strict: false
+        }).catch((er: Error) => {
             this.logger.error(er);
             return IResult.error(er);
         });
@@ -40,13 +45,13 @@ export class DonorRequestDbController {
             try {
                 if (v.error) return v;
                 const arr: IRequestSchema[] = v.data;
-                return (arr.length > 0) ? arr[0].info[hash] : IResult.error;
+                return (arr.length > 0) ? IResult.succData(arr[0].info[hash]) : IResult.error(null);
             } catch (e) {
                 return IResult.error(e);
             }
 
         }).catch(er => {
-            return {error: er};
+            return IResult.error(er);
         });
         return info.data ? info.data : null;
     }
