@@ -122,7 +122,7 @@ export class WorkerController extends BWorker {
 
 
         const pathToFile = resp? resp.pathToFile:client.requestInfo.pathToFile;
-        this.logger.info(`-----response from file / time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
+        this.logger.info(`-----response from file / method: ${client.req.method} time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
 
 
         client.res.writeHead(200, {"content-type": client.contentType});
@@ -134,17 +134,17 @@ export class WorkerController extends BWorker {
     }
 
     private responseError404(client: Client): void {
-        this.logger.info(`-----response error code: 404/ time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
+        this.logger.info(`-----response error code: 404 / method: ${client.req.method}/ time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
         client.res.status(404);
     }
 
     private responseError(client: Client, msg: string, code: number = 404): void {
-        this.logger.info(`-----response error code: ${code}/ time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
+        this.logger.info(`-----response error code: ${code}/ method: ${client.req.method} time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
         client.res.status(code).send(msg);
     }
 
     private responseErrorIResult(client: Client, iRes: IResult): void {
-        this.logger.info(`-----response error code: 500/ time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
+        this.logger.info(`-----response error code: 500/ method: ${client.req.method} time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
         client.res.status(500).send(IResult.resultToString(iRes));
     }
 

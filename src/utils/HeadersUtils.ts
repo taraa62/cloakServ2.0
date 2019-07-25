@@ -9,7 +9,7 @@ export class HeadersUtils {
      */
     public static getContentTypeFromRequest(req: IncomingMessage): string {
         let ct: string = this.getContentTypeOrAcceptHTTP(req.headers);
-        if (!ct) return this.getContentTypeFromOriginalUrl((<any>req).originalUrl);
+        if (!ct) return this.getContentTypeFromOriginalUrl(req.url);
         return ct;
     }
 
@@ -21,7 +21,7 @@ export class HeadersUtils {
             }
         } else if (headers['accept']) {
             let ct = headers['accept'].split(",")[0];
-            if (ct !== "/") {
+            if (ct !== "/" && ct !== "*/*") {
                 return ct;
             }
         }

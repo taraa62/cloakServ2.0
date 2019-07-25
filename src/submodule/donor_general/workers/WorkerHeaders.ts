@@ -21,7 +21,7 @@ export class WorkerHeaders extends BWorker {
             hostname: url.host,
             method: client.req.method,
             path: url.pathname,
-            protocol:url.protocol
+            protocol: url.protocol
         };
         Object.assign(opt.headers, client.req.headers);
         opt.headers.host = url.host;
@@ -38,7 +38,7 @@ export class WorkerHeaders extends BWorker {
             hostname: this.parent.getDonorURL().host,
             method: client.req.method,
             path: client.req.path,
-            protocol:this.parent.getDonorURL().protocolFull
+            protocol: this.parent.getDonorURL().protocolFull
         };
         Object.assign(opt.headers, client.req.headers);
 
@@ -47,7 +47,7 @@ export class WorkerHeaders extends BWorker {
     }
 
     private replaceHeaderForDonor<T>(opt: any, client: Client): T {
-        this.replaceObjParam(opt.headers, true);
+
         delete opt.headers['if-none-match'];
         delete opt.headers['if-modified-since'];
         // delete opt.headers['content-length'];
@@ -63,13 +63,14 @@ export class WorkerHeaders extends BWorker {
             opt.headers['accept'] = list.join(',');
         }
 
-        if (opt.headers.cookie) {
+        if (client.req.cookies && client.req.cookies instanceof Array) {
             const cookie = Object.assign({}, client.req.cookies);
-            // this.proxy.remCookieForReqDonor(cookie);
-            // delete cookie["t62Session"];
             opt.headers.cookie = Object.entries(cookie).map(v => v.join("=")).join("; ");
-            this.replaceObjParam(opt.headers, true);
+
+        } else if (client.req.headers.cookie) {
+            opt.headers.cookie = client.req.headers.cookie;
         }
+        this.replaceObjParam(opt.headers, true);
         return opt;
     }
 
