@@ -37,7 +37,7 @@ export class DonorConfigsController extends BaseDonorController {
         if (this.sConfig.isClearAllConfigsDB) {
             await this.db.clearDB(this.confModel).then(v => this.logger.info("all configs in db to clear")).catch(er => {
                 this.logger.error("error clear db from configs ", er);
-            })
+            });
         }
         if (this.sConfig.isUpdateConfWithFile) {
             fileCont = await new ReadConfFile(this.sConfig, this.logger).check();
@@ -45,19 +45,19 @@ export class DonorConfigsController extends BaseDonorController {
 
         if (fileCont && fileCont.length > 0) {
             for (let i = 0; i < fileCont.length; i++) {
-               const res =  await this.createNewConfig(fileCont[i]);
+                const res = await this.createNewConfig(fileCont[i]);
 
-               // console.log(111)
+                // console.log(111)
             }
         }
-        return super.init()
+        return super.init();
     }
 
 
     public async createNewConfig(conf: IItemConfig) {
         const saveList: IItemConfig[] = await this.findConfigByDonorAndOurHost(conf.data.donorOrigin, conf.data.ourHost, conf.data.nameResourceFolder);
         if (!this.sConfig.isUpdateConfWithFile && (!saveList || saveList && saveList.length > 0)) {
-            return "config is exist!"
+            return "config is exist!";
         } else {
             await this.checkCleaner(conf, saveList);
 
@@ -72,7 +72,7 @@ export class DonorConfigsController extends BaseDonorController {
     private async checkCleaner(conf: IItemConfig, list: IItemConfig[]): Promise<void> {
         if (list.length > 0) {
             for (let i = 0; i < list.length; i++) {
-                const iRes: IResult = await this.removeConfig(list[i]._id.toString())
+                const iRes: IResult = await this.removeConfig(list[i]._id.toString());
                 if (iRes.error) this.logger.error(iRes.error);
             }
         }
@@ -130,8 +130,12 @@ export class DonorConfigsController extends BaseDonorController {
 
     public async removeConfig(id: string | ObjectId): Promise<IResult> {
         if (id instanceof String) id = this.db.getObjectID(id as string);
-        return await this.db.remove(this.confModel, {_id: id})
+        return await this.db.remove(this.confModel, {_id: id});
     }
+
+
+
+
 
 
     /*  private testWorker() {

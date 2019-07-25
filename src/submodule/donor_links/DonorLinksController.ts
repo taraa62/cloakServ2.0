@@ -80,7 +80,7 @@ export class DonorLinksController extends BaseDonorController {
     public async checkLink(client: Client): Promise<void> {
         try {
             if (client.req.url.indexOf(this.linkKey) > -1) {
-             client.originalLink = await this.dbController.getInfoByLink(client, this.linkKey);
+                client.originalLink = await this.dbController.getInfoByLink(client, this.linkKey);
 
             }
         } catch (e) {
@@ -90,10 +90,18 @@ export class DonorLinksController extends BaseDonorController {
         return null;
     }
 
+    public checkRedirectLink(host: string, link: string): string {
+        const {key, nLink} = this.getReplUrl(link);
+        const list: Map<string, ILink> = new Map<string, ILink>();
+        list.set(key, new Link(key, link, nLink, true));
+        this.updateNewLinks(host, list);
+        return nLink;
+    }
+
+
     private getReplUrl(link: string) {
-        const _url = url.parse(link);
         const key = this.linkKey + "=" + StringUtils.hashCode(link);
-        const nLink = `${_url.path}${_url.query ? _url.query + "&" + key : "?"}${key}`;
+        const nLink = `/${key}`;
         return {key, nLink};
     }
 

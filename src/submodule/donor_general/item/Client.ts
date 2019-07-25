@@ -41,9 +41,9 @@ export class Client {
     }
 
     private normalizeReqURL(): void {
-        const u2 = new URL(decodeURIComponent(this.domainInfo.origin + +this.req.url));
+        const u2 = new URL(decodeURIComponent(this.domainInfo.origin + this.req.originalUrl));
 
-        this.req.url = u2.pathname + u2.search;
+        this.req.originalUrl = u2.pathname + u2.search;
     }
 
 

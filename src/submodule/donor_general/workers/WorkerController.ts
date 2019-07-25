@@ -47,6 +47,8 @@ export class WorkerController extends BWorker {
         const iRes: IResult = client.init();
         if (iRes.error) return res.status(500).send(IResult.resultToString(iRes));
 
+
+        //TODO research
         await this.donorLinkController.checkLink(client);
         const info = await this.donorRequestController.checkRequest(client).catch(er => null);  //питання про те чи потрібно нам потім перевіряти на оригінальний лінк
         if (info) {
@@ -67,17 +69,12 @@ export class WorkerController extends BWorker {
                 resourceFolder: this.getResourceFolderByContentType(client.contentType),
                 isEditData: client.isEditBeforeSend,
                 originalLink: client.originalLink,
-                isSave:client.checkIsSaveFile()
+                isSave: client.checkIsSaveFile()
             };
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
             //    if (donorReq.action.indexOf("t64") > -1) debugger;
             if (iRes.success) {
-                this.donorRequestController.createNewRequestInfo(client, iRes.data as TMessageWorkerDonorResp);
-                if (client.isEditBeforeSend) {
-                    this.responseData(client, iRes.data).catch(er => this.logger.error(er));
-                } else {
-                    this.responseFile(client, iRes.data);
-                }
+                this.analizeResponseOfDonor(iRes.data, client);
             } else {
                 this.responseError(client, IResult.resultToString(iRes), 500);
             }
@@ -85,6 +82,35 @@ export class WorkerController extends BWorker {
             this.responseError(client, "WorkController:error pool!", 500);
         }
     }
+
+    private analizeResponseOfDonor(mess: TMessageWorkerDonorResp, client: Client) {
+        const chart: number = Number(mess.respCode.toString().substr(0, 1));
+        switch (chart) {
+            case 1:
+            case 2: {
+                this.donorRequestController.createNewRequestInfo(client, mess);
+                if (client.isEditBeforeSend) {
+                    this.responseData(client, mess).catch(er => this.logger.error(er));
+                    // this.responseFile(client, iRes.data);
+                } else {
+                    this.responseFile(client, mess);
+                }
+            }
+            break;
+            case 3: {
+               const nLink =  this.donorLinkController.checkRedirectLink(client.domainInfo.host, mess.respHeaders.location);
+                return client.res.redirect(mess.respCode, client.domainInfo.origin +nLink);
+            }
+            case 4:
+                return this.responseError404(client);
+            case 5:
+                return this.responseError(client, "error500", 500);
+
+            default:
+                this.responseError(client, "undefined status code from donor", 500);
+        }
+    }
+
 
     private async responseData(client: Client, resp: TMessageWorkerDonorResp): Promise<any> {
         if (!resp) return this.responseError(client, "close");
@@ -121,7 +147,7 @@ export class WorkerController extends BWorker {
         if (!resp && !client.requestInfo) return this.responseError(client, "close");
 
 
-        const pathToFile = resp? resp.pathToFile:client.requestInfo.pathToFile;
+        const pathToFile = resp ? resp.pathToFile : client.requestInfo.pathToFile;
         this.logger.info(`-----response from file / method: ${client.req.method} time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
 
 

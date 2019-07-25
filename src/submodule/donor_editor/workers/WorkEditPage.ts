@@ -45,7 +45,9 @@ export class WorkEditPage extends BasePoolWorker {
         if (!list) return super.sendTaskComplitSuccess(text, data.key);
         else {
             const iRes: IResult = <IResult>await this.editText.edit(list, item, text);
-            const resp: TMessageWorkerEditTextResp = {};
+            const resp: TMessageWorkerEditTextResp = {
+
+            };
             if (iRes.error) resp.error = iRes.error;
             if (iRes.data) {
                 resp.text = iRes.data || text;

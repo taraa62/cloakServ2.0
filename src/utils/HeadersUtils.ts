@@ -9,7 +9,7 @@ export class HeadersUtils {
      */
     public static getContentTypeFromRequest(req: IncomingMessage): string {
         let ct: string = this.getContentTypeOrAcceptHTTP(req.headers);
-        if (!ct) return this.getContentTypeFromOriginalUrl(req.url);
+        if (!ct) return this.getContentTypeFromOriginalUrl((<any>req).originalUrl || (<any>req).url);
         return ct;
     }
 

@@ -13,6 +13,7 @@ export type TMessageWorkerBaseReq = {
 export type TMessageWorkerBaseResp = {
     error?: Error | IResult | string
     respHeaders?: IncomingHttpHeaders;
+
 }
 
 //*  Donor request */
@@ -27,8 +28,8 @@ export type TMessageWorkerDonorReq = TMessageWorkerBaseReq & {
 }
 
 export type TMessageWorkerDonorResp = TMessageWorkerBaseResp & {
-    pathToFile: string;
-
+    pathToFile?: string;
+    respCode:number;
 }
 
 

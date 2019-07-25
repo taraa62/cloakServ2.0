@@ -41,10 +41,10 @@ export class AnalizationDonorResponse {
 
             if (iRes.error) return this.controller.sendTaskComplitError(iRes.error, data.key);
             const mess: TMessageWorkerDonorResp = {
-                    pathToFile: iRes.data,
-                    respHeaders: response.headers
-                }
-            ;
+                pathToFile: iRes.data,
+                respHeaders: response.headers,
+                respCode: response.statusCode
+            };
             return this.controller.sendTaskComplitSuccess(mess, data.key);
         } else {
             //TODO перепровірити розмір контенту, якщо великий, то придащити res, а ні, то вигрузити дані і віддати.
@@ -55,7 +55,11 @@ export class AnalizationDonorResponse {
     }
 
     private async respCode300(response: IncomingMessage, data: IWorkerMessage): Promise<any> {
-        return this.controller.sendTaskComplitError("error300", data.key);
+        const mess: TMessageWorkerDonorResp = {
+            respCode: response.statusCode,
+            respHeaders: response.headers
+        };
+        return this.controller.sendTaskComplitSuccess(mess, data.key);
     }
 
     private async respCode400(response: IncomingMessage, data: IWorkerMessage): Promise<any> {

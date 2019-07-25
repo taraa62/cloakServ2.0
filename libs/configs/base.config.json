@@ -153,6 +153,7 @@
     "def": "none"
   },
   "linkKey": "t64",
+  "redirectKey": "t65",
   "fraudfilter": {
     "nameCookies": "watchT62",
     "authExpirationTime": "1m"

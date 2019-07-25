@@ -45,7 +45,7 @@ export class WorkWithDonor extends BasePoolWorker {
 
     private set_GET(data: IWorkerMessage, m: any): void {
         const options: TMessageWorkerDonorReq = data.data as TMessageWorkerDonorReq;
-         if (options.action.indexOf("laticon.wo") > -1) debugger;
+     //    if (options.action.indexOf("laticon.wo") > -1) debugger;
         delete options.options['x-real-ip']
         m.get(options.options, (resp: IncomingMessage) => {
             // this.logger.debug("donor response to server ->" + JSON.stringify(resp.headers));

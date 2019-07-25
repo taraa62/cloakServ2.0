@@ -109,10 +109,10 @@ export class MongoDBModule extends BaseDB {
     }
 
 
-    public remove<T>(model: Model<any>, findNote: T, opt: T = null): Promise<IResult> {
+    public remove<T>(model: Model<any>, findNote: T): Promise<IResult> {
         return new Promise((resolve, reject) => {
-            model.deleteMany(findNote, (err: Error) => {
-                (err) ? reject({error: err}) : resolve(IResult.success);
+            model.deleteMany(findNote,  (err: Error) => {
+                (err) ? reject(IResult.error(err)) : resolve(IResult.success);
             })
         })
     }

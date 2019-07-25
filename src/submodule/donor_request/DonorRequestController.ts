@@ -32,6 +32,13 @@ export class DonorRequestController extends BaseDonorController {
     public removeRequestInfo(host: string, action: string): Promise<IResult> {
         return this.dbController.removeRequest(host, action);
     }
+    public async clearHost(host: string): Promise<IResult> {
+        return this.dbController.removeAllRequests(host);
+    }
 
+
+    public createNewRequestInfoRedirect(client: Client, resp: TMessageWorkerDonorResp = null): void {
+        const reqInfo = new RequestInfo(client, resp);
+    }
 
 }

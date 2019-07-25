@@ -30,7 +30,7 @@ export interface ICleaner {
     isClearOnlyHTML: boolean;
     isClearSubDomains: boolean;
     isClearAllNotLocalFiles: boolean;
-    isClearResourceFolder: boolean;
+    isClearAllResource: boolean;
 }
 
 export interface IRegulations {

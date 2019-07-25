@@ -50,7 +50,7 @@ export class DonorModule extends BModule {
         const route: RouteModule = this.getModule('route') as RouteModule;
 
         route.getRoute().all("*", async (req: Request, res: Response, next: Function) => {
-            await route.getController().runHttp("cloaker", req.url, req, res, next);
+            await route.getController().runHttp("cloaker", req.originalUrl || req.url, req, res, next);
         });
     }
 

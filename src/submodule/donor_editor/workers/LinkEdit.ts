@@ -46,7 +46,6 @@ export class LinkEdit {
 
 
     private getReplUrl(link: string) {
-        const _url = url.parse(link);
         const key = this.parent.getBaseConfig().linkKey + "=" + StringUtils.hashCode(link);
         const nLink = `/${key}`;
         return {key, nLink};
