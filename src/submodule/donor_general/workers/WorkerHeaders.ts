@@ -120,6 +120,5 @@ export class WorkerHeaders extends BWorker {
             str = _repl(str, this.parent.getDonorURL().domain, this.parent.getOurURL().domain);
         }
         return str;
-
     }
 }

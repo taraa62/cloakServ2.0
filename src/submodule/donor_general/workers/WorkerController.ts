@@ -43,21 +43,15 @@ export class WorkerController extends BWorker {
 
     public async run(req: Request, res: Response, next: Function): Promise<any> {
 
-        const client: Client = new Client(this, req, res);
-        const iRes: IResult = client.init();
-        if (iRes.error) return res.status(500).send(IResult.resultToString(iRes));
-
-
-        //TODO research
-        await this.donorLinkController.checkLink(client);
-        const info = await this.donorRequestController.checkRequest(client).catch(er => null);  //питання про те чи потрібно нам потім перевіряти на оригінальний лінк
-        if (info) {
-            if (await FileManager.isExist(info.pathToFile)) {
-                client.requestInfo = info;
-            } else {
-                await this.donorRequestController.removeRequestInfo(client.domainInfo.host, info.action).catch(er => null);
-            }
+        const client: Client = new Client(this, req, res, this.logger);
+        const iRes: IResult = await client.init();
+        if (iRes.error) {
+            this.logger.error(iRes);
+            return res.status(500).send(IResult.resultToString(iRes));
         }
+
+
+        await this.donorLinkController.checkLink(client);
 
 
         if (client.requestInfo) return this.responseFile(client, iRes.data);
@@ -71,6 +65,7 @@ export class WorkerController extends BWorker {
                 originalLink: client.originalLink,
                 isSave: client.checkIsSaveFile()
             };
+            // if (!donorReq.isSave)debugger;
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
             //    if (donorReq.action.indexOf("t64") > -1) debugger;
             if (iRes.success) {
@@ -84,22 +79,31 @@ export class WorkerController extends BWorker {
     }
 
     private analizeResponseOfDonor(mess: TMessageWorkerDonorResp, client: Client) {
+
         const chart: number = Number(mess.respCode.toString().substr(0, 1));
         switch (chart) {
             case 1:
             case 2: {
                 this.donorRequestController.createNewRequestInfo(client, mess);
-                if (client.isEditBeforeSend) {
-                    this.responseData(client, mess).catch(er => this.logger.error(er));
-                    // this.responseFile(client, iRes.data);
-                } else {
-                    this.responseFile(client, mess);
+                const redirectTo: string = this.getLinkFromOriginal(client);
+                if (!redirectTo) {
+                    if (client.isEditBeforeSend) {
+                        this.responseData(client, mess).catch(er => this.logger.error(er));
+                        // this.responseFile(client, iRes.data);
+                    } else {
+                        this.responseFile(client, mess);
+                    }
+                }else {
+                    client.res.redirect(301,  redirectTo);
                 }
             }
-            break;
+                break;
             case 3: {
-               const nLink =  this.donorLinkController.checkRedirectLink(client.domainInfo.host, mess.respHeaders.location);
-                return client.res.redirect(mess.respCode, client.domainInfo.origin +nLink);
+                if (mess.respHeaders.location.startsWith("http")) {
+                    const nLink = this.donorLinkController.checkRedirectLink(client.domainInfo.host, mess.respHeaders.location);
+                    return client.res.redirect(mess.respCode, client.domainInfo.origin + nLink);
+                }
+                return client.res.redirect(mess.respCode, mess.respHeaders.location);
             }
             case 4:
                 return this.responseError404(client);
@@ -111,6 +115,14 @@ export class WorkerController extends BWorker {
         }
     }
 
+    private getLinkFromOriginal(client: Client): string {
+        if (client.originalLink) {
+            const urlOrigin = new URL(client.originalLink.original);
+            const link = `${client.domainInfo.origin}${urlOrigin.pathname}`;
+            return link;
+        }
+        return null;
+    }
 
     private async responseData(client: Client, resp: TMessageWorkerDonorResp): Promise<any> {
         if (!resp) return this.responseError(client, "close");
@@ -134,6 +146,8 @@ export class WorkerController extends BWorker {
         const iR: IResult = await this.donorEditController.getPool().newTask(task).catch(er => IResult.error(er));
         if (iR.error) this.responseErrorIResult(client, iR);
         else {
+
+
             const data: TMessageWorkerEditTextResp = iR.data;
             client.res.writeHead(200, {"content-type": client.contentType});
             client.res.write(data.text);
@@ -145,7 +159,7 @@ export class WorkerController extends BWorker {
 
     private responseFile(client: Client, resp: TMessageWorkerDonorResp): void {
         if (!resp && !client.requestInfo) return this.responseError(client, "close");
-
+        if(!client.contentType)debugger
 
         const pathToFile = resp ? resp.pathToFile : client.requestInfo.pathToFile;
         this.logger.info(`-----response from file / method: ${client.req.method} time: +${client.getLifeTimeClient()} url: ${client.req.url}`);

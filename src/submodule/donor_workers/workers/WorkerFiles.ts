@@ -65,7 +65,8 @@ export class WorkerFiles {
         try {
 
             if (data.originalLink) {
-                data.action = data.options.path as string;
+                data.action = data.originalLink.action || data.options.path as string;
+                if(data.action.endsWith("/"))data.action+="data.html";
             }
             let url = data.action;
             let path;

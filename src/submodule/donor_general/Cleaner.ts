@@ -6,6 +6,7 @@ import {EResourceFolder} from "../interface/EGlobal";
 import {CONTROLLERS} from "../DonorModule";
 import {DonorConfigsController} from "../donor_configs/DonorConfigsController";
 import {DonorRequestController} from "../donor_request/DonorRequestController";
+import {DonorLinksController} from "../donor_links/DonorLinksController";
 
 export class Cleaner {
 
@@ -16,6 +17,7 @@ export class Cleaner {
         if (item.getDomainConfig().data.cleaner.isClearAllResource) {
             await this.removeFolder(item.getResourceFolderBy(EResourceFolder.def));
           await (<DonorRequestController>item.getDonorController(CONTROLLERS.REQUEST)).clearHost(item.getDomainConfig().data.ourHost);
+          await (<DonorLinksController>item.getDonorController(CONTROLLERS.LINKS)).clearHost(item.getDomainConfig().data.ourHost);
         } else {
 
         }

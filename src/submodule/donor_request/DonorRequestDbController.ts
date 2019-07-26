@@ -19,7 +19,7 @@ export class DonorRequestDbController {
     }
 
     public async createNewPath(domain: string, requestInfo: RequestInfo): Promise<IResult> {
-        if(requestInfo.contentType === '*/*')debugger
+        if (requestInfo.contentType === '*/*')debugger
 
         const action = this.getKeyForAction(requestInfo.action);
 
@@ -35,8 +35,8 @@ export class DonorRequestDbController {
         });
     }
 
-    public async getInfoFor(domain: string, action: string): Promise<RequestInfo> {
-        const [hash, query] = this.getOptForFindAction(domain, action);
+    public async getInfoFor(domain: string, action: string, requestHash: number): Promise<RequestInfo> {
+        const [hash, query] = this.getOptForFindAction(domain, action, requestHash);
 
         const keyOpt = `info.${hash}`;
         const opt = {[keyOpt]: 1};
@@ -56,8 +56,8 @@ export class DonorRequestDbController {
         return info.data ? info.data : null;
     }
 
-    public async removeRequest(domain: string, action: string): Promise<IResult> {
-        const [hash, query] = this.getOptForFindAction(domain, action);
+    public async removeRequest(domain: string, action: string, requestHash: number): Promise<IResult> {
+        const [hash, query] = this.getOptForFindAction(domain, action, requestHash);
 
         return await this.db.remove(this.requestModel, query).catch(er => {
             return IResult.error(er);
@@ -76,8 +76,8 @@ export class DonorRequestDbController {
         return action;
     }
 
-    private getOptForFindAction<T extends Array<any>>(domain: string, action: string): T {
-        const hash = this.getKeyForAction(action);
+    private getOptForFindAction<T extends Array<any>>(domain: string, action: string, requestHash: number): T {
+        const hash = requestHash ? requestHash : this.getKeyForAction(action);
         const key = `info.${hash}.action`;
         const query = {[key]: action};
         const opt = {$and: [{domain: domain}, query]};

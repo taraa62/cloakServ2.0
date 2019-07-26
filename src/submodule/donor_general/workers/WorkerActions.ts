@@ -2,6 +2,11 @@ import {BWorker} from "./BWorker";
 import {Client} from "../item/Client";
 import {HeadersUtils} from "../../../utils/HeadersUtils";
 import {IBaseConfig} from "../../interface/configs/IBaseConfig";
+import {CONTROLLERS} from "../../DonorModule";
+import {DonorLinksController} from "../../donor_links/DonorLinksController";
+import {DonorRequestController} from "../../donor_request/DonorRequestController";
+import {RequestInfo} from "../../donor_request/RequestInfo";
+import {FileManager} from "../../../utils/FileManager";
 
 
 /**
@@ -13,9 +18,14 @@ export class WorkerActions extends BWorker {
     private blackParamForSave: string[];
     private priorityParamForSave: string[];
     private maxUseParamToSave: number = 10;
+    private linkController: DonorLinksController;
+    private requestController: DonorRequestController;
 
     public init(): void {
         try {
+
+            this.linkController = this.parent.getDonorController(CONTROLLERS.LINKS) as DonorLinksController;
+            this.requestController = this.parent.getDonorController(CONTROLLERS.REQUEST) as DonorRequestController;
             this.blackParamForSave = [];
             this.priorityParamForSave = [];
 
@@ -35,8 +45,17 @@ export class WorkerActions extends BWorker {
     }
 
 
-    public updAction(client: Client): void {
+    public async updAction(client: Client): Promise<void> {
         let url = client.req.originalUrl || client.req.url;
+
+        const info: RequestInfo = await this.requestController.checkRequest(client);
+        if (info) {
+            if (await FileManager.isExist(info.pathToFile)) {
+                client.requestInfo = info;
+            } else {
+                await this.requestController.removeRequestInfo(client.domainInfo.host, info.action).catch(er => null);
+            }
+        }
         if (url.length < 1) url = "/";
 
         if (url.endsWith("?")) {
@@ -59,6 +78,12 @@ export class WorkerActions extends BWorker {
                 isFile = false;
             }
         }
+        if (info) {
+            client.action = (file) ? file : url;
+            client.isFile = isFile;
+            return;
+        }
+
         if (!file) {
             let _url;
             if (url.indexOf("?") > -1) {
@@ -68,7 +93,7 @@ export class WorkerActions extends BWorker {
                 url += ".html";
             } else {
                 if (!isFile) {
-                    url += ".data";
+                    //url += ".data";
                 } else {
                     if (client.req.query) {
                         const list = Object.keys(client.req.query);
@@ -95,8 +120,6 @@ export class WorkerActions extends BWorker {
         client.action = url;
         client.isFile = isFile;
     }
-
-
 
 
 }

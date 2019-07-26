@@ -4,6 +4,8 @@ import {RequestInfo} from "./RequestInfo";
 import {DonorRequestDbController} from "./DonorRequestDbController";
 import {Client} from "../donor_general/item/Client";
 import {TMessageWorkerDonorResp} from "../interface/TMessageWorkers";
+import {CONTROLLERS} from "../DonorModule";
+import {DonorLinksController} from "../donor_links/DonorLinksController";
 
 export class DonorRequestController extends BaseDonorController {
 
@@ -20,7 +22,10 @@ export class DonorRequestController extends BaseDonorController {
 
     public async checkRequest(client: Client): Promise<RequestInfo> {
         if (client.req.method !== "GET") return null;
-        else return await this.dbController.getInfoFor(client.domainInfo.host, client.action).catch(er => null);
+        else {
+            const hash: number = (<DonorLinksController>this.parent.getController(CONTROLLERS.LINKS)).checkRequeskUrl(client.action || client.req.originalUrl || client.req.url);
+            return await this.dbController.getInfoFor(client.domainInfo.host, client.action, hash).catch(er => null);
+        }
     }
 
     public createNewRequestInfo(client: Client, resp: TMessageWorkerDonorResp = null): void {
@@ -30,8 +35,10 @@ export class DonorRequestController extends BaseDonorController {
     }
 
     public removeRequestInfo(host: string, action: string): Promise<IResult> {
-        return this.dbController.removeRequest(host, action);
+        const hash: number = (<DonorLinksController>this.parent.getController(CONTROLLERS.LINKS)).checkRequeskUrl(action);
+        return this.dbController.removeRequest(host, action, hash);
     }
+
     public async clearHost(host: string): Promise<IResult> {
         return this.dbController.removeAllRequests(host);
     }

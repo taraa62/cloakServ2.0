@@ -2,8 +2,6 @@ import {BaseDonorController, IBaseDonorConfig} from "../BaseDonorController";
 import {IResult} from "../../utils/IUtils";
 import {DBLinkController} from "./DBLinkController";
 import {ILink, Link} from "./Link";
-import {ItemDomain} from "../donor_general/ItemDomain";
-import url from "url";
 import {StringUtils} from "../../utils/StringUtils";
 import {Client} from "../donor_general/item/Client";
 import {CONTROLLERS} from "../DonorModule";
@@ -56,7 +54,7 @@ export class DonorLinksController extends BaseDonorController {
             const map: Map<string, Link> = this.domains.get(host);
             for (let v of list) {
                 if (!this.domains.get(host).has(v[1].original)) {
-                    map.set(v[1].original, new Link(v[1].key, v[1].original, v[1].nLink));
+                    map.set(v[1].original, new Link(v[1].key, v[1].original, v[1].nLink, v[1].action));
                 }
             }
             ;
@@ -93,7 +91,7 @@ export class DonorLinksController extends BaseDonorController {
     public checkRedirectLink(host: string, link: string): string {
         const {key, nLink} = this.getReplUrl(link);
         const list: Map<string, ILink> = new Map<string, ILink>();
-        list.set(key, new Link(key, link, nLink, true));
+        list.set(key, new Link(key, link, nLink, link, true)); //TODO, не впевнений на рахунок action=link
         this.updateNewLinks(host, list);
         return nLink;
     }
@@ -114,6 +112,24 @@ export class DonorLinksController extends BaseDonorController {
             }
         }
     }
+
+
+    public checkRequeskUrl(url: string): number {
+        if (url.indexOf(this.linkKey) > -1) {
+            const arr = url.split("=");
+            if (arr.length > 1) {
+                const h = Number.parseInt(arr[1]);
+                if(h.toString() !== "NaN")return h
+            }
+        }
+        return null;
+    }
+
+    public async clearHost(host: string): Promise<IResult> {
+        return this.dbController.removeAllRequests(host);
+    }
+
+
 }
 
 

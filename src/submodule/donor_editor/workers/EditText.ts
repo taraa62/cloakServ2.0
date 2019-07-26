@@ -150,7 +150,7 @@ export class EditText {
     }
 
     private isHtml(text: string): boolean {
-        const defCheckList = ["</html>", "</body>", "</head>"];
+        const defCheckList = ["html>", "<body>", "<head>"];
         for (let i of defCheckList) {
             if (text.indexOf(i) < 0) return false;
         }

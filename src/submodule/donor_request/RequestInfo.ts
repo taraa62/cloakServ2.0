@@ -15,7 +15,7 @@ export class RequestInfo {
         if (resp) {
             if (!resp.error) {
                 this.pathToFile = resp.pathToFile;
-                if (client.contentType !== resp.respHeaders["content-type"]) client.contentType = resp.respHeaders["content-type"];
+                if (resp.respHeaders["content-type"] && client.contentType !== resp.respHeaders["content-type"]) client.contentType = resp.respHeaders["content-type"];
             }
         }
 

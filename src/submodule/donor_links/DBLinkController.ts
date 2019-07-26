@@ -23,7 +23,7 @@ export class DBLinkController {
         const links: IResult = await this.db.query(this.linkModel, {});
 
         if (links.success && links.data.length > 0) {
-            const domains = this.parent.getDomains();
+          //  const domains = this.parent.getDomains();
 
             const arr: any[] = links.data;
             arr.map((v: any) => {
@@ -103,5 +103,11 @@ export class DBLinkController {
             }
         }
         return null;
+    }
+
+    async removeAllRequests(domain: string): Promise<IResult> {
+        return await this.db.remove(this.linkModel, {domain: domain}).catch(er => {
+            return IResult.error(er);
+        });
     }
 }

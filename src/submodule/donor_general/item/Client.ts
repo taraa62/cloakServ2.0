@@ -5,34 +5,35 @@ import {IResult} from "../../../utils/IUtils";
 import {HeadersUtils} from "../../../utils/HeadersUtils";
 import {Link} from "../../donor_links/Link";
 import {RequestInfo} from "../../donor_request/RequestInfo";
+import {BLogger} from "../../../module/logger/BLogger";
 
 export class Client {
     public clientIp: string;
     public action: string;  //originalUrl - before edition
     public originalLink: Link;  //originalLink - link from original page
-
     public isFile: boolean;
-
     public contentType: string;
-
-    public pathToFile: string;
-
     public domainInfo: IItemDomainInfo;
     public requestInfo: RequestInfo;
     private _isEditBeforeSend: boolean = false;
 
     private timeInitClient: number = new Date().getTime();
 
-    constructor(public workController: WorkerController, public req: Request, public res: Response) {
+
+    constructor(public workController: WorkerController, public req: Request, public res: Response, private logger: BLogger) {
 
     }
 
-    public init(): IResult {
+    public async init(): Promise<IResult> {
         try {
             this.domainInfo = this.workController.getDomainConfig();
             this.normalizeReqURL();
-            this.workController.workerAction.updAction(this);
-            this.contentType = HeadersUtils.getContentTypeFromRequest(this.req);
+            const iRes: IResult = <IResult>await this.workController.workerAction.updAction(this).then(() => IResult.success).catch(er => {
+                this.logger.error(er)
+                IResult.error(er);
+            });
+            if (iRes.error) return iRes;
+            this.updateContentTye();
             this.checkIsEditData();
         } catch (e) {
             return IResult.error(e);
@@ -42,24 +43,26 @@ export class Client {
 
     private normalizeReqURL(): void {
         const u2 = new URL(decodeURIComponent(this.domainInfo.origin + this.req.originalUrl));
-
         this.req.originalUrl = u2.pathname + u2.search;
     }
 
-
-    public checkIsSaveFile(): boolean {
-        if (this.isFile) {
-            const arr: Array<string> = this.workController.parent.getBaseConf().maskAcceptSaveContentType.filter(v => this.contentType.indexOf(v) > -1);
-            return arr.length > 0;
-        }
-        return false;
+    private updateContentTye(): void {
+        this.contentType = HeadersUtils.getContentTypeFromRequest(this.req)
+            || HeadersUtils.getContentTypeFromOriginalUrl(this.action)
+            || HeadersUtils.getContentTypeFromOriginalUrl(this.originalLink ? this.originalLink.original : "");
     }
 
+    public checkIsSaveFile(): boolean {
+        if (!this.contentType) this.updateContentTye();
+        if (!this.contentType) return false;
+        const arr = this.workController.parent.getBaseConf().maskAcceptSaveContentType.find(v => this.contentType.indexOf(v) > -1);
+        return !!arr;
+    }
 
     public checkIsEditData(): boolean {
         if (!this.contentType) return;
-        const arr: Array<string> = this.workController.parent.getBaseConf().maskEditContentType.filter(v => this.contentType.indexOf(v) > -1);
-        this._isEditBeforeSend = arr.length > 0;
+        const arr: string = this.workController.parent.getBaseConf().maskEditContentType.find(v => this.contentType.indexOf(v) > -1);
+        this._isEditBeforeSend = !!arr;
         return this._isEditBeforeSend;
     }
 

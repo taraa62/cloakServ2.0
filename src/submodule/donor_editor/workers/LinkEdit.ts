@@ -32,7 +32,7 @@ export class LinkEdit {
             if (link.startsWith("http")) {
                 const {key, nLink} = this.getReplUrl(link);
 
-                this.domains.set(link, {key, original: link, nLink} as ILink);
+                this.domains.set(link, {key, original: link, nLink, action:item.url} as ILink);
                 return nLink;
             }
         } catch (e) {
