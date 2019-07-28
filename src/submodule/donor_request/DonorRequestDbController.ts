@@ -6,6 +6,7 @@ import {RequestInfo} from "./RequestInfo";
 import {IResult} from "../../utils/IUtils";
 import {IRequestSchema} from "../interface/ISchema";
 import crypto from "crypto";
+import {EModules} from "../../server/config";
 
 export class DonorRequestDbController {
 
@@ -13,7 +14,7 @@ export class DonorRequestDbController {
     private requestModel: Model<any>;
 
     constructor(private parent: DonorRequestController, private logger: BLogger) {
-        this.db = this.parent.getModule("mongodb") as MongoDBModule;
+        this.db = this.parent.getModule(EModules.MONGODB) as MongoDBModule;
         const requestSchema = require("./requestSchema");
         this.requestModel = this.db.getModel("RequestModel", requestSchema);
     }

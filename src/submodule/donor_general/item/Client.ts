@@ -54,9 +54,9 @@ export class Client {
 
     public checkIsSaveFile(): boolean {
         if (!this.contentType) this.updateContentTye();
-        if (!this.contentType) return false;
+        if (!this.contentType) return this.isFile;
         const arr = this.workController.parent.getBaseConf().maskAcceptSaveContentType.find(v => this.contentType.indexOf(v) > -1);
-        return !!arr;
+        return !!arr || this.isFile;
     }
 
     public checkIsEditData(): boolean {

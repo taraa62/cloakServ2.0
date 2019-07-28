@@ -3,6 +3,7 @@ import {IServer} from "../server/IServer";
 import {FileManager} from "../utils/FileManager";
 import {IResult} from "../utils/IUtils";
 import {BLogger} from "./logger/BLogger";
+import {EModules} from "../server/config";
 
 
 export class BModule {
@@ -37,8 +38,8 @@ export class BModule {
     }
 
 
-    public getModule(name: string): BModule {
-        return this.app.getModule(name);
+    public getModule(eModule: EModules): BModule {
+        return this.app.getModule(eModule);
     }
 
 

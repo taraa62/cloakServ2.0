@@ -5,7 +5,8 @@ import {Model} from "mongoose";
 
 import {IResult} from "../../utils/IUtils";
 import {Client} from "../donor_general/item/Client";
-import {ILink, Link} from "./Link";
+import {ILink} from "./Link";
+import {EModules} from "../../server/config";
 
 export class DBLinkController {
 
@@ -13,7 +14,7 @@ export class DBLinkController {
     private linkModel: Model<any>;
 
     constructor(private parent: DonorLinksController, private logger: BLogger, private sConf: IDonorLinksControllerConfig) {
-        this.db = parent.getModule("mongodb") as MongoDBModule;
+        this.db = parent.getModule(EModules.MONGODB) as MongoDBModule;
         const linkSchema = require("./linkSchema");
         this.linkModel = this.db.getModel(sConf.dbTable, linkSchema);
         this.updateLinkInfo();

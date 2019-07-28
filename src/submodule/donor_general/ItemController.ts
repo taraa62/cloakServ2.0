@@ -10,6 +10,9 @@ import {ClassUtils} from "../../utils/ClassUtils";
 import {BLogger} from "../../module/logger/BLogger";
 import {IItemNginxConfig, INginxConfig} from "../interface/configs/INginxConfig";
 import {BWorker} from "./workers/BWorker";
+import {EModules} from "../../server/config";
+import {RouteModule} from "../../module/route/RouteModule";
+import {CloakerRouteController} from "../CloakerRouteController";
 
 
 export interface IItemController extends IBaseDonorConfig {

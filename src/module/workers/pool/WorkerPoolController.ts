@@ -132,6 +132,16 @@ export class WorkerPoolController implements IWorkerController {
         return IResult.success;
     }
 
+    public getRunTask(): ItemTask[] {
+        const key = Array.from(this.workers.keys());
+        const tasks: any = [];
+        key.forEach(v => {
+            const arr = this.workers.get(v).getListTasks();
+            tasks.push(...arr);
+        });
+        return tasks as ItemTask[];
+    }
+
 
 }
 

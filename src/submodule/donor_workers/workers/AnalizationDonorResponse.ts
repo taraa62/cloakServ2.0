@@ -36,6 +36,7 @@ export class AnalizationDonorResponse {
     }
 
     private async respCode200(response: IncomingMessage, data: IWorkerMessage): Promise<any> {
+        // if((<TMessageWorkerDonorReq>data.data).action.indexOf("index.php")>-1)debugger
         if ((data.data as TMessageWorkerDonorReq).isSave) {
             const iRes: IResult = await this.controller.workerFiles.saveFileOnDisk(response, <TMessageWorkerDonorReq>data.data).catch(e => IResult.error(e));
 

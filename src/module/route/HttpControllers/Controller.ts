@@ -1,12 +1,14 @@
 import {RouteController} from "../RouteController";
 import {BLogger} from "../../logger/BLogger";
-import {Request, Response} from "express";
+import {Request, Response, Router} from "express";
 import {BModule} from "../../BModule";
 import {IResult} from "../../../utils/IUtils";
+import {EModules} from "../../../server/config";
 
 export class Controller {
 
-    constructor(private rController: RouteController, protected logger: BLogger) {
+
+    constructor(protected rController: RouteController, private route: Router, protected logger: BLogger) {
 
     }
 
@@ -18,7 +20,7 @@ export class Controller {
         return IResult.success;
     }
 
-    public async run(action: string, req: Request, res: Response, next: Function): Promise<any> {
+   /* public async run(action: string, req: Request, res: Response, next: Function): Promise<any> {
         const targ: Function = (this as any)[action];
 
         if (targ) {
@@ -32,12 +34,13 @@ export class Controller {
             }
 
         } else return next();
+    }*/
 
-    }
-
-    protected getModule(name: string): BModule {
+    protected getModule(name: EModules): BModule {
         return this.rController.getModule(name);
     }
 
 
 }
+
+

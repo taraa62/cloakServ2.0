@@ -24,7 +24,7 @@ export class WorkWithDonor extends BasePoolWorker {
     //*init command
     private setRequest(data: IWorkerMessage): void {
         try {
-            this.logger.debug("server send to donor->" + (<TMessageWorkerDonorReq>data.data).options.path);
+            this.logger.debug(`server send to donor--> key: ${data.key}, path: ${(<TMessageWorkerDonorReq>data.data).options.path}`);
             //    this.logger.debug(JSON.stringify(data.options));
 
             const options: TMessageWorkerDonorReq = data.data as TMessageWorkerDonorReq;
@@ -33,7 +33,7 @@ export class WorkWithDonor extends BasePoolWorker {
                 delete (options.options as any).protocol;
                 this.set_GET(data, m);
             } else {
-
+                this.sendTaskComplitError({error: "method isn't GET"}, data.key);
             }
 
 

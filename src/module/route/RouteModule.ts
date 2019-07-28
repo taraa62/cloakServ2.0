@@ -12,26 +12,25 @@ export class RouteModule extends BModule {
 
     public async init(): Promise<IResult> {
         try {
-            this.controller = new RouteController(this, this.logger);
+            this.route = Router();
+            this.controller = new RouteController(this, this.route, this.logger);
             const iRes: IResult = await this.controller.init().catch(e => {
                 return IResult.error(e);
             });
             if (iRes.error) return iRes;
 
-            this.route = Router();
+
 
             (process as any).constant.app.appExp.use(this.route);
             return super.init();
         } catch (e) {
             return IResult.error(e);
         }
-
-
     }
 
-    public getRoute(): Router {
+    /*public getRoute(): Router {
         return this.route;
-    }
+    }*/
 
     public getController(): RouteController {
         return this.controller;

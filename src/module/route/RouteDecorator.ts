@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import {AdminRouteController} from "../admin/AdminRouteController";
 
 type Controller = InstanceType<any>;
 
@@ -34,4 +35,26 @@ export function Controller(conf: ControllerConf): ClassDecorator {
         Reflect.defineMetadata(ClassKeys.BasePath, '/' + conf.path, target.prototype);
         return target;
     };
+}
+
+export function EndPoint(isUse: boolean, auth: boolean, action: string): MethodDecorator {
+
+    // tslint:disable-next-line:ban-types
+    return (target: any, propertyName: string, propertyDescriptor: PropertyDescriptor) => {
+
+
+        if (!target.__routeMethod) target.__routeMethod = new Map<string, RouteEndPoint>();
+        if (isUse && target[propertyName] && target[propertyName] instanceof Function) {
+            const ed: RouteEndPoint = new RouteEndPoint(auth, action, target, target[propertyName]);
+            target.__routeMethod.set(action, ed);
+        }
+        return target;
+    };
+}
+
+export class RouteEndPoint {
+
+    constructor(public auth: boolean, public action: string, public target: any, public callback: Function) {
+
+    }
 }

@@ -6,6 +6,7 @@ import {Model} from "mongoose";
 import {IItemConfig} from "../interface/configs/IConfig";
 import {IResult} from "../../utils/IUtils";
 import {ObjectId} from "mongodb";
+import {EModules} from "../../server/config";
 
 
 export interface IDonorConfigs extends IBaseDonorConfig {
@@ -30,7 +31,7 @@ export class DonorConfigsController extends BaseDonorController {
 
     public async init(): Promise<IResult> {
         this.sConfig = this.config as IDonorConfigs;
-        this.db = this.parent.getModule("mongodb") as MongoDBModule;
+        this.db = this.parent.getModule(EModules.MONGODB) as MongoDBModule;
         this.confModel = this.db.getModel(this.sConfig.dbTable, configSchema);
 
         let fileCont: IItemConfig[];

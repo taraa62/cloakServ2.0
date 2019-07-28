@@ -56,6 +56,7 @@ export class WorkerController extends BWorker {
 
         if (client.requestInfo) return this.responseFile(client, iRes.data);
         if (this.poolWorkWithDonor) {
+            // if(client.action.indexOf("index.php")>-1)debugger
             const donorReq: TMessageWorkerDonorReq = {
                 command: "setRequest",
                 options: this.workerHeaders.getBodyForRequestDonor(client),
@@ -71,10 +72,10 @@ export class WorkerController extends BWorker {
             if (iRes.success) {
                 this.analizeResponseOfDonor(iRes.data, client);
             } else {
-                this.responseError(client, IResult.resultToString(iRes), 500);
+                this.responseError(client, IResult.resultToString(iRes), 588);
             }
         } else {
-            this.responseError(client, "WorkController:error pool!", 500);
+            this.responseError(client, "WorkController:error pool!", 577);
         }
     }
 
@@ -93,8 +94,8 @@ export class WorkerController extends BWorker {
                     } else {
                         this.responseFile(client, mess);
                     }
-                }else {
-                    client.res.redirect(301,  redirectTo);
+                } else {
+                    client.res.redirect(301, redirectTo);
                 }
             }
                 break;
@@ -108,10 +109,10 @@ export class WorkerController extends BWorker {
             case 4:
                 return this.responseError404(client);
             case 5:
-                return this.responseError(client, "error500", 500);
+                return this.responseError(client, "error500", 566);
 
             default:
-                this.responseError(client, "undefined status code from donor", 500);
+                this.responseError(client, "undefined status code from donor", 544);
         }
     }
 
@@ -147,7 +148,7 @@ export class WorkerController extends BWorker {
         if (iR.error) this.responseErrorIResult(client, iR);
         else {
 
-
+            if (!iR.data || !iR.data.text)debugger;
             const data: TMessageWorkerEditTextResp = iR.data;
             client.res.writeHead(200, {"content-type": client.contentType});
             client.res.write(data.text);
@@ -159,7 +160,7 @@ export class WorkerController extends BWorker {
 
     private responseFile(client: Client, resp: TMessageWorkerDonorResp): void {
         if (!resp && !client.requestInfo) return this.responseError(client, "close");
-        if(!client.contentType)debugger
+        if (!client.contentType)debugger
 
         const pathToFile = resp ? resp.pathToFile : client.requestInfo.pathToFile;
         this.logger.info(`-----response from file / method: ${client.req.method} time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
@@ -169,7 +170,7 @@ export class WorkerController extends BWorker {
         FileManager._fs.createReadStream(pathToFile).pipe(client.res).on("error", (er: Error) => {
 
             //TODO remove file and clear request info!!!!!!!
-            this.responseError(client, er.message, 500);
+            this.responseError(client, er.message, 533);
         });
     }
 

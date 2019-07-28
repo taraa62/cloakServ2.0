@@ -4,9 +4,8 @@ import {DonorConfigsController} from "./donor_configs/DonorConfigsController";
 import {BaseDonorController} from "./BaseDonorController";
 import {WorkersModule} from "../module/workers/WorkersModule";
 import {RouteModule} from "../module/route/RouteModule";
-import {Request, Response} from "express";
 import {IResult} from "../utils/IUtils";
-import {CloakerController} from "../module/route/HttpControllers/CloakerController";
+import {CloakerRouteController} from "./CloakerRouteController";
 import {ItemController} from "./donor_general/ItemController";
 import {DonorWorkersController} from "./donor_workers/DonorWorkersController";
 import {ClassUtils} from "../utils/ClassUtils";
@@ -14,6 +13,7 @@ import {BWorker} from "./donor_general/workers/BWorker";
 import {DonorEditController} from "./donor_editor/DonorEditController";
 import {DonorLinksController} from "./donor_links/DonorLinksController";
 import {DonorRequestController} from "./donor_request/DonorRequestController";
+import {EModules} from "../server/config";
 
 
 export class DonorModule extends BModule {
@@ -24,7 +24,7 @@ export class DonorModule extends BModule {
 
     public async init(): Promise<IResult> {
         this.donorControllers = new Map<CONTROLLERS, BaseDonorController>();
-        this.workers = (<WorkersModule>this.getModule('workers'));
+        this.workers = (<WorkersModule>this.getModule(EModules.WORKERS));
 
         return super.init();
     }
@@ -42,21 +42,15 @@ export class DonorModule extends BModule {
         const endInit: IResult = await ClassUtils.initClasses(this.donorControllers, "endInit").catch((er:Error) => IResult.error(er));
         if (endInit.error) return endInit;
 
-        this.registerRoute();
         return IResult.success;
     }
 
-    private registerRoute(): void {
-        const route: RouteModule = this.getModule('route') as RouteModule;
-
-        route.getRoute().all("*", async (req: Request, res: Response, next: Function) => {
-            await route.getController().runHttp("cloaker", req.originalUrl || req.url, req, res, next);
-        });
-    }
 
     public registerHostInController(host: string, controller:BWorker): void {
-        const route: RouteModule = this.getModule('route') as RouteModule;
-        (<CloakerController>route.getSubControllerHttp("cloaker")).registerHOST(host, controller);
+        // const route: RouteModule = this.getModule(EModules.ROUTE) as RouteModule;
+        // (<CloakerRouteController>route.getSubControllerHttp("cloaker")).registerHOST(host, controller);
+
+        (this.getModule(EModules.ROUTE) as RouteModule).getController().registerNewController(host, CloakerRouteController, controller);
     }
 
     public getController(name: CONTROLLERS): BaseDonorController {

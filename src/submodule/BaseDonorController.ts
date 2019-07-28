@@ -6,6 +6,7 @@ import {FileManager} from "../utils/FileManager";
 import {WorkerPoolController} from "../module/workers/pool/WorkerPoolController";
 import {ModeThread} from "../module/workers/WorkerOption";
 import {BModule} from "../module/BModule";
+import {EModules} from "../server/config";
 
 export interface IBaseDonorConfig {
 
@@ -33,7 +34,7 @@ export class BaseDonorController {
         return this.parent.getController(name);
     }
 
-    public getModule(name: string): BModule {
+    public getModule(name: EModules): BModule {
         return this.parent.getModule(name);
     }
 

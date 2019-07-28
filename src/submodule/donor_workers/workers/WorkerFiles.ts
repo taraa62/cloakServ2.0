@@ -64,24 +64,13 @@ export class WorkerFiles {
     private async getNameForFile(resp: IncomingMessage, data: TMessageWorkerDonorReq): Promise<IResult> {
         try {
 
+           if (data.action.indexOf("index.php") > -1)debugger
+
             if (data.originalLink) {
                 data.action = data.originalLink.action || data.options.path as string;
-                if(data.action.endsWith("/"))data.action+="data.html";
+                if (data.action.endsWith("/")) data.action += "data.html";
             }
             let url = data.action;
-            let path;
-            const ctResp = HeadersUtils.getContentTypeOrAcceptHTTP(resp.headers);
-            if (ctResp) {
-                const form = ctResp.split("/");
-                if (form.length > 1) {
-                    if (!data.action.endsWith(form[1])) {
-                        const ind = data.action.indexOf(".");
-                        if (ind > -1) {
-                            url = data.action.substr(0, ind) + "." + form[1];
-                        }
-                    }
-                }
-            }
 
             if (url.length > 150) {
                 url = this.minimizeUlr(url);
@@ -89,7 +78,7 @@ export class WorkerFiles {
             url = StringUtils.replaceAll(url, "\\?", "");
             url = StringUtils.replaceAll(url, ":", "");
             url = StringUtils.replaceAll(url, "\\\\", "");
-            path = (!data.originalLink) ? `${data.resourceFolder}/${url}` : `${data.resourceFolder}/${data.options.host}/${url}`;
+            let path = (!data.originalLink) ? `${data.resourceFolder}/${url}` : `${data.resourceFolder}/${data.options.host}/${url}`;
             path = FileManager._path.normalize(path);
 
 

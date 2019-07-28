@@ -69,13 +69,28 @@ export class WorkerActions extends BWorker {
 
         let isFile = false;
         let file;
+
         if (url.indexOf(".") > -1) {
             const indParam = url.indexOf("?");
             file = (indParam > -1) ? url.substr(0, indParam) : url;
             isFile = true;
             if (!HeadersUtils.getContentTypeFromOriginalUrl(file)) {
-                file = null;
-                isFile = false;
+                if (file.endsWith(".php")) {
+                    isFile = true;
+                } else {
+                    if (client.req.query) {
+                        const query = Object.values(client.req.query).find(val => HeadersUtils.getContentTypeFromOriginalUrl(val as string));
+                        if (query) {
+                            isFile = true;
+                        } else {
+                            file = null;
+                            isFile = false;
+                        }
+                    } else {
+                        file = null;
+                        isFile = false;
+                    }
+                }
             }
         }
         if (info) {
@@ -84,7 +99,7 @@ export class WorkerActions extends BWorker {
             return;
         }
 
-        if (!file) {
+        if (!file || url.indexOf("?") > 0) {
             let _url;
             if (url.indexOf("?") > -1) {
                 _url = url.substr(0, url.indexOf("?"));
@@ -102,7 +117,13 @@ export class WorkerActions extends BWorker {
                             for (let v in this.priorityParamForSave) {
                                 if (list.indexOf(this.priorityParamForSave[v]) > -1) select.push(this.priorityParamForSave[v]);
                             }
-
+                            if (select.length < this.maxUseParamToSave) {
+                                select.push(...list);
+                            }
+                            for (let v in this.blackParamForSave) {
+                                const ind = select.indexOf(this.blackParamForSave[v]);
+                                if (ind > -1) select.splice(ind, 1);
+                            }
                             let params = "";
                             select.forEach((v) => {
                                 params += `&${v}=${client.req.query[v]}`;

@@ -1,3 +1,11 @@
+export enum EModules {
+    MONGODB="mongodb",
+    DONOR="donor",
+    ROUTE="route",
+    ADMIN="admin",
+    WORKERS="workers",
+}
+
 export const config = {
     mode: "dev",
     server: {
@@ -40,7 +48,7 @@ export const config = {
     initModuleBeforeRunServe: [
         {
             isUse: true,
-            name: "mongodb",
+            name: EModules.MONGODB,
             path: "./dist/module/db/mongo/MongoDBModule",
             config: {
                 debug: false,
@@ -50,20 +58,27 @@ export const config = {
             },
         }, {
             isUse: true,
-            name: "workers",
+            name:EModules.WORKERS,
             path: "./dist/module/workers/WorkersModule",
             config: {},
         }, {
             isUse: true,
-            name: "route",
+            name: EModules.ROUTE,
             path: "./dist/module/route/RouteModule",
             config: {},
+        }, {
+            isUse: true,
+            name: EModules.ADMIN,
+            path: "./dist/module/admin/AdminModule",
+            config: {
+                registerHost:"tess",
+                nginxType:"http"
+            },
         },
-
     ],
     initModuleAfterRunServe: [{
         isUse: true,
-        name: "donor",
+        name: EModules.DONOR,
         path: "./dist/submodule/DonorModule",
         config: {
             CONFIGS: {
@@ -91,3 +106,5 @@ export const config = {
         },
     }],
 };
+
+
