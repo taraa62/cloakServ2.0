@@ -28,6 +28,7 @@
     "ansi-parser": "^3.2.9",
     "crypto": "^1.0.1",
     "express": "^5.0.0-alpha.7",
+    "get-urls": "^9.1.0",
     "http2": "^3.3.7",
     "iconv": "^2.3.4",
     "iltorb": "^2.4.3",

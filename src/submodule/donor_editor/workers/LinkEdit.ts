@@ -21,6 +21,15 @@ export class LinkEdit {
         return this.domains.size ? this.domains : null;
     }
 
+    public async checkListLinks(item: TMessageWorkerEditTextReq, list: Set<string>): Promise<Set<any>> {
+        const nList: Set<any> = new Set<any>();
+        for (let link of list) {
+            const l = await this.checkLink(item, link);
+            nList.add({original: link, nLink: l});
+        }
+        return nList;
+    }
+
     public checkLink(item: TMessageWorkerEditTextReq, link: string): string {
         try {
             if (link.startsWith("/")) return link;
@@ -32,7 +41,7 @@ export class LinkEdit {
             if (link.startsWith("http")) {
                 const {key, nLink} = this.getReplUrl(link);
 
-                this.domains.set(link, {key, original: link, nLink, action:item.url} as ILink);
+                this.domains.set(link, {key, original: link, nLink, action: item.url} as ILink);
                 return nLink;
             }
         } catch (e) {

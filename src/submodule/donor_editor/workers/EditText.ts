@@ -6,7 +6,11 @@ import {EProcessEdit} from "../../interface/EGlobal";
 import {WorkEditPage} from "./WorkEditPage";
 import {BLogger} from "../../../module/logger/BLogger";
 import {JSDOM, VirtualConsole} from "jsdom";
+import getUrls from "get-urls";
+import {Utils} from "tslint";
 
+const urlRegex = require('url-regex');
+const normalizeUrl = require('normalize-url');
 
 export class EditText {
 
@@ -17,6 +21,10 @@ export class EditText {
 
     public async edit(reqList: IRegulations[], item: TMessageWorkerEditTextReq, text: string): Promise<IResult> {
         try {
+            text = await this.checkLinks(text, item).catch(er => {
+                this.logger.error(er);
+                return null;
+            });
             if (text) {
                 if (text && this.isHtml(text)) {
                     text = this.stripHtmlComments(text);
@@ -52,10 +60,12 @@ export class EditText {
 
                             const dom1: JSDOM = new JSDOM(text, {virtualConsole});
 
+
                             this.xpath.install(dom1.window);
 
                             this.checkDefault(dom1, item);
-                            await this.checkLinks(dom1, item).catch(er => this.logger.error(er));
+                            // await this.checkLinksElements(dom1, item).catch(er => this.logger.error(er));
+
                             this.editElemenLevelDom(dom1, sList);
                             this.deleteElementLevelDom(dom1, sList);
                             this.createElementLevelDom(dom1, sList);
@@ -150,7 +160,7 @@ export class EditText {
     }
 
     private isHtml(text: string): boolean {
-        const defCheckList = ["html>", "<body>", "<head>"];
+        const defCheckList = ["html>", "body>", "head>"];
         for (let i of defCheckList) {
             if (text.indexOf(i) < 0) return false;
         }
@@ -316,7 +326,24 @@ export class EditText {
     }
 
     //**************EDIT************//
-    private async checkLinks(dom: JSDOM, item: TMessageWorkerEditTextReq): Promise<void> {
+    private async checkLinks(text: string, item: TMessageWorkerEditTextReq): Promise<string> {
+        if (!text) return text;
+
+
+        const urls = text.match(urlRegex()) || [];
+        for (const url of urls) {
+            try {
+                // const _url =normalizeUrl(url.trim().replace(/\.+$/, ''), {});
+                const path = await this.parent.linkModule.checkLink(item, url);
+                text = text.replace(url, path);
+            } catch (_) {
+            }
+        }
+
+        return text;
+    }
+
+    private async checkLinksElements(dom: JSDOM, item: TMessageWorkerEditTextReq): Promise<void> {
         const doc = dom.window.document;
 
         const checkList = this.parent.getBaseConfig().htmlTagWishLinkUrl;
