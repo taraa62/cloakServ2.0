@@ -11,7 +11,7 @@ import {Utils} from "tslint";
 
 const urlRegex = require('url-regex');
 const normalizeUrl = require('normalize-url');
-
+//https://images-na.ssl-images-amazon.com/images/G/01/AmazonExports/Fuji/2019/February/Dashboard/computer120x._CB468850970_SY85_.jpg
 export class EditText {
 
     private xpath = require("wgxpath");
@@ -73,7 +73,7 @@ export class EditText {
                         }
                     }
                 }
-                text = this.replaceLevelText(text, item);
+               // text = this.replaceLevelText(text, item);
             }
         } catch (e) {
             this.logger.error(e.message || e);
@@ -94,6 +94,27 @@ export class EditText {
                 return '';
             }).trim();
     };
+
+    private async checkLinks(text: string, item: TMessageWorkerEditTextReq): Promise<string> {
+        if (!text) return text;
+        //text = text.replace("%3A%2F%2F", "://")
+        text = StringUtils.replaceAll(text,"%3A%2F%2F", "://")
+        // const list: Set<string> = getUrls(text);
+        // const links: Set<any> = await this.parent.linkModule.checkListLinks(item, list);
+
+
+
+        return text.replace(urlRegex(),  function (m0:any, cmt:any, open:any, close:any) {
+            if (m0 && m0.startsWith("/")) return m0;
+           // if (open || close) return m0;
+            // if (open) throw 'Illegal HTML - no closing comment sequence ("-->") for open at "' + open + '"';
+            // if (close) throw 'Illegal HTML - unexpected close comment at "' + close + '"';
+            const path = this.parent.linkModule.checkLink(item, m0);
+            return path;
+        }.bind(this)).trim();
+
+        // return text;
+    }
 
     private regListToSimpleList(regList: IRegulations[], cProcess: EProcessEdit): IRegular[] {
         const sList: IRegular[] = [];
@@ -326,22 +347,6 @@ export class EditText {
     }
 
     //**************EDIT************//
-    private async checkLinks(text: string, item: TMessageWorkerEditTextReq): Promise<string> {
-        if (!text) return text;
-
-
-        const urls = text.match(urlRegex()) || [];
-        for (const url of urls) {
-            try {
-                // const _url =normalizeUrl(url.trim().replace(/\.+$/, ''), {});
-                const path = await this.parent.linkModule.checkLink(item, url);
-                text = text.replace(url, path);
-            } catch (_) {
-            }
-        }
-
-        return text;
-    }
 
     private async checkLinksElements(dom: JSDOM, item: TMessageWorkerEditTextReq): Promise<void> {
         const doc = dom.window.document;
