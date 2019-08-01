@@ -79,7 +79,7 @@ export class DonorLinksController extends BaseDonorController {
         try {
             if (client.req.url.indexOf(this.linkKey) > -1) {
                 client.originalLink = await this.dbController.getInfoByLink(client, this.linkKey);
-
+                client.addNewCookieForClient("t65", client.req.url.substring(1, client.req.url.length));
             }
         } catch (e) {
             this.logger.error(e);
@@ -119,7 +119,7 @@ export class DonorLinksController extends BaseDonorController {
             const arr = url.split("=");
             if (arr.length > 1) {
                 const h = Number.parseInt(arr[1]);
-                if(h.toString() !== "NaN")return h
+                if (h.toString() !== "NaN") return h
             }
         }
         return null;

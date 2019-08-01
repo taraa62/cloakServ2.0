@@ -26,6 +26,7 @@
     "@types/rimraf": "^2.0.2",
     "@types/shelljs": "^0.8.5",
     "ansi-parser": "^3.2.9",
+    "cookie-parser": "^1.4.4",
     "crypto": "^1.0.1",
     "express": "^5.0.0-alpha.7",
     "get-urls": "^9.1.0",

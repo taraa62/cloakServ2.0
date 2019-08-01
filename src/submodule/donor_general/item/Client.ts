@@ -18,7 +18,7 @@ export class Client {
     private _isEditBeforeSend: boolean = false;
 
     private timeInitClient: number = new Date().getTime();
-
+    private addCookieForClient: Map<string, string> = new Map<string, string>();
 
     constructor(public workController: WorkerController, public req: Request, public res: Response, private logger: BLogger) {
 
@@ -72,6 +72,17 @@ export class Client {
 
     public getLifeTimeClient(): number {
         return new Date().getTime() - this.timeInitClient;
+    }
+
+    public addNewCookieForClient(key: string, val: string) {
+        this.addCookieForClient.set(key, val);
+    }
+
+    public generateHeaderForResponse(): void {
+        this.addCookieForClient.forEach((v, v1) => {
+            this.res.cookie(v1, v);
+        })
+
     }
 
 }

@@ -80,7 +80,7 @@ export class WorkerController extends BWorker {
     }
 
     private analizeResponseOfDonor(mess: TMessageWorkerDonorResp, client: Client) {
-
+        client.generateHeaderForResponse();
         const chart: number = Number(mess.respCode.toString().substr(0, 1));
         switch (chart) {
             case 1:

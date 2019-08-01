@@ -58,7 +58,7 @@ export abstract class BaseServer implements IServer {
     private async appendListeners(): Promise<any> {
         this.appExp = express();
         this.modules = new Map<string, BModule>();
-
+        this.appExp.use(require('cookie-parser')());
 
         /* const route: Router = express.Router();
 
