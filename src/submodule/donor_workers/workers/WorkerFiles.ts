@@ -64,10 +64,10 @@ export class WorkerFiles {
     private async getNameForFile(resp: IncomingMessage, data: TMessageWorkerDonorReq): Promise<IResult> {
         try {
 
-           if (data.action.indexOf("index.php") > -1)debugger
+           //if (data.action.indexOf(".css") > -1)debugger
 
             if (data.originalLink) {
-                data.action = data.originalLink.action || data.options.path as string;
+                data.action =  data.options.path as string;
                 if (data.action.endsWith("/")) data.action += "data.html";
             }
             let url = data.action;

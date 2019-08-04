@@ -46,7 +46,7 @@ export class ItemDomain {
             this.workersMap.set(EItemDomainController.ACTION, new WorkerActions(this, this.logger));
 
             ClassUtils.initClasses(this.workersMap).catch(e => {
-                throw new Error(e)
+                throw new Error(e);
             });
 
             this.controller.registerHostInController(this.conf.data.ourHost, this.workersMap.get(EItemDomainController.CONTROLLER));
@@ -68,7 +68,7 @@ export class ItemDomain {
         return {
             host: url.host,
             origin: url.protocol + "//" + url.host,
-            protocol: (url.protocol.startsWith("https")) ? "https" : "http",
+            protocol: (url.protocol.startsWith("https")) ? "https:" : "http:",
             protocolFull: url.protocol + "//",
             domain: domain
         };

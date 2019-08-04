@@ -19,6 +19,7 @@ import {WorkerActions} from "./WorkerActions";
 import {FileManager} from "../../../utils/FileManager";
 import {DonorLinksController} from "../../donor_links/DonorLinksController";
 import {DonorRequestController} from "../../donor_request/DonorRequestController";
+import {RequestInfo} from "../../donor_request/RequestInfo";
 
 export class WorkerController extends BWorker {
 
@@ -50,11 +51,24 @@ export class WorkerController extends BWorker {
             return res.status(500).send(IResult.resultToString(iRes));
         }
 
-
         await this.donorLinkController.checkLink(client);
 
 
+        const info: RequestInfo = await this.donorRequestController.checkRequest(client).catch(er => null);
+        if (info) {
+            if (await FileManager.isExist(info.pathToFile)) {
+                client.requestInfo = info;
+            } else {
+                await this.donorRequestController.removeRequestInfo(client.domainInfo.host, info.action).catch(er => null);
+            }
+        } else {
+            if (client.originalLink && client.originalLink.isRunToDonorRequest) {
+                return this.responseError404(client);
+            }
+        }
         if (client.requestInfo) return this.responseFile(client, iRes.data);
+
+
         if (this.poolWorkWithDonor) {
             // if(client.action.indexOf("index.php")>-1)debugger
             const donorReq: TMessageWorkerDonorReq = {
@@ -86,17 +100,13 @@ export class WorkerController extends BWorker {
             case 1:
             case 2: {
                 this.donorRequestController.createNewRequestInfo(client, mess);
-                const redirectTo: string = this.getLinkFromOriginal(client);
-                if (!redirectTo) {
-                    if (client.isEditBeforeSend) {
-                        this.responseData(client, mess).catch(er => this.logger.error(er));
-                        // this.responseFile(client, iRes.data);
-                    } else {
-                        this.responseFile(client, mess);
-                    }
+                if (client.isEditBeforeSend) {
+                    this.responseData(client, mess).catch(er => this.logger.error(er));
+                    // this.responseFile(client, iRes.data);
                 } else {
-                    client.res.redirect(301, redirectTo);
+                    this.responseFile(client, mess);
                 }
+
             }
                 break;
             case 3: {
@@ -154,7 +164,7 @@ export class WorkerController extends BWorker {
             client.res.write(data.text);
             client.res.end();
 
-            if (data.linksMap) this.donorLinkController.updateNewLinks(this.getDomainConfig().host, data.linksMap);
+            if (data.linksMap) this.donorLinkController.updateNewLinks(this.workerAction, this.getDomainConfig().host, data.linksMap);
         }
     }
 

@@ -19,7 +19,6 @@ export interface IConfig {
     nameResourceFolder: string;
     canDoRequestToDonor: string;
     blackParamForSave?: string[];
-    prioritySaveParam?: string[];
     cleaner: ICleaner;
     regulations: IRegulations[];
     googleManagerID?: string;

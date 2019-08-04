@@ -7,7 +7,7 @@ import {StringUtils} from "../../../utils/StringUtils";
 
 export class LinkEdit {
 
-    private domains: Map<string, ILink> = new Map<string, ILink>();
+    private domains: Map<string, string> = new Map<string, string>();
 
     constructor(private parent: WorkEditPage, private logger: BLogger) {
 
@@ -17,47 +17,37 @@ export class LinkEdit {
         this.domains.clear();
     }
 
-    public getLinks(): Map<string, ILink> {
+    public getLinks(): Map<string, string> {
         return this.domains.size ? this.domains : null;
     }
 
-    public async checkListLinks(item: TMessageWorkerEditTextReq, list: Set<string>): Promise<Set<any>> {
-        const nList: Set<any> = new Set<any>();
-        for (let link of list) {
-            const l = await this.checkLink(item, link);
-            nList.add({original: link, nLink: l});
-        }
-        return nList;
-    }
 
-    public checkLink(item: TMessageWorkerEditTextReq, link: string): string {
+    public checkLink(item: TMessageWorkerEditTextReq, url: string): string {
         try {
-            if (link.startsWith("/")) return link;
+            if (url.startsWith("/")) return url;
 
             const host = item.ourInfo.host;
             if (!host) return "/";
-            if (this.domains.has(link)) return this.domains.get(link).nLink;
 
-            if (link.startsWith("http")) {
-                const {key, nLink} = this.getReplUrl(link);
+            if (this.domains.has(url)) return this.domains.get(url);
 
-                this.domains.set(link, {key, original: link, nLink, action: item.url} as ILink);
-                return nLink;
+            if (url.startsWith("http")) {
+                const uu = new URL(url);
+                // const act = url.substr(url.indexOf(uu.host) + uu.host.length, url.length);
+                const act = uu.pathname+uu.search;
+
+                uu.hostname = host;
+                uu.protocol = item.ourInfo.protocol;
+
+                this.domains.set(act, url);
+                return uu.href;
             }
         } catch (e) {
             this.logger.error(e);
             // console.error(`-------------------ERROR ${e}-----------------`)
         }
-        return link;
-
-        return "";
+        return url;
     }
 
-
-    private getReplUrl(link: string) {
-        const key = this.parent.getBaseConfig().linkKey + "=" + StringUtils.hashCode(link);
-        const nLink = `/${key}`;
-        return {key, nLink};
-    }
 
 }

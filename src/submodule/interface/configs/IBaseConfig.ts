@@ -13,9 +13,7 @@ export interface IBaseConfig {
     listBlackScripts: string[];
     listBlackNoScript: string[];
     listMeta: string[];
-    maxUseParamForSaveFile: number;
     blackParamForSave: string[];
-    prioritySaveParam: string[];
     htmlTagWishLinkUrl: string[];
     proxy: IProxyConf;
     defListInvAutoTime: string[];

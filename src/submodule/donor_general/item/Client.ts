@@ -33,7 +33,7 @@ export class Client {
                 IResult.error(er);
             });
             if (iRes.error) return iRes;
-            this.updateContentTye();
+            this.updateContentType();
             this.checkIsEditData();
         } catch (e) {
             return IResult.error(e);
@@ -46,14 +46,14 @@ export class Client {
         this.req.originalUrl = u2.pathname + u2.search;
     }
 
-    private updateContentTye(): void {
+    private updateContentType(): void {
         this.contentType = HeadersUtils.getContentTypeFromRequest(this.req)
             || HeadersUtils.getContentTypeFromOriginalUrl(this.action)
             || HeadersUtils.getContentTypeFromOriginalUrl(this.originalLink ? this.originalLink.original : "");
     }
 
     public checkIsSaveFile(): boolean {
-        if (!this.contentType) this.updateContentTye();
+        if (!this.contentType) this.updateContentType();
         if (!this.contentType) return this.isFile;
         const arr = this.workController.parent.getBaseConf().maskAcceptSaveContentType.find(v => this.contentType.indexOf(v) > -1);
         return !!arr || this.isFile;

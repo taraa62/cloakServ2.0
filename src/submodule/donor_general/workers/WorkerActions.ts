@@ -16,8 +16,8 @@ import {FileManager} from "../../../utils/FileManager";
 export class WorkerActions extends BWorker {
 
     private blackParamForSave: string[];
-    private priorityParamForSave: string[];
-    private maxUseParamToSave: number = 10;
+
+
     private linkController: DonorLinksController;
     private requestController: DonorRequestController;
 
@@ -27,17 +27,11 @@ export class WorkerActions extends BWorker {
             this.linkController = this.parent.getDonorController(CONTROLLERS.LINKS) as DonorLinksController;
             this.requestController = this.parent.getDonorController(CONTROLLERS.REQUEST) as DonorRequestController;
             this.blackParamForSave = [];
-            this.priorityParamForSave = [];
 
             const baseConf: IBaseConfig = this.parent.getBaseConf();
-            this.maxUseParamToSave = baseConf.maxUseParamForSaveFile || 2;
 
             Object.assign(this.blackParamForSave, baseConf.blackParamForSave);
             Object.assign(this.blackParamForSave, this.parent.getDomainConfig().data.blackParamForSave || []);
-
-            Object.assign(this.priorityParamForSave, baseConf.prioritySaveParam);
-            Object.assign(this.priorityParamForSave, this.parent.getDomainConfig().data.prioritySaveParam);
-
 
         } catch (e) {
             this.logger.error(e);
@@ -48,14 +42,14 @@ export class WorkerActions extends BWorker {
     public async updAction(client: Client): Promise<void> {
         let url = client.req.originalUrl || client.req.url;
 
-        const info: RequestInfo = await this.requestController.checkRequest(client);
-        if (info) {
-            if (await FileManager.isExist(info.pathToFile)) {
-                client.requestInfo = info;
-            } else {
-                await this.requestController.removeRequestInfo(client.domainInfo.host, info.action).catch(er => null);
-            }
-        }
+        /* const info: RequestInfo = await this.requestController.checkRequest(client);
+         if (info) {
+             if (await FileManager.isExist(info.pathToFile)) {
+                 client.requestInfo = info;
+             } else {
+                 await this.requestController.removeRequestInfo(client.domainInfo.host, info.action).catch(er => null);
+             }
+         }*/
         if (url.length < 1) url = "/";
 
         if (url.endsWith("?")) {
@@ -65,7 +59,7 @@ export class WorkerActions extends BWorker {
             url += "index.html";
         }
         if (url.startsWith("/")) url = url.substr(1, url.length);
-        url = url.toLocaleLowerCase();
+        // url = url.toLocaleLowerCase();
 
         let isFile = false;
         let file;
@@ -93,11 +87,11 @@ export class WorkerActions extends BWorker {
                 }
             }
         }
-        if (info) {
-            client.action = (file) ? file : url;
-            client.isFile = isFile;
-            return;
-        }
+        /* if (info) {
+             client.action = (file) ? file : url;
+             client.isFile = isFile;
+             return;
+         }*/
 
         if (!file || url.indexOf("?") > 0) {
             let _url;
@@ -113,13 +107,11 @@ export class WorkerActions extends BWorker {
                     if (client.req.query) {
                         const list = Object.keys(client.req.query);
                         if (list.length > 0) {
-                            const select = [];
-                            for (let v in this.priorityParamForSave) {
-                                if (list.indexOf(this.priorityParamForSave[v]) > -1) select.push(this.priorityParamForSave[v]);
-                            }
-                            if (select.length < this.maxUseParamToSave) {
-                                select.push(...list);
-                            }
+                            url = this.checkURLOnBlackParams("http://test.com/" + url, true);
+
+                            /*
+                            const select: string[] = [];
+//TODO перепровірити чи працює система викидання параметрів із чорного списку для збереження файлу і action
                             for (let v in this.blackParamForSave) {
                                 const ind = select.indexOf(this.blackParamForSave[v]);
                                 if (ind > -1) select.splice(ind, 1);
@@ -128,7 +120,7 @@ export class WorkerActions extends BWorker {
                             select.forEach((v) => {
                                 params += `&${v}=${client.req.query[v]}`;
                             });
-                            url = file + params;
+                            url = file + params;*/
                         }
                     }
                 }
@@ -142,5 +134,19 @@ export class WorkerActions extends BWorker {
         client.isFile = isFile;
     }
 
+    public checkURLOnBlackParams(url: string | URL, returnOnlyAction = false): string {
+        if (typeof url === "string") url = new URL(url as string);
 
+        if (Array.from(url.searchParams.keys()).length > 0) {
+            for (let v of this.blackParamForSave) {
+                if (url.searchParams.has(v)) {
+                    url.searchParams.delete(v);
+                }
+            }
+        }
+        if (returnOnlyAction) {
+            return url.href.replace(url.protocol + "//" + url.hostname + "/", "");
+        }
+        return url.href;
+    }
 }

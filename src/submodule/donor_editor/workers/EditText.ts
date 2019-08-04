@@ -11,6 +11,7 @@ import {Utils} from "tslint";
 
 const urlRegex = require('url-regex');
 const normalizeUrl = require('normalize-url');
+
 //https://images-na.ssl-images-amazon.com/images/G/01/AmazonExports/Fuji/2019/February/Dashboard/computer120x._CB468850970_SY85_.jpg
 export class EditText {
 
@@ -73,7 +74,7 @@ export class EditText {
                         }
                     }
                 }
-               // text = this.replaceLevelText(text, item);
+                // text = this.replaceLevelText(text, item);
             }
         } catch (e) {
             this.logger.error(e.message || e);
@@ -97,18 +98,18 @@ export class EditText {
 
     private async checkLinks(text: string, item: TMessageWorkerEditTextReq): Promise<string> {
         if (!text) return text;
-        //text = text.replace("%3A%2F%2F", "://")
-        text = StringUtils.replaceAll(text,"%3A%2F%2F", "://")
-        // const list: Set<string> = getUrls(text);
-        // const links: Set<any> = await this.parent.linkModule.checkListLinks(item, list);
+
+        text = StringUtils.replaceAll(text, "%3A%2F%2F", "://");
 
 
-
-        return text.replace(urlRegex(),  function (m0:any, cmt:any, open:any, close:any) {
+        return text.replace(urlRegex(), function(m0: string, cmt: any, open: any, close: any) {
             if (m0 && m0.startsWith("/")) return m0;
-           // if (open || close) return m0;
-            // if (open) throw 'Illegal HTML - no closing comment sequence ("-->") for open at "' + open + '"';
-            // if (close) throw 'Illegal HTML - unexpected close comment at "' + close + '"';
+
+            if (m0.indexOf("'") > -1) m0 = m0.substring(0, m0.indexOf("'"));
+            if (m0.indexOf("\"") > -1) m0 = m0.substring(0, m0.indexOf("\""));
+            if (m0.indexOf(")") > -1) m0 = m0.substring(0, m0.indexOf(")"));
+            if (m0.indexOf(";") > -1) m0 = m0.substring(0, m0.indexOf(";"));
+            if (m0.indexOf("'") > -1)debugger
             const path = this.parent.linkModule.checkLink(item, m0);
             return path;
         }.bind(this)).trim();

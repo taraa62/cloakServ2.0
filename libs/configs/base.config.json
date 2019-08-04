@@ -62,20 +62,11 @@
     "msvalidate.01",
     "yandex-verification"
   ],
-  "maxUseParamForSaveFile": 2,
   "blackParamForSave": [
     "_",
     "callback",
     "tm",
     "g"
-  ],
-  "prioritySaveParam": [
-    "v",
-    "ver",
-    "version",
-    "_v",
-    "name",
-    "rev"
   ],
   "htmlTagWishLinkUrl": ["data-src", "src", "url", "href", "data-original"],
   "proxy": {

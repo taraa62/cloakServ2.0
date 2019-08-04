@@ -49,5 +49,5 @@ export type TMessageWorkerEditTextReq = TMessageWorkerBaseReq & {
 /**worker to main*/
 export type TMessageWorkerEditTextResp = TMessageWorkerBaseResp & {
     text?: string
-    linksMap?: Map<string, ILink>;
+    linksMap?: Map<string, string>;
 }

@@ -6,6 +6,7 @@ import {StringUtils} from "../../utils/StringUtils";
 import {Client} from "../donor_general/item/Client";
 import {CONTROLLERS} from "../DonorModule";
 import {ItemController} from "../donor_general/ItemController";
+import {WorkerActions} from "../donor_general/workers/WorkerActions";
 
 
 export interface IDonorLinksControllerConfig extends IBaseDonorConfig {
@@ -16,7 +17,7 @@ export class DonorLinksController extends BaseDonorController {
 
     private sConf: IDonorLinksControllerConfig;
 
-    private domains: Map<string, Map<string, Link>>;
+    private domains: Map<string, Map<string, ILink>>;
     private dbController: DBLinkController;
     private linkKey: string;
     private _isBlockUpdDB: boolean = false;
@@ -44,24 +45,45 @@ export class DonorLinksController extends BaseDonorController {
         return this._isBlockUpdDB;
     }
 
-
-    public updateNewLinks(host: string, list: Map<string, ILink>): void {
+    /**
+     * from edit
+     * @param host
+     * @param list
+     */
+    public updateNewLinks(actionWorker: WorkerActions, host: string, list: Map<string, string>): void {
         if (list) {
             this._isBlockUpdDB = true;
             if (!this.domains.has(host)) {
                 this.domains.set(host, new Map<string, Link>());
             }
-            const map: Map<string, Link> = this.domains.get(host);
-            for (let v of list) {
-                if (!this.domains.get(host).has(v[1].original)) {
-                    map.set(v[1].original, new Link(v[1].key, v[1].original, v[1].nLink, v[1].action));
+            const map: Map<string, ILink> = this.domains.get(host);
+            const sList = this.domains.get(host);
+            for (let [action, original] of list) {
+                if (!sList.has(action)) {
+                    action = actionWorker.checkURLOnBlackParams(original, true);
+                    const ind = action.indexOf("#");
+                    if (ind > -1) {
+                        action = action.substring(0, ind);
+                    }
+
+                    const key = this.linkKey + "=" + StringUtils.hashCode(action);
+
+                    if (original.indexOf("21mOLw+nYYL.css,01L8Y-JFEhL.css_.css") > -1) {
+                        console.info("******************updateNewLinks link*********************");
+                        console.info(`key: ${key}`);
+                        console.info(`action: ${action}`);
+                        console.info(`request: ${original}`);
+                        console.info("******************end updateNewLinks link*********************");
+                    }
+
+                    map.set(action, new Link(key, original, action));
                 }
             }
-            ;
             this.endEditCheckLinks();
         }
     }
 
+//t64=-1400355040  /t64=331927855//t64=1226005495
 
     /**
      * перевіряємо чи є незбережені лінки в бд.
@@ -77,10 +99,16 @@ export class DonorLinksController extends BaseDonorController {
 
     public async checkLink(client: Client): Promise<void> {
         try {
-            if (client.req.url.indexOf(this.linkKey) > -1) {
-                client.originalLink = await this.dbController.getInfoByLink(client, this.linkKey);
-                client.addNewCookieForClient("t65", client.req.url.substring(1, client.req.url.length));
+            const key = this.linkKey + "=" + StringUtils.hashCode(client.action);
+            const l = await this.dbController.getInfoByKey(client, key);
+            if (client.action.indexOf("21mOLw+nYYL.css,01L8Y-JFEhL.css_.css") > -1) {
+                console.info("******************check link*********************");
+                console.info(`key: ${key}`);
+                console.info(`action: ${client.action}`);
+                console.info(`request: ${client.req.originalUrl}`);
+                console.info("******************end check link*********************");
             }
+            client.originalLink = l;
         } catch (e) {
             this.logger.error(e);
             // console.error(`-------------------ERROR ${e}-----------------`)
@@ -91,8 +119,8 @@ export class DonorLinksController extends BaseDonorController {
     public checkRedirectLink(host: string, link: string): string {
         const {key, nLink} = this.getReplUrl(link);
         const list: Map<string, ILink> = new Map<string, ILink>();
-        list.set(key, new Link(key, link, nLink, link, true)); //TODO, не впевнений на рахунок action=link
-        this.updateNewLinks(host, list);
+        //     list.set(key, new Link(key, link, nLink, link, true)); //TODO, не впевнений на рахунок action=link
+        //     this.updateNewLinks(host, list);
         return nLink;
     }
 
@@ -119,7 +147,7 @@ export class DonorLinksController extends BaseDonorController {
             const arr = url.split("=");
             if (arr.length > 1) {
                 const h = Number.parseInt(arr[1]);
-                if (h.toString() !== "NaN") return h
+                if (h.toString() !== "NaN") return h;
             }
         }
         return null;

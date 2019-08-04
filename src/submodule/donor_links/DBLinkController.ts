@@ -24,7 +24,7 @@ export class DBLinkController {
         const links: IResult = await this.db.query(this.linkModel, {});
 
         if (links.success && links.data.length > 0) {
-          //  const domains = this.parent.getDomains();
+            //  const domains = this.parent.getDomains();
 
             const arr: any[] = links.data;
             arr.map((v: any) => {
@@ -54,32 +54,44 @@ export class DBLinkController {
                               if (!exist) return null;
               */
 
-                val.forEach(async info => {
+
+                for (let [action, info] of val) {
                     if (!info.isCreateDB) {
                         info.isCreateDB = true;
                         const _data = `info.${info.key}`;
                         const data = {[_data]: info};
 
-                        const find: any = {domain: key};
+                        const find: any = {
+                            domain: key
+                        };
 
                         await this.db.update(this.linkModel, find, data, {upsert: true, strict: false}).catch(err => {
                             this.logger.error(err);
                             info.isCreateDB = false;
                         });
                     }
-                });
+                }
             }
         }
     }
 
-    public async getInfoByLink(client: Client, linkKey: string): Promise<ILink> {
+    public async getInfoByKey(client: Client, key: string): Promise<ILink> {
+        if (client && key) {
+            return this.getInfoByLink(client, null, key);
+        }
+        return null;
+    }
+
+    public async getInfoByLink(client: Client, linkKey: string, key: string = null): Promise<ILink> {
         const params: string[] = (Object.keys(client.req.query).length > 0) ? Object.values(client.req.query) : Object.values(client.req.params);
-        let key;
-        let check = linkKey + "=";
-        for (let i = 0; i < params.length; i++) {
-            if (params[i].includes(linkKey)) {
-                key = params[i].substr(1, params[i].length);
-                if (!key.startsWith(check)) key = null;
+
+        if (!key) {
+            let check = linkKey + "=";
+            for (let i = 0; i < params.length; i++) {
+                if (params[i].includes(linkKey)) {
+                    key = params[i].substr(1, params[i].length);
+                    if (!key.startsWith(check)) key = null;
+                }
             }
         }
         if (key) {
