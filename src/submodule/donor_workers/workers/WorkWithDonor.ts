@@ -28,14 +28,23 @@ export class WorkWithDonor extends BasePoolWorker {
             //    this.logger.debug(JSON.stringify(data.options));
 
             const options: TMessageWorkerDonorReq = data.data as TMessageWorkerDonorReq;
-            if ((options.options as any).method === "GET") {
-                const m = (options.options as any).protocol === "http://" ? http : https;
-                delete (options.options as any).protocol;
-                this.set_GET(data, m);
-            } else {
-                this.sendTaskComplitError({error: "method isn't GET"}, data.key);
-            }
+            const m = (options.options as any).protocol === "http://" ? http : https;
+            delete (options.options as any).protocol;
 
+            switch ((options.options as any).method) {
+                case "GET": {
+                    this.set_GET(data, m);
+                    return;
+                }
+                case "POST": {
+                    this.set_POST(data, m);
+                    return;
+                }
+                default:
+                    this.sendTaskComplitError({error: "method isn't GET"}, data.key);
+
+
+            }
 
         } catch (e) {
             this.sendTaskComplitError({error: e}, data.key);
@@ -45,8 +54,8 @@ export class WorkWithDonor extends BasePoolWorker {
 
     private set_GET(data: IWorkerMessage, m: any): void {
         const options: TMessageWorkerDonorReq = data.data as TMessageWorkerDonorReq;
-     //    if (options.action.indexOf("laticon.wo") > -1) debugger;
-        delete options.options['x-real-ip']
+        //    if (options.action.indexOf("laticon.wo") > -1) debugger;
+        delete options.options['x-real-ip'];
         m.get(options.options, (resp: IncomingMessage) => {
             // this.logger.debug("donor response to server ->" + JSON.stringify(resp.headers));
             // this.logger.debug("donor response to server ->" + data.key);
@@ -56,12 +65,35 @@ export class WorkWithDonor extends BasePoolWorker {
         }).on("error", (err: Error) => {
             this.logger.debug("donor response to server error->" + options.action);
             super.sendTaskComplitError(err, data.key);
-        })
-            .on("close", (val: any) => {
-                // this.logger.debug("donor response to server close->" + data.key);
-                // super.sendTaskComplitError("close", data.key);
-            });
+        }).on("close", (val: any) => {
+            // this.logger.debug("donor response to server close->" + data.key);
+            // super.sendTaskComplitError("close", data.key);
+        });
     }
+
+    private set_POST(data: IWorkerMessage, m: any): void {
+        const options: TMessageWorkerDonorReq = data.data as TMessageWorkerDonorReq;
+        //    if (options.action.indexOf("laticon.wo") > -1) debugger;
+        delete options.options['x-real-ip'];
+        options.options["content-length"] = options.body.length.toString();
+
+
+        m.request(options.options, (resp: IncomingMessage) => {
+            // this.logger.debug("donor response to server ->" + JSON.stringify(resp.headers));
+            // this.logger.debug("donor response to server ->" + data.key);
+            // if (options.action.indexOf("t64") > -1) debugger;
+            this.analizator.analize(resp, data);
+
+        }).on("error", (err: Error) => {
+            this.logger.debug("donor response to server error->" + options.action);
+            super.sendTaskComplitError(err, data.key);
+        }).on("close", (val: any) => {
+            // this.logger.debug("donor response to server close->" + data.key);
+            // super.sendTaskComplitError("close", data.key);
+        });
+    }
+
+
 }
 
 new WorkWithDonor();

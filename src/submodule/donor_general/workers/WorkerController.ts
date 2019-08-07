@@ -78,9 +78,10 @@ export class WorkerController extends BWorker {
                 resourceFolder: this.getResourceFolderByContentType(client.contentType),
                 isEditData: client.isEditBeforeSend,
                 originalLink: client.originalLink,
-                isSave: client.checkIsSaveFile()
+                isSave: client.checkIsSaveFile(),
+                body: client.getRequestBody()
             };
-            // if (!donorReq.isSave)debugger;
+            if (req.method.toLocaleUpperCase() === "POST")debugger;
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
             //    if (donorReq.action.indexOf("t64") > -1) debugger;
             if (iRes.success) {

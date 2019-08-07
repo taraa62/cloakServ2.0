@@ -83,8 +83,6 @@ export class DonorLinksController extends BaseDonorController {
         }
     }
 
-//t64=-1400355040  /t64=331927855//t64=1226005495
-
     /**
      * перевіряємо чи є незбережені лінки в бд.
      * @return {Promise<void>}

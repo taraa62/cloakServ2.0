@@ -6,6 +6,7 @@ import {HeadersUtils} from "../../../utils/HeadersUtils";
 import {Link} from "../../donor_links/Link";
 import {RequestInfo} from "../../donor_request/RequestInfo";
 import {BLogger} from "../../../module/logger/BLogger";
+import * as querystring from "querystring";
 
 export class Client {
     public clientIp: string;
@@ -29,7 +30,7 @@ export class Client {
             this.domainInfo = this.workController.getDomainConfig();
             this.normalizeReqURL();
             const iRes: IResult = <IResult>await this.workController.workerAction.updAction(this).then(() => IResult.success).catch(er => {
-                this.logger.error(er)
+                this.logger.error(er);
                 IResult.error(er);
             });
             if (iRes.error) return iRes;
@@ -53,6 +54,7 @@ export class Client {
     }
 
     public checkIsSaveFile(): boolean {
+        if (this.req.method.toLocaleUpperCase() !== "GET") return false;
         if (!this.contentType) this.updateContentType();
         if (!this.contentType) return this.isFile;
         const arr = this.workController.parent.getBaseConf().maskAcceptSaveContentType.find(v => this.contentType.indexOf(v) > -1);
@@ -81,8 +83,13 @@ export class Client {
     public generateHeaderForResponse(): void {
         this.addCookieForClient.forEach((v, v1) => {
             this.res.cookie(v1, v);
-        })
+        });
 
+    }
+
+    public getRequestBody(): string {
+        if (!this.req.body) return null;
+        return (this.contentType.indexOf("form") > -1) ? querystring.stringify(this.req.body) : JSON.stringify(this.req.body);
     }
 
 }

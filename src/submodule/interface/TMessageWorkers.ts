@@ -24,12 +24,13 @@ export type TMessageWorkerDonorReq = TMessageWorkerBaseReq & {
     resourceFolder: string;
     isEditData: boolean;
     originalLink: ILink;
-    isSave:boolean;
+    isSave: boolean;
+    body: string;
 }
 
 export type TMessageWorkerDonorResp = TMessageWorkerBaseResp & {
     pathToFile?: string;
-    respCode:number;
+    respCode: number;
 }
 
 
