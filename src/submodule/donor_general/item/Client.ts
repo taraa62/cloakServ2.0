@@ -12,6 +12,8 @@ export class Client {
     public clientIp: string;
     public action: string;  //originalUrl - before edition
     public originalLink: Link;  //originalLink - link from original page
+    public subHost: string = "";
+
     public isFile: boolean;
     public contentType: string;
     public domainInfo: IItemDomainInfo;
@@ -21,13 +23,15 @@ export class Client {
     private timeInitClient: number = new Date().getTime();
     private addCookieForClient: Map<string, string> = new Map<string, string>();
 
-    constructor(public workController: WorkerController, public req: Request, public res: Response, private logger: BLogger) {
-
+    constructor(public workController: WorkerController, public req: Request, public res: Response, private logger: BLogger, subhost = "") {
+        this.subHost = subhost;
     }
 
     public async init(): Promise<IResult> {
         try {
             this.domainInfo = this.workController.getDomainConfig();
+            this.subHost = this.subHost.replace(this.domainInfo.host, "");
+
             this.normalizeReqURL();
             const iRes: IResult = <IResult>await this.workController.workerAction.updAction(this).then(() => IResult.success).catch(er => {
                 this.logger.error(er);

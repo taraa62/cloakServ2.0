@@ -68,6 +68,8 @@
     "tm",
     "g"
   ],
+  "blackReplaceDomain": [],
+  "blackReplaceSubDomain": [],
   "htmlTagWishLinkUrl": ["data-src", "src", "url", "href", "data-original"],
   "proxy": {
     "proxyList": [

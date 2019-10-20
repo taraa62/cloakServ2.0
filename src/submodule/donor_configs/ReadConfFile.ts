@@ -1,8 +1,8 @@
 import {IDonorConfigs} from "./DonorConfigsController";
-import {FileManager} from "../../utils/FileManager";
 import {ServerConfig} from "../../server/ServerConfig";
 import {IItemConfig} from "../interface/configs/IConfig";
 import {IResult} from "../../utils/IUtils";
+import FileManager from "../../utils/FileManager";
 
 
 export class ReadConfFile {
@@ -15,21 +15,21 @@ export class ReadConfFile {
         const path: string = FileManager.getSimplePath(this.config.pathToConfFiles, ((<any>process).constant.conf as ServerConfig).dirProject);
 
         const list: IItemConfig[] = await this.getConfigs(path);
-        return list
+        return list;
     }
 
     private async getConfigs(path: string): Promise<IItemConfig[]> {
         const result: Array<IItemConfig> = [];
-        const list:IResult = await FileManager.getFileInFolder(path).catch(er => {
+        const list: IResult = await FileManager.getFileOnFolder(path).catch(er => {
             return null;
         });
         if (list.success && list.data.length > 0) {
             for (let i = 0, y = list.data.length; i < y; i++) {
                 try {
-                    const v = list.data[i];
-                    if (v.info.isFile) {
-                        let obj = await FileManager.readFile(v.path).catch(er => {
-                            return null
+                    const v: IResult = await (list.data[i]).info;
+                    if (v.success && v.data.isFile) {
+                        let obj = await FileManager.readFile(list.data[i].path).catch(er => {
+                            return null;
                         });
 
                         if (obj) {

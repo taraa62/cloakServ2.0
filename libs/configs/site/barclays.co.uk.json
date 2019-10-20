@@ -1,6 +1,6 @@
 {
   "data": {
-    "donorOrigin": "https://a.belochki.info/",
+    "donorOrigin": "https://kinokrad.co/",
     "ourHost": "t63.com",
     "nameResourceFolder": "./resource2/ritcapuk_5.com",
     "fraudfilter": {
@@ -67,6 +67,8 @@
         "who": "I'm"
       }
     },
+    "blackReplaceDomain": [],
+    "blackReplaceSubDomain": ["hls.kinokrad.co"],
     "blackParamForSave": [],
     "prioritySaveParam": [
       "t",

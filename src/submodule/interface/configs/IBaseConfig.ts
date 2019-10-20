@@ -15,6 +15,8 @@ export interface IBaseConfig {
     listMeta: string[];
     blackParamForSave: string[];
     htmlTagWishLinkUrl: string[];
+    blackReplaceDomain: string[];
+    blackReplaceSubDomain: string[];
     proxy: IProxyConf;
     defListInvAutoTime: string[];
     defInvTime: IDefInvalidationTime;

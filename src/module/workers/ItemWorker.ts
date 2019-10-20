@@ -1,9 +1,9 @@
 import {Random} from "../../utils/Random";
 import {MessageChannel, Worker} from "worker_threads";
-import {FileManager} from "../../utils/FileManager";
 import {IWorkerController, IWorkerData, WorkerOption} from "./WorkerOption";
 import {IResult} from "../../utils/IUtils";
 import {WorkerMessage} from "./WorkerMessage";
+import FileManager from "../../utils/FileManager";
 
 //TODO close channels port!!!!;
 export class ItemWorker {
@@ -147,10 +147,9 @@ export class ItemWorker {
         if (this.worker) {
             this.worker.removeAllListeners();
 
-            await this.worker.terminate((err, code) => {
-                if (err) IRes = {error: err, code: code};
-                else IRes = {success: true, code: code};
-            });
+            const exitCode = await this.worker.terminate();
+            if (exitCode > 0) IRes = IResult.error("error ended a worker", exitCode);
+            else IRes = IResult.success;
         }
         return IRes;
     }

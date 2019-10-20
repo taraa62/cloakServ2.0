@@ -1,9 +1,9 @@
 import {IModuleConfig} from "../server/IConfig";
 import {IServer} from "../server/IServer";
-import {FileManager} from "../utils/FileManager";
 import {IResult} from "../utils/IUtils";
 import {BLogger} from "./logger/BLogger";
 import {EModules} from "../server/config";
+import FileManager from "../utils/FileManager";
 
 
 export class BModule {

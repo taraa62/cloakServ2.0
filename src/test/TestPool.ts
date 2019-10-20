@@ -1,7 +1,7 @@
 import {WorkersModule} from "../module/workers/WorkersModule";
 import {BModule} from "../module/BModule";
 import {IResult} from "../utils/IUtils";
-import util from "util";
+import * as util from "util";
 
 export class TestPool {
 

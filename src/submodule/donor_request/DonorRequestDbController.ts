@@ -5,7 +5,7 @@ import {Model} from "mongoose";
 import {RequestInfo} from "./RequestInfo";
 import {IResult} from "../../utils/IUtils";
 import {IRequestSchema} from "../interface/ISchema";
-import crypto from "crypto";
+import * as crypto from "crypto";
 import {EModules} from "../../server/config";
 
 export class DonorRequestDbController {

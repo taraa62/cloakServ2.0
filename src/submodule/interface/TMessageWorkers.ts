@@ -44,7 +44,8 @@ export type TMessageWorkerEditTextReq = TMessageWorkerBaseReq & {
     pathToFile?: string;
     text?: string;
     googleManagerID?: string;
-
+    blackEditDomain: string[];
+    blackEditSubDomain: string[]
 }
 
 /**worker to main*/

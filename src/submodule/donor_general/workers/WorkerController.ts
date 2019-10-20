@@ -16,14 +16,14 @@ import {
     TMessageWorkerEditTextResp
 } from "../../interface/TMessageWorkers";
 import {WorkerActions} from "./WorkerActions";
-import {FileManager} from "../../../utils/FileManager";
 import {DonorLinksController} from "../../donor_links/DonorLinksController";
 import {DonorRequestController} from "../../donor_request/DonorRequestController";
 import {RequestInfo} from "../../donor_request/RequestInfo";
+import FileManager from "../../../utils/FileManager";
 
 export class WorkerController extends BWorker {
 
-    private poolWorkWithDonor: WorkerPoolController;
+    protected poolWorkWithDonor: WorkerPoolController;
 
     public workerAction: WorkerActions;
     public workerHeaders: WorkerHeaders;
@@ -81,7 +81,7 @@ export class WorkerController extends BWorker {
                 isSave: client.checkIsSaveFile(),
                 body: client.getRequestBody()
             };
-            if (req.method.toLocaleUpperCase() === "POST")debugger;
+            if (req.method.toLocaleUpperCase() === "POST") debugger;
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
             //    if (donorReq.action.indexOf("t64") > -1) debugger;
             if (iRes.success) {
@@ -94,7 +94,7 @@ export class WorkerController extends BWorker {
         }
     }
 
-    private analizeResponseOfDonor(mess: TMessageWorkerDonorResp, client: Client) {
+    protected analizeResponseOfDonor(mess: TMessageWorkerDonorResp, client: Client) {
         client.generateHeaderForResponse();
         const chart: number = Number(mess.respCode.toString().substr(0, 1));
         switch (chart) {
@@ -127,7 +127,7 @@ export class WorkerController extends BWorker {
         }
     }
 
-    private getLinkFromOriginal(client: Client): string {
+    protected getLinkFromOriginal(client: Client): string {
         if (client.originalLink) {
             const urlOrigin = new URL(client.originalLink.original);
             const link = `${client.domainInfo.origin}${urlOrigin.pathname}`;
@@ -136,7 +136,7 @@ export class WorkerController extends BWorker {
         return null;
     }
 
-    private async responseData(client: Client, resp: TMessageWorkerDonorResp): Promise<any> {
+    protected async responseData(client: Client, resp: TMessageWorkerDonorResp): Promise<any> {
         if (!resp) return this.responseError(client, "close");
 
         this.logger.info(`-----response from data / time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
@@ -152,14 +152,16 @@ export class WorkerController extends BWorker {
             ourInfo: this.getDomainConfig(),
             donorInfo: this.getDonorConfig(),
             process: EProcessEdit.PRE,
-            googleManagerID: this.parent.getDomainConfig().data.googleManagerID
+            googleManagerID: this.parent.getDomainConfig().data.googleManagerID,
+            blackEditDomain: this.getBlackEditDomain(),
+            blackEditSubDomain:this.getBlackEditSubDomain()
         };
 
         const iR: IResult = await this.donorEditController.getPool().newTask(task).catch(er => IResult.error(er));
         if (iR.error) this.responseErrorIResult(client, iR);
         else {
 
-            if (!iR.data || !iR.data.text)debugger;
+            if (!iR.data || !iR.data.text) debugger;
             const data: TMessageWorkerEditTextResp = iR.data;
             client.res.writeHead(200, {"content-type": client.contentType});
             client.res.write(data.text);
@@ -169,13 +171,19 @@ export class WorkerController extends BWorker {
         }
     }
 
-    private responseFile(client: Client, resp: TMessageWorkerDonorResp): void {
+    protected responseFile(client: Client, resp: TMessageWorkerDonorResp): Promise<any> | void {
         if (!resp && !client.requestInfo) return this.responseError(client, "close");
-        if (!client.contentType)debugger
+        if (!client.contentType) debugger
 
         const pathToFile = resp ? resp.pathToFile : client.requestInfo.pathToFile;
         this.logger.info(`-----response from file / method: ${client.req.method} time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
-
+        if (client.isEditBeforeSend) {
+            if (!resp) resp = {
+                pathToFile: pathToFile,
+                respCode: 200
+            };
+            return this.responseData(client, resp);
+        }
 
         client.res.writeHead(200, {"content-type": client.contentType});
         FileManager._fs.createReadStream(pathToFile).pipe(client.res).on("error", (er: Error) => {
@@ -185,17 +193,17 @@ export class WorkerController extends BWorker {
         });
     }
 
-    private responseError404(client: Client): void {
+    protected responseError404(client: Client): void {
         this.logger.info(`-----response error code: 404 / method: ${client.req.method}/ time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
         client.res.status(404);
     }
 
-    private responseError(client: Client, msg: string, code: number = 404): void {
+    protected responseError(client: Client, msg: string, code: number = 404): void {
         this.logger.info(`-----response error code: ${code}/ method: ${client.req.method} time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
         client.res.status(code).send(msg);
     }
 
-    private responseErrorIResult(client: Client, iRes: IResult): void {
+    protected responseErrorIResult(client: Client, iRes: IResult): void {
         this.logger.info(`-----response error code: 500/ method: ${client.req.method} time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
         client.res.status(500).send(IResult.resultToString(iRes));
     }
@@ -209,7 +217,15 @@ export class WorkerController extends BWorker {
         return this.parent.getDonorURL();
     }
 
-    private getResourceFolderByContentType(ct: string): string {
+    protected getBlackEditDomain(): string[] {
+        return this.parent.getDomainConfig().data.blackReplaceDomain;
+    }
+
+    protected getBlackEditSubDomain(): string[] {
+        return this.parent.getDomainConfig().data.blackReplaceSubDomain;
+    }
+
+    protected getResourceFolderByContentType(ct: string): string {
         if (ct && ct.indexOf("htm") > -1) return this.parent.getResourceFolderBy(EResourceFolder.html);
         return this.parent.getResourceFolderBy(EResourceFolder.def);
     }

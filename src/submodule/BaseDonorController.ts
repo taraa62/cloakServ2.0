@@ -2,11 +2,11 @@ import {CONTROLLERS, DonorModule} from "./DonorModule";
 import {IResult} from "../utils/IUtils";
 import {BLogger} from "../module/logger/BLogger";
 import {PoolOptions} from "../module/workers/pool/PoolOptions";
-import {FileManager} from "../utils/FileManager";
 import {WorkerPoolController} from "../module/workers/pool/WorkerPoolController";
 import {ModeThread} from "../module/workers/WorkerOption";
 import {BModule} from "../module/BModule";
 import {EModules} from "../server/config";
+import FileManager from "../utils/FileManager";
 
 export interface IBaseDonorConfig {
 

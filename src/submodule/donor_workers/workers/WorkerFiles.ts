@@ -1,16 +1,16 @@
-import zlib from 'zlib';
+import * as zlib from 'zlib';
 import {IncomingHttpHeaders, IncomingMessage} from "http";
 import {IResult} from "../../../utils/IUtils";
 import {WorkWithDonor} from "./WorkWithDonor";
 import {BLogger} from "../../../module/logger/BLogger";
-import fs from "fs";
+import * as fs from "fs";
 import {TMessageWorkerDonorReq} from "../../interface/TMessageWorkers";
 import {StringUtils} from "../../../utils/StringUtils";
-import {HeadersUtils} from "../../../utils/HeadersUtils";
-import {FileManager} from "../../../utils/FileManager";
-import Iconv from 'iconv';
+
+import * as Iconv from 'iconv';
 
 import {decompressStream} from 'iltorb';
+import FileManager from "../../../utils/FileManager";
 
 export class WorkerFiles {
 
@@ -83,7 +83,7 @@ export class WorkerFiles {
 
 
             if (await FileManager.isExist(path)) return IResult.succMess(path);
-            const iRes: IResult = await FileManager.checkPathToFolder(FileManager.backFolder(path, 1), null, true).catch(e => {
+            const iRes: IResult = await FileManager.checkPathToFolder(FileManager.backFolder(path, 1), null, true).catch((e:Error) => {
                 throw e;
             });
             if (iRes.error) return iRes;

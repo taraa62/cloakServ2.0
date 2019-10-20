@@ -1,7 +1,8 @@
 import {BaseDB} from "../BaseDB";
 import {CMDUtils} from "../../../utils/cmd/CMDUtils";
 import {IResult} from "../../../utils/IUtils";
-import mongoose, {Model} from "mongoose";
+import * as mongoose from "mongoose";
+import {Model} from "mongoose";
 import {ObjectID} from "mongodb";
 
 
@@ -32,7 +33,7 @@ export class MongoDBModule extends BaseDB {
     private async connectToDB(): Promise<any> {
         if (!this.isRunDB) return;
 
-        mongoose.Promise = Promise;
+        (mongoose as any).Promise = Promise;
         mongoose.set('debug', this.subConfig.debug);
         await mongoose.connect(this.subConfig.url, {
             useCreateIndex: true,
@@ -72,8 +73,8 @@ export class MongoDBModule extends BaseDB {
             obj.save((err: Error, targ: any) => {
                 if (err) reject(err);
                 else resolve(targ._doc);
-            })
-        })
+            });
+        });
     }
 
     /**
@@ -83,7 +84,7 @@ export class MongoDBModule extends BaseDB {
      * @param isSpreadOut - нужно ли нам перебрать ответ и выбрать только обьект с данными, по дефолту  - да
      * @return {Promise<any>}
      */
-    query<T>(model: Model<any>, find: T, opt:any = null, isSpreadOut = true): Promise<IResult> {
+    query<T>(model: Model<any>, find: T, opt: any = null, isSpreadOut = true): Promise<IResult> {
         return new Promise((resolve, reject) => {
             model.find(find, opt, (err, doc) => {
                 if (err) reject({error: err});
@@ -96,33 +97,33 @@ export class MongoDBModule extends BaseDB {
                         resolve(IResult.succData(doc));
                     }
                 }
-            })
-        })
+            });
+        });
     }
 
     public update<T>(model: Model<any>, findNote: T, replaceTo: T, opt: T = null): Promise<IResult> {
         return new Promise((resolve, reject) => {
             model.updateMany(findNote, replaceTo, opt, (err, result) => {
                 (err) ? reject({error: err}) : resolve(IResult.succData(result));
-            })
-        })
+            });
+        });
     }
 
 
     public remove<T>(model: Model<any>, findNote: T): Promise<IResult> {
         return new Promise((resolve, reject) => {
-            model.deleteMany(findNote,  (err: Error) => {
+            model.deleteMany(findNote, (err: Error) => {
                 (err) ? reject(IResult.error(err)) : resolve(IResult.success);
-            })
-        })
+            });
+        });
     }
 
     public clearDB(model: Model<any>): Promise<IResult> {
         return new Promise((resolve, reject) => {
             model.deleteMany({}, (err) => {
                 (err) ? reject({error: err}) : resolve(IResult.success);
-            })
-        })
+            });
+        });
     }
 
 

@@ -6,8 +6,7 @@ import {EProcessEdit} from "../../interface/EGlobal";
 import {WorkEditPage} from "./WorkEditPage";
 import {BLogger} from "../../../module/logger/BLogger";
 import {JSDOM, VirtualConsole} from "jsdom";
-import getUrls from "get-urls";
-import {Utils} from "tslint";
+
 
 const urlRegex = require('url-regex');
 const normalizeUrl = require('normalize-url');
@@ -100,18 +99,56 @@ export class EditText {
         if (!text) return text;
 
         text = StringUtils.replaceAll(text, "%3A%2F%2F", "://");
-
+        const h = "://" + item.blackEditDomain;
+        const h1 = "://" + item.blackEditSubDomain;
 
         return text.replace(urlRegex(), function(m0: string, cmt: any, open: any, close: any) {
-            if (m0 && m0.startsWith("/")) return m0;
+            if (!m0) return m0;
 
-            if (m0.indexOf("'") > -1) m0 = m0.substring(0, m0.indexOf("'"));
-            if (m0.indexOf("\"") > -1) m0 = m0.substring(0, m0.indexOf("\""));
-            if (m0.indexOf(")") > -1) m0 = m0.substring(0, m0.indexOf(")"));
-            if (m0.indexOf(";") > -1) m0 = m0.substring(0, m0.indexOf(";"));
-            if (m0.indexOf("'") > -1)debugger
-            const path = this.parent.linkModule.checkLink(item, m0);
-            return path;
+            if (m0.startsWith("/")) return m0;
+
+
+            let sufix = "";
+            if (m0.indexOf("'") > -1) {
+                sufix = m0.substring(m0.indexOf("'"), m0.length);
+                m0 = m0.substring(0, m0.indexOf("'"));
+            }
+            if (m0.indexOf("\"") > -1) {
+                sufix = m0.substring(m0.indexOf("\""), m0.length);
+                m0 = m0.substring(0, m0.indexOf("\""));
+            }
+            if (m0.indexOf(")") > -1) {
+                sufix = m0.substring(m0.indexOf(")"), m0.length);
+                m0 = m0.substring(0, m0.indexOf(")"));
+            }
+            if (m0.indexOf(";") > -1) {
+                sufix = m0.substring(m0.indexOf(";"), m0.length);
+                m0 = m0.substring(0, m0.indexOf(";"));
+            }
+
+            if (item.blackEditDomain && item.blackEditDomain.length) {
+                for (let ii of item.blackEditDomain) {
+                    const h = "://" + ii;
+                    const id = m0.indexOf(h);
+                    if (id > 0 && id < 6) {
+                        return m0;
+                    }
+                }
+            }
+            let path;
+
+            if (item.blackEditSubDomain && item.blackEditSubDomain.length) {
+                for (let ii of item.blackEditSubDomain) {
+                    const h = "://" + ii;
+                    const id = m0.indexOf(h);
+                    if (id > 0 && id < 6) {
+                        path = this.parent.linkModule.checkLink(item, m0, true);
+                        continue;
+                    }
+                }
+            }
+            if (!path) path = this.parent.linkModule.checkLink(item, m0);
+            return path + sufix;
         }.bind(this)).trim();
 
         // return text;

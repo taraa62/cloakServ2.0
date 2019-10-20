@@ -1,7 +1,6 @@
 import {BaseServer} from "./BaseServer";
-import {FileManager} from "../utils/FileManager";
-import {Http2ServerRequest, Http2ServerResponse} from "http2";
 import {IResult} from "../utils/IUtils";
+import FileManager from "../utils/FileManager";
 
 export class ServerHTTP2 extends BaseServer {
 

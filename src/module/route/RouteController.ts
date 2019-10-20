@@ -5,7 +5,6 @@ import {BLogger} from "../logger/BLogger";
 import {Controller} from "./HttpControllers/Controller";
 import {BModule} from "../BModule";
 import {ClassUtils} from "../../utils/ClassUtils";
-import {TestController} from "./HttpControllers/TestController";
 import {EModules} from "../../server/config";
 import Module = WebAssembly.Module;
 import {RouteEndPoint} from "./RouteDecorator";

@@ -1,10 +1,10 @@
-import {FileManager} from "./FileManager";
 import {CDMCommand, CMDResult} from "./cmd/CMDResult";
 import {CMDUtils} from "./cmd/CMDUtils";
 import {BLogger} from "../module/logger/BLogger";
 import {StringUtils} from "./StringUtils";
 import {IConfigNginx, IItemConfigNginx} from "../submodule/interface/configs/INginxConfig";
 import {IResult} from "./IUtils";
+import FileManager from "./FileManager";
 
 export class NginxUtils {
 
@@ -118,7 +118,7 @@ export class NginxUtils {
         if (this.configs && this.configs.size < 1) {
             let path = FileManager.backFolder(__dirname, 2);
             path += "/libs/nginx/";
-            const res: IResult = await FileManager.getFileInFolder(path);
+            const res: IResult = await FileManager.getFileOnFolder(path);
             if (res.success && res.data instanceof Array) {
                 for (const v of res.data) {
                     const conf = await FileManager.readFile(v.path);

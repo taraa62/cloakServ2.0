@@ -1,5 +1,6 @@
 export enum EItemDomainController {
     CONTROLLER = "CONTROLLER",
+    SUB_CONTROLLER = "SUB_CONTROLLER",
     ACTION = "ACTION",
     HEADER = "HEADER"
 }

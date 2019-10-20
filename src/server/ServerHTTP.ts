@@ -1,6 +1,6 @@
 import {BaseServer} from "./BaseServer";
-import http from "http";
-import {Signals} from "../const/Signals";
+import * as  http from "http";
+
 import {IResult} from "../utils/IUtils";
 
 export class ServerHTTP extends BaseServer {

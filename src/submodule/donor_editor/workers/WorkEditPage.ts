@@ -1,5 +1,4 @@
 import {BasePoolWorker} from "../../../module/workers/pool/workers/BasePoolWorker";
-import {FileManager} from "../../../utils/FileManager";
 import {IResult} from "../../../utils/IUtils";
 import {TMessageWorkerEditTextReq, TMessageWorkerEditTextResp} from "../../interface/TMessageWorkers";
 import {IItemConfig, IRegular, IRegulations} from "../../interface/configs/IConfig";
@@ -8,6 +7,7 @@ import {EProcessEdit} from "../../interface/EGlobal";
 import {IWorkerMessage} from "../../../module/workers/WorkerMessage";
 import {IBaseConfig} from "../../interface/configs/IBaseConfig";
 import {LinkEdit} from "./LinkEdit";
+import FileManager from "../../../utils/FileManager";
 
 
 /*

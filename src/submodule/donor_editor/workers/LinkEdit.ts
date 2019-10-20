@@ -1,9 +1,6 @@
 import {WorkEditPage} from "./WorkEditPage";
 import {BLogger} from "../../../module/logger/BLogger";
 import {TMessageWorkerEditTextReq} from "../../interface/TMessageWorkers";
-import {ILink, Link} from "../../donor_links/Link";
-import url from "url";
-import {StringUtils} from "../../../utils/StringUtils";
 
 export class LinkEdit {
 
@@ -22,7 +19,7 @@ export class LinkEdit {
     }
 
 
-    public checkLink(item: TMessageWorkerEditTextReq, url: string): string {
+    public checkLink(item: TMessageWorkerEditTextReq, url: string, isSaveSubDomain = false): string {
         try {
             if (url.startsWith("/")) return url;
 
@@ -34,9 +31,12 @@ export class LinkEdit {
             if (url.startsWith("http")) {
                 const uu = new URL(url);
                 // const act = url.substr(url.indexOf(uu.host) + uu.host.length, url.length);
-                const act = uu.pathname+uu.search;
+                const act = uu.pathname + uu.search;
 
-                uu.hostname = host;
+                if (!isSaveSubDomain) uu.hostname = host;
+                else {
+                    uu.hostname = uu.hostname.replace(item.donorInfo.domain, item.ourInfo.domain);
+                }
                 uu.protocol = item.ourInfo.protocol;
 
                 this.domains.set(act, url);

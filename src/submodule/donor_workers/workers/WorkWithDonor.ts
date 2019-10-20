@@ -1,6 +1,7 @@
 import {BasePoolWorker} from "../../../module/workers/pool/workers/BasePoolWorker";
-import https from "https";
-import http, {IncomingMessage} from "http";
+import * as https from "https";
+import * as http from "http";
+import {IncomingMessage} from "http";
 import {AnalizationDonorResponse} from "./AnalizationDonorResponse";
 import {WorkerFiles} from "./WorkerFiles";
 import {TMessageWorkerDonorReq} from "../../interface/TMessageWorkers";

@@ -12,9 +12,11 @@ import {WorkerHeaders} from "./workers/WorkerHeaders";
 import {WorkerActions} from "./workers/WorkerActions";
 import {BWorker} from "./workers/BWorker";
 import {EDomainType, EItemDomainController, EResourceFolder} from "../interface/EGlobal";
-import {FileManager} from "../../utils/FileManager";
 import {ClassUtils} from "../../utils/ClassUtils";
 import {Cleaner} from "./Cleaner";
+import FileManager from "../../utils/FileManager";
+import {json} from "express";
+import {WorkerSubController} from "./workers/WorkerSubController";
 
 export class ItemDomain {
 
@@ -42,18 +44,31 @@ export class ItemDomain {
 
             this.workersMap = new Map<EItemDomainController, BWorker>();
             this.workersMap.set(EItemDomainController.CONTROLLER, new WorkerController(this, this.logger));
+            this.workersMap.set(EItemDomainController.SUB_CONTROLLER, new WorkerSubController(this, this.logger));
+
             this.workersMap.set(EItemDomainController.HEADER, new WorkerHeaders(this, this.logger));
             this.workersMap.set(EItemDomainController.ACTION, new WorkerActions(this, this.logger));
 
-            ClassUtils.initClasses(this.workersMap).catch(e => {
-                throw new Error(e);
-            });
+            ClassUtils.initClasses(this.workersMap);
 
             this.controller.registerHostInController(this.conf.data.ourHost, this.workersMap.get(EItemDomainController.CONTROLLER));
+            this.registerHosts();
             const iRes: IResult = await this.checkResourceFolders([EResourceFolder.html, EResourceFolder.sub]);
+
+            this.getDomainConfig().data.blackReplaceDomain = this.getDomainConfig().data.blackReplaceDomain.concat(this.getBaseConf().blackReplaceDomain);
+            this.getDomainConfig().data.blackReplaceSubDomain = this.getDomainConfig().data.blackReplaceSubDomain.concat(this.getBaseConf().blackReplaceSubDomain);
             return iRes;
         } catch (e) {
             return IResult.error(e.error || e);
+        }
+    }
+    private registerHosts(): void {
+        //general
+        this.controller.registerHostInController(this.conf.data.ourHost, this.workersMap.get(EItemDomainController.CONTROLLER));
+        if (this.getDomainConfig().data.blackReplaceSubDomain) {
+            for (let sub of this.getDomainConfig().data.blackReplaceSubDomain) {
+                this.controller.registerHostInController(sub.replace(this.donorURl.host, this.ourURL.host), this.workersMap.get(EItemDomainController.SUB_CONTROLLER), true);
+            }
         }
     }
 
@@ -130,4 +145,10 @@ export class ItemDomain {
         return null;
     }
 
+    private registerSubHost() {
+        const conf:IItemConfig = JSON.parse(JSON.stringify(this.conf))
+
+        // conf.
+
+    }
 }

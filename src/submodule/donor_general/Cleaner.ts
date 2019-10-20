@@ -1,12 +1,12 @@
 import {ItemDomain} from "./ItemDomain";
 import {IResult} from "../../utils/IUtils";
 import {BLogger} from "../../module/logger/BLogger";
-import {FileManager} from "../../utils/FileManager";
 import {EResourceFolder} from "../interface/EGlobal";
 import {CONTROLLERS} from "../DonorModule";
 import {DonorConfigsController} from "../donor_configs/DonorConfigsController";
 import {DonorRequestController} from "../donor_request/DonorRequestController";
 import {DonorLinksController} from "../donor_links/DonorLinksController";
+import FileManager from "../../utils/FileManager";
 
 export class Cleaner {
 

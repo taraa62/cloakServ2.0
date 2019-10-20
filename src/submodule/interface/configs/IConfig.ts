@@ -22,6 +22,8 @@ export interface IConfig {
     cleaner: ICleaner;
     regulations: IRegulations[];
     googleManagerID?: string;
+    blackReplaceDomain: string[],
+    blackReplaceSubDomain: string[]
 }
 
 export interface ICleaner {

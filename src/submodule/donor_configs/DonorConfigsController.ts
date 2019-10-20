@@ -55,7 +55,7 @@ export class DonorConfigsController extends BaseDonorController {
     }
 
 
-    public async createNewConfig(conf: IItemConfig) {
+    public async createNewConfig(conf: IItemConfig):Promise<any> {
         const saveList: IItemConfig[] = await this.findConfigByDonorAndOurHost(conf.data.donorOrigin, conf.data.ourHost, conf.data.nameResourceFolder);
         if (!this.sConfig.isUpdateConfWithFile && (!saveList || saveList && saveList.length > 0)) {
             return "config is exist!";

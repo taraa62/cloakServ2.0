@@ -14,6 +14,7 @@ import {DonorEditController} from "./donor_editor/DonorEditController";
 import {DonorLinksController} from "./donor_links/DonorLinksController";
 import {DonorRequestController} from "./donor_request/DonorRequestController";
 import {EModules} from "../server/config";
+import {SubCloakerRouteController} from "./SubCloakerRouteController";
 
 
 export class DonorModule extends BModule {
@@ -37,20 +38,22 @@ export class DonorModule extends BModule {
         this.donorControllers.set(CONTROLLERS.ITEM, new ItemController(this, this.getConfigForController(CONTROLLERS.ITEM)));
         this.donorControllers.set(CONTROLLERS.EDITOR, new DonorEditController(this, this.getConfigForController(CONTROLLERS.EDITOR)));
 
-        const initContr: IResult = await ClassUtils.initClasses(this.donorControllers).catch((er:Error) => IResult.error(er));
+        const initContr: IResult = await ClassUtils.initClasses(this.donorControllers).catch((er: Error) => IResult.error(er));
         if (initContr.error) return initContr;
-        const endInit: IResult = await ClassUtils.initClasses(this.donorControllers, "endInit").catch((er:Error) => IResult.error(er));
+        const endInit: IResult = await ClassUtils.initClasses(this.donorControllers, "endInit").catch((er: Error) => IResult.error(er));
         if (endInit.error) return endInit;
 
         return IResult.success;
     }
 
 
-    public registerHostInController(host: string, controller:BWorker): void {
+    public registerHostInController(host: string, controller: BWorker, subHost = false): void {
         // const route: RouteModule = this.getModule(EModules.ROUTE) as RouteModule;
         // (<CloakerRouteController>route.getSubControllerHttp("cloaker")).registerHOST(host, controller);
-
-        (this.getModule(EModules.ROUTE) as RouteModule).getController().registerNewController(host, CloakerRouteController, controller);
+        if (subHost)
+            (this.getModule(EModules.ROUTE) as RouteModule).getController().registerNewController(host, SubCloakerRouteController, controller);
+        else
+            (this.getModule(EModules.ROUTE) as RouteModule).getController().registerNewController(host, CloakerRouteController, controller);
     }
 
     public getController(name: CONTROLLERS): BaseDonorController {

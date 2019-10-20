@@ -1,5 +1,6 @@
 import {IResult} from "./IUtils";
-import {FileManager} from "./FileManager";
+import FileManager from "./FileManager";
+
 
 export interface IClasses {
     init(): Promise<any>

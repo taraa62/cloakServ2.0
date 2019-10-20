@@ -1,8 +1,8 @@
 import {ENV} from "../const/System";
-import {FileManager} from "../utils/FileManager";
 import {IConfig, ILoggerConfig, IModuleConfig, IServerConfig} from "./IConfig";
 import {BaseServer} from "./BaseServer";
 import {IResult} from "../utils/IUtils";
+import FileManager from "../utils/FileManager";
 
 export class ServerConfig {
 
@@ -22,7 +22,7 @@ export class ServerConfig {
     }
 
     public async updVersionServer(): Promise<any> {
-        const json: IResult = await FileManager.readFile(this.dirProject + "/package.json").catch((er) => '{"version":"undefined"}') as IResult;
+        const json: IResult = await FileManager.readFile(this.dirProject + "/package.json").catch(er => '{"version":"undefined"}') as IResult;
         this.version = JSON.parse(json.data).version;
     }
 

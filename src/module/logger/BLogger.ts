@@ -70,12 +70,12 @@ export class BLogger {
         if (this.isShowCallClassOnlyError && type !== "error") isCreate = false;
         if (!isCreate) return "";
 
-        const blackList = ["task_queues", "process.emit", "emitListeningNT", "events.js"]
+        const blackList = ["task_queues", "process.emit", "emitListeningNT", "events.js"];
         // const blackList = [""]
         const err = {};
         Error.captureStackTrace(err);
         const lines: any[] = (err as Error).stack.split("\n");
-        let arr = [];
+        let arr: any[] = [];
         for (let t: number = 1; t < lines.length; t++) {
             const st: string = lines[t];
             if (!blackList.find(v => st.indexOf(v) > -1)) {
@@ -85,7 +85,7 @@ export class BLogger {
                     if (!arr.length) arr.push([aa[0], [aa[1]]]);
                     else if (arr[arr.length - 1][0] == aa[0]) {
                         const s = arr[arr.length - 1];
-                        (<any>s[1]).push(aa[1])
+                        (<any>s[1]).push(aa[1]);
                     } else {
                         arr.push([aa[0], [aa[1]]]);
                     }
@@ -95,11 +95,11 @@ export class BLogger {
 
         if (arr.length > 0) {
             let mes = "";
-            arr = arr.reverse()
+            arr = arr.reverse();
             for (let vv = 0; vv < arr.length - 1; vv++) {
                 const v = arr[vv];
-                if (mes) mes += "::"
-                mes += `[${v[0]}:${(v[1] as any).join(":")}]`
+                if (mes) mes += "::";
+                mes += `[${v[0]}:${(v[1] as any).join(":")}]`;
             }
             return mes + "    ";
 

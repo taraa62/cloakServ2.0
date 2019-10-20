@@ -1,4 +1,4 @@
-import express from "express";
+import * as express from "express";
 import {Signals} from "../const/Signals";
 import {BModule} from "../module/BModule";
 import {BLogger} from "../module/logger/BLogger";

@@ -1,7 +1,6 @@
 import {BaseDonorController, IBaseDonorConfig} from "../BaseDonorController";
 import {IResult} from "../../utils/IUtils";
 import {IBaseConfig} from "../interface/configs/IBaseConfig";
-import {FileManager} from "../../utils/FileManager";
 import {CONTROLLERS} from "../DonorModule";
 import {DonorConfigsController} from "../donor_configs/DonorConfigsController";
 import {IItemConfig} from "../interface/configs/IConfig";
@@ -10,9 +9,7 @@ import {ClassUtils} from "../../utils/ClassUtils";
 import {BLogger} from "../../module/logger/BLogger";
 import {IItemNginxConfig, INginxConfig} from "../interface/configs/INginxConfig";
 import {BWorker} from "./workers/BWorker";
-import {EModules} from "../../server/config";
-import {RouteModule} from "../../module/route/RouteModule";
-import {CloakerRouteController} from "../CloakerRouteController";
+import FileManager from "../../utils/FileManager";
 
 
 export interface IItemController extends IBaseDonorConfig {
@@ -50,7 +47,7 @@ export class ItemController extends BaseDonorController {
 
     private async loadConfig(cPath: string): Promise<any> {
         const path: string = FileManager.getSimplePath(cPath, FileManager.backFolder(__dirname, 3));
-        const ires: IResult = await FileManager.readFile(path).catch(e => {
+        const ires: IResult = await FileManager.readFile(path).catch((e: IResult) => {
             this.logger.error(e);
             return e;
         });
@@ -76,8 +73,8 @@ export class ItemController extends BaseDonorController {
         return conf;
     }
 
-    public registerHostInController(host: string, controller: BWorker): void {
-        this.parent.registerHostInController(host, controller);
+    public registerHostInController(host: string, controller: BWorker, subHost = false): void {
+        this.parent.registerHostInController(host, controller, subHost);
     }
 
     public getLogger(): BLogger {
