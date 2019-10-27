@@ -20,7 +20,7 @@ export class ReadConfFile {
 
     private async getConfigs(path: string): Promise<IItemConfig[]> {
         const result: Array<IItemConfig> = [];
-        const list: IResult = await FileManager.getFileOnFolder(path).catch(er => {
+        const list: IResult = await FileManager.getFileOnFolder(path, true).catch(er => {
             return null;
         });
         if (list.success && list.data.length > 0) {

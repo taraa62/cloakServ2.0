@@ -35,26 +35,33 @@ export class WorkEditPage extends BasePoolWorker {
 
     //*** for exit from main thread
     public async editFile(data: IWorkerMessage): Promise<any> {
-        const item: TMessageWorkerEditTextReq = data.data as TMessageWorkerEditTextReq;
-        let text: string = <string>await ((item.text) ? item.text : (item.pathToFile) ? this.getTextFromDisk(item.pathToFile) : "");
+        try {
+            const item: TMessageWorkerEditTextReq = data.data as TMessageWorkerEditTextReq;
+            let text: string = <string>await ((item.text) ? item.text : (item.pathToFile) ? this.getTextFromDisk(item.pathToFile) : "");
 
-        const regulations: IRegulations[] = this.getRegulation(item.ourInfo.host);
-        if (!regulations) super.sendTaskComplitSuccess(text, data.key);
+            const regulations: IRegulations[] = this.getRegulation(item.ourInfo.host);
+            if (!regulations) super.sendTaskComplitSuccess(text, data.key);
 
-        const list: IRegulations[] = this.isEditText(item, regulations);
-        if (!list) return super.sendTaskComplitSuccess(text, data.key);
-        else {
-            const iRes: IResult = <IResult>await this.editText.edit(list, item, text);
-            const resp: TMessageWorkerEditTextResp = {
+            const list: IRegulations[] = this.isEditText(item, regulations);
+            if (!list) return super.sendTaskComplitSuccess(text, data.key);
+            else {
+                const iRes: IResult = <IResult>await this.editText.edit(list, item, text);
+                const resp: TMessageWorkerEditTextResp = {
 
-            };
-            if (iRes.error) resp.error = iRes.error;
-            if (iRes.data) {
-                resp.text = iRes.data || text;
-                resp.linksMap = this._linkModule.getLinks();
+                };
+                if (iRes.error) resp.error = iRes.error;
+                if (iRes.data) {
+                    resp.text = iRes.data || text;
+                    resp.linksMap = this._linkModule.getLinks();
+                }
+                (iRes.error) ? super.sendTaskComplitError(resp) : super.sendTaskComplitSuccess(resp, data.key);
             }
-            (iRes.error) ? super.sendTaskComplitError(resp) : super.sendTaskComplitSuccess(resp, data.key);
+        }catch (e) {
+            super.sendTaskComplitError(<TMessageWorkerEditTextResp>{
+                error:e
+            })
         }
+
     }
 
     private getRegulation(host: string): IRegulations[] {

@@ -6,7 +6,7 @@ import {IResult} from "../utils/IUtils";
 export class ServerHTTP extends BaseServer {
 
 
-    protected async upServer(): Promise<IResult> {
+    protected upServer(): Promise<IResult> {
 
         return new Promise<IResult>((res, rej)=>{
             try {

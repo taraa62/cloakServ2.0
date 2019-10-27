@@ -7,7 +7,7 @@
     "start": "tsc && node dist/entry.js",
     "test": "echo \\\"Error: no src/test specified\\\" && exit 1",
     "build": "tsc && node --max-old-space-size=8192 dist/entry.js ",
-    "start:dev1": "ts-node src/entry.ts"
+    "start:dev1": "ts-node ./src/entry.ts"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +18,7 @@
     "typescript": "^3.6.4"
   },
   "dependencies": {
+    "@types/cors": "^2.8.6",
     "@types/iconv": "^2.1.16",
     "@types/iltorb": "^2.3.0",
     "@types/jsdom": "^12.2.4",
@@ -28,6 +29,7 @@
     "@types/shelljs": "^0.8.5",
     "ansi-parser": "^3.2.9",
     "cookie-parser": "^1.4.4",
+    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "express": "^5.0.0-alpha.7",
     "get-urls": "^9.1.0",

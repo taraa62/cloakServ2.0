@@ -57,7 +57,7 @@
       "isClearOnlyHTML": false,
       "isClearSubDomains": false,
       "isClearAllNotLocalFiles": false,
-      "isClearAllResource": true
+      "isClearAllResource": false
     },
     "GET": {
       "removeHead": [

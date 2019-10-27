@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
-import { Stream } from 'stream';
+import {Stream} from 'stream';
 import * as recursive from 'recursive-readdir';
 import * as rimraf from 'rimraf';
 import {IFileInfo, IResult} from "./IUtils";
@@ -44,19 +44,25 @@ export default class FileManager {
             else {
                 if (!isCreateFolder) rj(IResult.error('folder is not Founde'));
                 else {
-                    const arr = path.split(this._path.sep);
-                    let _cD = '';
-                    for (const f of arr) {
-                        if (f) {
-                            _cD += this._path.sep + f;
 
-                            if (!await this.isExist(_cD)) {
-                                await fs.mkdirSync(_cD);
-                            }
-                        }
+                    if (!await this.isExist(path)) {
+                        await fs.mkdirSync(path, {recursive: true});
                     }
-                    if (_cD === path) res(IResult.succData(path));
-                    rj(IResult.error('error create folder => ' + _cD));
+                    (await this.isExist(path))? res(IResult.succData(path)):rj(IResult.error('error create folder => ' + res))
+
+                    /*  const arr = path.split(this._path.sep);
+                      let _cD = '';
+                      for (const f of arr) {
+                          if (f) {
+                              _cD += this._path.sep + f;
+
+                              if (!await this.isExist(_cD)) {
+                                  await fs.mkdirSync(_cD);
+                              }
+                          }
+                      }
+                      if (_cD === path) res(IResult.succData(path));
+                      rj(IResult.error('error create folder => ' + _cD));*/
                 }
             }
         });
@@ -81,11 +87,11 @@ export default class FileManager {
     static async writeToFile(path: string, text: string, isRewritefile: boolean = true, isCreateFile: boolean = true): Promise<IResult> {
         const info = await FileManager.getInfoFile(path).catch((er: Error) => null);
         if (info) {
-            if (!info.isFile) return { error: 'file is directory' } as IResult;
+            if (!info.isFile) return {error: 'file is directory'} as IResult;
             if (!info.isBlockDevice) {
                 if (isRewritefile) return await FileManager.rewriteFile(path, text);
                 else return FileManager.writeFile(path, text);
-            } else return { error: 'file is blocker device' } as IResult;
+            } else return {error: 'file is blocker device'} as IResult;
         } else {
             if (isCreateFile) return await FileManager.writeToNewFile(path, text);
             return IResult.error('file isn\'t exist');
@@ -97,8 +103,8 @@ export default class FileManager {
             path = this._path.normalize(path);
             fs.writeFile(path, text, (err) => {
                 if (err)
-                    rej({ error: 'Error writing file: ' + err });
-                else res({ success: true } as IResult);
+                    rej({error: 'Error writing file: ' + err});
+                else res({success: true} as IResult);
             });
         });
     }
@@ -109,12 +115,12 @@ export default class FileManager {
             path = this._path.normalize(path);
             const fd = fs.openSync(path, 'r+');
             fs.ftruncate(fd, 0, (err) => {
-                if (err) rej({ error: err });
+                if (err) rej({error: err});
                 else {
                     fs.writeFile(path, text, (err) => {
                         if (err)
-                            rej({ error: 'Error writing file: ' + err });
-                        else res({ success: true } as IResult);
+                            rej({error: 'Error writing file: ' + err});
+                        else res({success: true} as IResult);
                     });
                 }
             });
@@ -124,8 +130,8 @@ export default class FileManager {
     static writeToNewFile(path: string, text: string): Promise<IResult> {
         return new Promise((res, rej) => {
             fs.appendFile(path, text, (err) => {
-                if (err) rej({ error: err });
-                else res({ success: true } as IResult);
+                if (err) rej({error: err});
+                else res({success: true} as IResult);
             });
         });
     }
@@ -192,17 +198,17 @@ export default class FileManager {
     static getAllFileInFolderRecursive(path: string): Promise<IResult> {
         return new Promise((res, rej) => {
             if (!fs.existsSync(path)) {
-                rej({ error: `file "${path}" is not found` });
+                rej({error: `file "${path}" is not found`});
             } else {
                 recursive(path, (err: Error, files: string[]) => {
-                    (err) ? rej({ error: err }) : res({ data: files, success: true });
+                    (err) ? rej({error: err}) : res({data: files, success: true});
                 });
             }
 
         });
     }
 
-    static async getFileOnFolder(path: string): Promise<IResult> {
+    static async getFileOnFolder(path: string, getFileInfo = false): Promise<IResult> {
         if (!fs.existsSync(path))
             return IResult.error(`folder ${path} isn't found"`);
 
@@ -210,17 +216,17 @@ export default class FileManager {
 
         return new Promise((res, rej) => {
             fs.readdir(path, async (err: Error, item) => {
-                if (err) rej({ error: err });
+                if (err) rej({error: err});
                 else {
                     const listFile = [];
                     for (let y = 0; y < item.length; y++) {
                         const obj = {
                             path: path + this._path.sep + item[y],
-                            info: await this.getInfoFile(path + this._path.sep + item[y]),
+                            info: (getFileInfo) ? await this.getInfoFile(path + this._path.sep + item[y]) : null,
                         };
                         listFile.push(obj);
                     }
-                    res({ success: true, data: listFile });
+                    res({success: true, data: listFile});
                 }
             });
         });
@@ -241,7 +247,7 @@ export default class FileManager {
     // for all files and folder ad recursive
     static removeFileRecursive(path: string): Promise<IResult> {
         return new Promise((res, rej) => {
-            rimraf(path, (er:Error) => {
+            rimraf(path, (er: Error) => {
                 (er) ? rej(IResult.error(er)) : res(IResult.success);
             });
         });
