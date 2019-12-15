@@ -1,8 +1,9 @@
 import {Client} from "../item/Client";
 import {StringUtils} from "../../../utils/StringUtils";
 import {BWorker} from "./BWorker";
-
+import * as querystring from "querystring";
 import {IncomingHttpHeaders} from "http";
+import {TMessageWorkerDonorResp} from "../../interface/TMessageWorkers";
 
 export class WorkerHeaders extends BWorker {
 
@@ -15,12 +16,15 @@ export class WorkerHeaders extends BWorker {
 
     private getHeaderForOriginalLink(client: Client): any {
         const url: URL = new URL(client.originalLink.original);
+        const query = client.req.query ? "?" + querystring.stringify(client.req.query) : "";
         const opt: any = {
-            headers: {},
+            headers: {
+                "user-agent": 'Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36'
+            },
             host: url.host,
             hostname: url.host,
             method: client.req.method,
-            path: url.pathname,
+            path: url.pathname + query,
             protocol: url.protocol
         };
         Object.assign(opt.headers, client.req.headers);
@@ -30,20 +34,30 @@ export class WorkerHeaders extends BWorker {
 
 
     private getHeaderForRequestDonor(client: Client): any {
+        const query = client.req.query ? "?" + querystring.stringify(client.req.query) : "";
         const opt: any = {
             headers: {
-                host: this.parent.getDonorURL().host
+                host: this.parent.getDonorURL().host,
+                "user-agent": 'Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36'
             },
             host: this.parent.getDonorURL().host,
             hostname: this.parent.getDonorURL().host,
             method: client.req.method,
-            path: client.req.originalUrl,
+            path: client.req.originalUrl + query,
             protocol: this.parent.getDonorURL().protocolFull
         };
         Object.assign(opt.headers, client.req.headers);
 
 
         return this.replaceHeaderForDonor(opt, client);
+    }
+
+    public getHeaderForResponseClient(client: Client, mess: TMessageWorkerDonorResp): void {
+        if (mess && mess.respHeaders) {
+            Object.entries(mess.respHeaders).map(([key, val]) => {
+                client.res.setHeader(key, val);
+            });
+        }
     }
 
     private replaceHeaderForDonor<T>(opt: any, client: Client): T {

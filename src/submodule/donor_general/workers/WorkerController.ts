@@ -81,7 +81,7 @@ export class WorkerController extends BWorker {
                 isSave: client.checkIsSaveFile(),
                 body: client.getRequestBody()
             };
-            if (req.method.toLocaleUpperCase() === "POST") debugger;
+            //  if (req.method.toLocaleUpperCase() === "POST") debugger;
             const iRes: IResult = await this.poolWorkWithDonor.newTask(donorReq).catch(er => IResult.error(er));
             //    if (donorReq.action.indexOf("t64") > -1) debugger;
             if (iRes.success) {
@@ -95,17 +95,21 @@ export class WorkerController extends BWorker {
     }
 
     protected analizeResponseOfDonor(mess: TMessageWorkerDonorResp, client: Client) {
-        client.generateHeaderForResponse();
+        client.generateHeaderForResponse(mess);
         const chart: number = Number(mess.respCode.toString().substr(0, 1));
         switch (chart) {
             case 1:
             case 2: {
-                this.donorRequestController.createNewRequestInfo(client, mess);
-                if (client.isEditBeforeSend) {
-                    this.responseData(client, mess).catch(er => this.logger.error(er));
-                    // this.responseFile(client, iRes.data);
+                if (client.isFile) {
+                    this.donorRequestController.createNewRequestInfo(client, mess);
+                    if (client.isEditBeforeSend) {
+                        this.responseData(client, mess).catch(er => this.logger.error(er));
+                        // this.responseFile(client, iRes.data);
+                    } else {
+                        this.responseFile(client, mess);
+                    }
                 } else {
-                    this.responseFile(client, mess);
+                    this.responseData(client, mess).catch(er => this.logger.error(er));
                 }
 
             }
@@ -141,41 +145,55 @@ export class WorkerController extends BWorker {
 
         this.logger.info(`-----response from data / time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
 
+        if (client.isFile) {
+            if (!resp.pathToFile) return this.responseError404(client);
 
-        if (!resp.pathToFile) return this.responseError404(client);
+            const task: TMessageWorkerEditTextReq = {
+                command: "editFile",
+                url: client.req.path,
+                pathToFile: resp.pathToFile,
+                contentType: client.contentType,
+                ourInfo: this.getDomainConfig(),
+                donorInfo: this.getDonorConfig(),
+                process: EProcessEdit.PRE,
+                googleManagerID: this.parent.getDomainConfig().data.googleManagerID,
+                blackEditDomain: this.getBlackEditDomain(),
+                blackEditSubDomain: this.getBlackEditSubDomain()
+            };
 
-        const task: TMessageWorkerEditTextReq = {
-            command: "editFile",
-            url: client.req.path,
-            pathToFile: resp.pathToFile,
-            contentType: client.contentType,
-            ourInfo: this.getDomainConfig(),
-            donorInfo: this.getDonorConfig(),
-            process: EProcessEdit.PRE,
-            googleManagerID: this.parent.getDomainConfig().data.googleManagerID,
-            blackEditDomain: this.getBlackEditDomain(),
-            blackEditSubDomain:this.getBlackEditSubDomain()
-        };
+            const iR: IResult = await this.donorEditController.getPool().newTask(task).catch(er => IResult.error(er));
+            if (iR.error) this.responseErrorIResult(client, iR);
+            else {
 
-        const iR: IResult = await this.donorEditController.getPool().newTask(task).catch(er => IResult.error(er));
-        if (iR.error) this.responseErrorIResult(client, iR);
-        else {
+                if (!iR.data || !iR.data.text) debugger;
+                const data: TMessageWorkerEditTextResp = iR.data;
+                client.res.writeHead(200, {"content-type": client.contentType});
+                client.res.write(data.text);
+                client.res.end();
 
-            if (!iR.data || !iR.data.text) debugger;
-            const data: TMessageWorkerEditTextResp = iR.data;
-            client.res.writeHead(200, {"content-type": client.contentType});
-            client.res.write(data.text);
+                if (data.linksMap) this.donorLinkController.updateNewLinks(this.workerAction, this.getDomainConfig().host, data.linksMap);
+            }
+        } else {
+            const body:string = resp.data || ((resp.data && resp.data.data) ? resp.data.data : "");
+            client.res.setHeader('content-length', body.length);
+            client.res.write(body);
             client.res.end();
-
-            if (data.linksMap) this.donorLinkController.updateNewLinks(this.workerAction, this.getDomainConfig().host, data.linksMap);
         }
     }
 
-    protected responseFile(client: Client, resp: TMessageWorkerDonorResp): Promise<any> | void {
+    protected async responseFile(client: Client, resp: TMessageWorkerDonorResp): Promise<any | void> {
         if (!resp && !client.requestInfo) return this.responseError(client, "close");
         if (!client.contentType) debugger
 
         const pathToFile = resp ? resp.pathToFile : client.requestInfo.pathToFile;
+        const isExis = await FileManager.isExist(pathToFile);
+        if (!isExis) {
+            if (resp.data) {
+                client.isFile = false;
+                return this.responseData(client, resp);
+            }
+            return this.responseError404(client);
+        }
         this.logger.info(`-----response from file / method: ${client.req.method} time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
         if (client.isEditBeforeSend) {
             if (!resp) resp = {

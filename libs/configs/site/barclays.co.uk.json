@@ -1,6 +1,6 @@
 {
   "data": {
-    "donorOrigin": "https://kinokrad.co/",
+    "donorOrigin": "https://www.instagram.com/katusha_adushkina/",
     "ourHost": "t63.com",
     "nameResourceFolder": "./resource2/ritcapuk_5.com",
     "fraudfilter": {
@@ -57,7 +57,7 @@
       "isClearOnlyHTML": false,
       "isClearSubDomains": false,
       "isClearAllNotLocalFiles": false,
-      "isClearAllResource": false
+      "isClearAllResource": true
     },
     "GET": {
       "removeHead": [
@@ -67,8 +67,8 @@
         "who": "I'm"
       }
     },
-    "blackReplaceDomain": [],
-    "blackReplaceSubDomain": ["hls.kinokrad.co"],
+    "blackReplaceDomain": ["a5.behance.net"],
+    "blackReplaceSubDomain": [],
     "blackParamForSave": [],
     "prioritySaveParam": [
       "t",

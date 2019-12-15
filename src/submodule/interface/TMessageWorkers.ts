@@ -31,6 +31,7 @@ export type TMessageWorkerDonorReq = TMessageWorkerBaseReq & {
 export type TMessageWorkerDonorResp = TMessageWorkerBaseResp & {
     pathToFile?: string;
     respCode: number;
+    data?: any;
 }
 
 

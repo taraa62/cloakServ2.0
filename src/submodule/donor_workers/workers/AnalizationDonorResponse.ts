@@ -49,8 +49,15 @@ export class AnalizationDonorResponse {
             return this.controller.sendTaskComplitSuccess(mess, data.key);
         } else {
             //TODO перепровірити розмір контенту, якщо великий, то придащити res, а ні, то вигрузити дані і віддати.
-
-            return this.respCode500(response, data);
+            const iRes: IResult = await this.loadDataOfResponse(response, data);
+            if (iRes.error) return this.controller.sendTaskComplitError(iRes.error, data.key);
+            const mess: TMessageWorkerDonorResp = {
+                data: iRes.data,
+                respHeaders: response.headers,
+                respCode: response.statusCode
+            };
+            return this.controller.sendTaskComplitSuccess(mess, data.key);
+            // return this.respCode500(response, data);
         }
 
     }
@@ -69,6 +76,23 @@ export class AnalizationDonorResponse {
 
     private async respCode500(response: IncomingMessage, data: IWorkerMessage): Promise<any> {
         return this.controller.sendTaskComplitError("error500", data.key);
+    }
+
+
+    private loadDataOfResponse(response: IncomingMessage, data: IWorkerMessage): Promise<IResult> {
+        return new Promise<IResult>((res, rej) => {
+            data.dataArr = [];
+            response.on('data', chunk => data.dataArr.push(chunk));
+            response.on('error', error => {
+                res(IResult.error(error));
+            });
+            response.on('end', () => {
+                if (response.statusCode > 299) return res(IResult.error('error'));
+                // TODO maybe must be decode chunks?
+                return res(IResult.succData(data.dataArr.join()));
+            });
+        });
+
     }
 
 }

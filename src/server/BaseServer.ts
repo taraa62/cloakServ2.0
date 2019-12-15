@@ -9,6 +9,7 @@ import {ServerConfig} from "./ServerConfig";
 import {IResult} from "../utils/IUtils";
 import {ClassUtils} from "../utils/ClassUtils";
 import * as cors from 'cors';
+import * as bodyParser from 'body-parser';
 
 
 export abstract class BaseServer implements IServer {
@@ -60,14 +61,15 @@ export abstract class BaseServer implements IServer {
         this.appExp = express();
         this.modules = new Map<string, BModule>();
         this.appExp.use(require('cookie-parser')());
-
+        this.appExp.use(bodyParser.json({limit: "5mb"}));
+        this.appExp.use(bodyParser.urlencoded({extended: false}));
 
         //** CORS **
         if (this.conf.config.server.corsWhitelist) {
             var whitelist = this.conf.config.server.corsWhitelist;
             var corsOptions = {
                 origin: function(origin: string, callback: Function) {
-                    return  callback(null, true);
+                    return callback(null, true);
                     if (whitelist.indexOf(origin) !== -1) {
                         callback(null, true);
                     } else {

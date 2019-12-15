@@ -7,6 +7,7 @@ import {Link} from "../../donor_links/Link";
 import {RequestInfo} from "../../donor_request/RequestInfo";
 import {BLogger} from "../../../module/logger/BLogger";
 import * as querystring from "querystring";
+import {TMessageWorkerDonorResp} from "../../interface/TMessageWorkers";
 
 export class Client {
     public clientIp: string;
@@ -84,7 +85,8 @@ export class Client {
         this.addCookieForClient.set(key, val);
     }
 
-    public generateHeaderForResponse(): void {
+    public generateHeaderForResponse(mess: TMessageWorkerDonorResp): void {
+        this.workController.workerHeaders.getHeaderForResponseClient(this, mess);
         this.addCookieForClient.forEach((v, v1) => {
             this.res.cookie(v1, v);
         });
@@ -92,7 +94,7 @@ export class Client {
     }
 
     public getRequestBody(): string {
-        if (!this.req.body) return null;
+        if (!this.req.body || this.req.method.toLocaleUpperCase()!== "POST") return null;
         return (this.contentType.indexOf("form") > -1) ? querystring.stringify(this.req.body) : JSON.stringify(this.req.body);
     }
 
