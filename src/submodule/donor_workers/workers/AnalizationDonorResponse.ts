@@ -89,7 +89,9 @@ export class AnalizationDonorResponse {
             response.on('end', () => {
                 if (response.statusCode > 299) return res(IResult.error('error'));
                 // TODO maybe must be decode chunks?
-                return res(IResult.succData(data.dataArr.join()));
+                // const result = data.dataArr.join("");
+                const val = this.controller.workerFiles.decodeCharset(response.headers, data.dataArr as any[]);
+                res(IResult.succData(val));
             });
         });
 

@@ -1,7 +1,7 @@
 {
   "data": {
     "donorOrigin": "https://www.instagram.com/katusha_adushkina/",
-    "ourHost": "t63.com",
+    "ourHost": "127.0.0.1:8082",
     "nameResourceFolder": "./resource2/ritcapuk_5.com",
     "fraudfilter": {
       "isUse": false,
@@ -67,7 +67,7 @@
         "who": "I'm"
       }
     },
-    "blackReplaceDomain": ["a5.behance.net"],
+    "blackReplaceDomain": ["instagram.fiev18-1.fna.fbcdn.net"],
     "blackReplaceSubDomain": [],
     "blackParamForSave": [],
     "prioritySaveParam": [

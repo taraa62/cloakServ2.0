@@ -5,6 +5,7 @@ export interface IWorkerMessage {
     type: string;
     data: TMessageWorkerBaseReq;
     dataArr?: Array<any>
+    isRequestEnd?:boolean;
 }
 
 export class WorkerMessage implements IWorkerMessage {

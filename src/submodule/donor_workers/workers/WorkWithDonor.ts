@@ -54,29 +54,33 @@ export class WorkWithDonor extends BasePoolWorker {
     }
 
 
+
     private set_GET(data: IWorkerMessage, m: any): void {
         const options: TMessageWorkerDonorReq = data.data as TMessageWorkerDonorReq;
         //    if (options.action.indexOf("laticon.wo") > -1) debugger;
         delete (options.options.headers as any)['x-real-ip'];
-        if (options.options.path.indexOf('/v/t51.2885-15') > -1) {
+      /*  if (options.options.path.indexOf('/v/t51.2885-15') > -1) {
             options.options.host = options.options.hostname = "instagram.fiev18-1.fna.fbcdn.net";
-            if(options.options && (options.options as any).headers && (options.options as any).headers.host){
-                (options.options as any).headers.host = "instagram.fiev18-1.fna.fbcdn.net"
+            if (options.options && (options.options as any).headers && (options.options as any).headers.host) {
+                (options.options as any).headers.host = "instagram.fiev18-1.fna.fbcdn.net";
             }
-        }
+        }*/
         m.get(options.options, (resp: IncomingMessage) => {
             // this.logger.debug("donor response to server ->" + JSON.stringify(resp.headers));
             // this.logger.debug("donor response to server ->" + data.key);
             // if (options.action.indexOf("t64") > -1) debugger;
+            data.isRequestEnd = true;
             this.analizator.analize(resp, data);
 
         }).on("error", (err: Error) => {
             console.error(err);
             this.logger.error("donor response to server error->" + options.action);
+            data.isRequestEnd = true;
             super.sendTaskComplitError(err, data.key);
         }).on("close", (val: any) => {
             // this.logger.debug("donor response to server close->" + data.key);
-            // super.sendTaskComplitError("close", data.key);
+            if (!data.isRequestEnd) super.sendTaskComplitError("close", data.key);
+
         });
     }
 
@@ -91,14 +95,17 @@ export class WorkWithDonor extends BasePoolWorker {
             // this.logger.debug("donor response to server ->" + JSON.stringify(resp.headers));
             // this.logger.debug("donor response to server ->" + data.key);
             // if (options.action.indexOf("t64") > -1) debugger;
+            data.isRequestEnd = true;
             this.analizator.analize(resp, data);
 
         }).on("error", (err: Error) => {
             this.logger.debug("donor response to server error->" + options.action);
+            data.isRequestEnd = true;
             super.sendTaskComplitError(err, data.key);
         }).on("close", (val: any) => {
             // this.logger.debug("donor response to server close->" + data.key);
             // super.sendTaskComplitError("close", data.key);
+            if (!data.isRequestEnd) super.sendTaskComplitError("close", data.key);
         });
         req.write(options.body);
         req.end();

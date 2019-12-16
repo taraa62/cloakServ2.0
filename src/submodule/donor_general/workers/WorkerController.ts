@@ -174,7 +174,8 @@ export class WorkerController extends BWorker {
                 if (data.linksMap) this.donorLinkController.updateNewLinks(this.workerAction, this.getDomainConfig().host, data.linksMap);
             }
         } else {
-            const body:string = resp.data || ((resp.data && resp.data.data) ? resp.data.data : "");
+            const body: string = resp.data || ((resp.data && resp.data.data) ? resp.data.data : "");
+            client.res.status(200);
             client.res.setHeader('content-length', body.length);
             client.res.write(body);
             client.res.end();

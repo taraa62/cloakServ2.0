@@ -64,10 +64,10 @@ export class WorkerFiles {
     private async getNameForFile(resp: IncomingMessage, data: TMessageWorkerDonorReq): Promise<IResult> {
         try {
 
-           //if (data.action.indexOf(".css") > -1)debugger
+            //if (data.action.indexOf(".css") > -1)debugger
 
             if (data.originalLink) {
-                data.action =  data.options.path as string;
+                data.action = data.options.path as string;
                 if (data.action.endsWith("/")) data.action += "data.html";
             }
             let url = data.action;
@@ -83,7 +83,7 @@ export class WorkerFiles {
 
 
             if (await FileManager.isExist(path)) return IResult.succMess(path);
-            const iRes: IResult = await FileManager.checkPathToFolder(FileManager.backFolder(path, 1), null, true).catch((e:Error) => {
+            const iRes: IResult = await FileManager.checkPathToFolder(FileManager.backFolder(path, 1), null, true).catch((e: Error) => {
                 throw e;
             });
             if (iRes.error) return iRes;
@@ -118,5 +118,20 @@ export class WorkerFiles {
         return encod || "utf8";
     }
 
+    //************** decode charset ****//
+    /**
+     * декодируем зашифрованый текст не в utf8
+     * @param client -
+     * @param text
+     */
+    public decodeCharset(headers: any, text: Array<any>) {
+        const charset = this.getCharset(headers).toUpperCase().replace(/^"(.+(?="$))"$/, '$1');
+        const iconv = (charset == "UTF-8") ? null : new Iconv(charset, 'UTF-8');
+        if (iconv) {
+            return iconv.convert(Buffer.concat(text as Array<any>)).toString();
+
+        }
+        return text.join("");
+    }
 
 }
