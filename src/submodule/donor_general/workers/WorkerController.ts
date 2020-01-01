@@ -51,10 +51,10 @@ export class WorkerController extends BWorker {
             return res.status(500).send(IResult.resultToString(iRes));
         }
 
-        await this.donorLinkController.checkLink(client);
+        // await this.donorLinkController.checkLink(client);
 
-
-        const info: RequestInfo = await this.donorRequestController.checkRequest(client).catch(er => null);
+//TODO delete - .then(v => null)
+        const info: RequestInfo = await this.donorRequestController.checkRequest(client).then(v => null).catch(er => null);
         if (info) {
             if (await FileManager.isExist(info.pathToFile)) {
                 client.requestInfo = info;
@@ -115,10 +115,10 @@ export class WorkerController extends BWorker {
             }
                 break;
             case 3: {
-                if (mess.respHeaders.location.startsWith("http")) {
-                    const nLink = this.donorLinkController.checkRedirectLink(client.domainInfo.host, mess.respHeaders.location);
-                    return client.res.redirect(mess.respCode, client.domainInfo.origin + nLink);
-                }
+                // if (mess.respHeaders.location.startsWith("http")) {
+                //     const nLink = this.donorLinkController.checkRedirectLink(client.domainInfo.host, mess.respHeaders.location);
+                //     return client.res.redirect(mess.respCode, client.domainInfo.origin + nLink);
+                // }
                 return client.res.redirect(mess.respCode, mess.respHeaders.location);
             }
             case 4:
@@ -144,9 +144,12 @@ export class WorkerController extends BWorker {
         if (!resp) return this.responseError(client, "close");
 
         this.logger.info(`-----response from data / time: +${client.getLifeTimeClient()} url: ${client.req.url}`);
+        let isRespData = true;
 
-        if (client.isFile) {
-            if (!resp.pathToFile) return this.responseError404(client);
+        if (resp && resp.respCode > 199 && resp.respCode < 300 && !resp.pathToFile && (!resp.data || resp.data && !resp.data.lenght)) isRespData = false;
+
+        if (client.isFile && isRespData) {
+         //   if (!resp.pathToFile) return this.responseError404(client);
 
             const task: TMessageWorkerEditTextReq = {
                 command: "editFile",
@@ -164,14 +167,19 @@ export class WorkerController extends BWorker {
             const iR: IResult = await this.donorEditController.getPool().newTask(task).catch(er => IResult.error(er));
             if (iR.error) this.responseErrorIResult(client, iR);
             else {
+                try {
+                    if (!iR.data || !iR.data.text) debugger;
+                    const data: TMessageWorkerEditTextResp = iR.data;
+                    client.res.writeHead(200, {"content-type": client.contentType, "content-length": data.text.length});
 
-                if (!iR.data || !iR.data.text) debugger;
-                const data: TMessageWorkerEditTextResp = iR.data;
-                client.res.writeHead(200, {"content-type": client.contentType});
-                client.res.write(data.text);
-                client.res.end();
+                    client.res.write(data.text);
+                    client.res.end();
 
-                if (data.linksMap) this.donorLinkController.updateNewLinks(this.workerAction, this.getDomainConfig().host, data.linksMap);
+                    if (data.linksMap) this.donorLinkController.updateNewLinks(this.workerAction, this.getDomainConfig().host, data.linksMap);
+                } catch (e) {
+                    console.error(1111);
+                }
+
             }
         } else {
             const body: string = resp.data || ((resp.data && resp.data.data) ? resp.data.data : "");

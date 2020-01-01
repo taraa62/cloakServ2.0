@@ -27,8 +27,8 @@
   "item": [
     {
       "host": "t63.com",
-      "isRewriteConfigNginx": true,
-      "typeConfig": "defaultNginxConfigCloudflare"
+      "isRewriteConfigNginx": false,
+      "typeConfig": "cloudflare"
     }
   ]
 }

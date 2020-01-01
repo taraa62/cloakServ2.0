@@ -87,15 +87,18 @@ export class Client {
 
     public generateHeaderForResponse(mess: TMessageWorkerDonorResp): void {
         this.workController.workerHeaders.getHeaderForResponseClient(this, mess);
-        this.addCookieForClient.forEach((v, v1) => {
+        /*this.addCookieForClient.forEach((v, v1) => {
             this.res.cookie(v1, v);
-        });
+        });*/
 
     }
 
     public getRequestBody(): string {
-        if (!this.req.body || this.req.method.toLocaleUpperCase()!== "POST") return null;
-        return (this.contentType.indexOf("form") > -1) ? querystring.stringify(this.req.body) : JSON.stringify(this.req.body);
+        if (!this.req.body || this.req.method.toLocaleUpperCase() !== "POST") return null;
+
+        let body = (this.contentType.indexOf("form") > -1) ? querystring.stringify(this.req.body) : JSON.stringify(this.req.body);
+        body = this.workController.workerHeaders.replaceStringParam(body, true);
+        return body;
     }
 
 }

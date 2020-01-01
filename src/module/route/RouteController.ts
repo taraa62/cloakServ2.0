@@ -22,6 +22,9 @@ export class RouteController {
         let iRes: IResult = IResult.success;
 
         try {
+            this.route.get("*", async (req: Request, res: Response, next: Function) => {
+                this.newRequest(req, res, next);
+            });
             this.route.all("*", async (req: Request, res: Response, next: Function) => {
                 this.newRequest(req, res, next);
             });

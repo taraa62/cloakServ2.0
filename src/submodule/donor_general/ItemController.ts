@@ -69,7 +69,7 @@ export class ItemController extends BaseDonorController {
     public getNginxConfForHost(host: string): IItemNginxConfig {
         let conf = this.nginxConfig.item.find(v => v.host === host);
         if (!conf) conf = this.nginxConfig.defForNewConfigs;
-        conf.configDomain = this.nginxConfig.configuration[host] || this.nginxConfig.configuration["http"];
+        conf.configDomain = this.nginxConfig.configuration[conf.typeConfig] || this.nginxConfig.configuration["http"];
         return conf;
     }
 

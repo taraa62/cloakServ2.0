@@ -63,6 +63,7 @@ export abstract class BaseServer implements IServer {
         this.appExp.use(require('cookie-parser')());
         this.appExp.use(bodyParser.json({limit: "5mb"}));
         this.appExp.use(bodyParser.urlencoded({extended: false}));
+        this.appExp.use(bodyParser.json({type: 'application/csp-report'}));
 
         //** CORS **
         if (this.conf.config.server.corsWhitelist) {

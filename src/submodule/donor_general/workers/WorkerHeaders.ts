@@ -19,12 +19,14 @@ export class WorkerHeaders extends BWorker {
         const query = client.req.query ? "?" + querystring.stringify(client.req.query) : "";
         const opt: any = {
             headers: {
+                'access-control-allow-credentials': true,
                 "user-agent": 'Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36'
+                // "user-agent":'Mozilla/5.0 (X11; OpenBSD i386) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36'
             },
             host: url.host,
             hostname: url.host,
             method: client.req.method,
-            path: url.pathname + query,
+            path: client.req.originalUrl,
             protocol: url.protocol
         };
         Object.assign(opt.headers, client.req.headers);
@@ -38,12 +40,14 @@ export class WorkerHeaders extends BWorker {
         const opt: any = {
             headers: {
                 host: this.parent.getDonorURL().host,
+                'access-control-allow-credentials': true,
                 "user-agent": 'Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36'
+                // "user-agent":'Mozilla/5.0 (X11; OpenBSD i386) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36'
             },
             host: this.parent.getDonorURL().host,
             hostname: this.parent.getDonorURL().host,
             method: client.req.method,
-            path: client.req.originalUrl + query,
+            path: client.req.originalUrl,
             protocol: this.parent.getDonorURL().protocolFull
         };
         Object.assign(opt.headers, client.req.headers);
@@ -54,9 +58,74 @@ export class WorkerHeaders extends BWorker {
 
     public getHeaderForResponseClient(client: Client, mess: TMessageWorkerDonorResp): void {
         if (mess && mess.respHeaders) {
+            // (client.res as any)._headers = {};
+
+            const police = mess.respHeaders['content-security-policy'];
+            this.replaceObjParam(mess.respHeaders, false);
+            if (mess.respHeaders['set-cookie']) {
+                mess.respHeaders['set-cookie'].map((v, i) => {
+                    mess.respHeaders['set-cookie'][i] = v.replace('instagram.com', 't63.com');
+                    // mess.respHeaders['set-cookie'][i] = v.replace('Secure', '');
+                   /* const arr = v.split(";");
+                    arr.map((v, i) => {
+                        // if (v.indexOf('HttpOnly') > -1) arr[i] = null;
+                        // if (v.indexOf('Secure') > -1) arr[i] = null;
+                        // if (v.indexOf('Domain') > -1) arr[i] = "";
+                        // if (v.indexOf('Path') > -1) arr[i] = "Path=/";
+                    });
+                    const aa: string[] = [];
+                    arr.map(v => {
+                        if (v) aa.push(v.trim());
+                    });*/
+
+                    // aa[0] = arr[0];
+                    // aa[1] = 'Path=/';
+                    // mess.respHeaders['set-cookie'][i] = aa.join('; ');
+                    // mess.respHeaders['set-cookie'][i] =  mess.respHeaders['set-cookie'][i].trim();
+                    // console.log(1);
+                });
+                // client.res.setHeader('cookie', mess.respHeaders['set-cookie'].join("; "));
+                // mess.respHeaders['set-cookie'] = null;
+            }
+            if (mess.respHeaders['content-security-policy']) {
+                const arr = (mess.respHeaders['content-security-policy'] as string).split(' ');
+                arr.map((v, i) => {
+                    if (v.startsWith('https://t63.com')) {
+                        arr[i] = v.replace('https://t63.com', 'http://t63.com');
+                    }
+                    if (v.startsWith('https://*.t63.com')) {
+                        arr[i] = v.replace('https://*.t63.com', 'http://*.t63.com');
+                    }
+                    if (v.startsWith('https:')) {
+                        // arr[i] = v.replace('https:', 'http:');
+                    }
+                });
+                mess.respHeaders['content-security-policy'] = arr.join(' ');
+            }
+            // delete mess.respHeaders['x-content-type-options'];
+            // delete mess.respHeaders['vary'];
+            // delete mess.respHeaders['Vary'];
+            // delete mess.respHeaders['strict-transport-security'];
+            // delete mess.respHeaders['x-xss-protection'];
+            // delete mess.respHeaders['x-ig-set-www-claim'];
+            // delete mess.respHeaders['access-control-expose-headers'];
+            // delete mess.respHeaders['x-fb-trip-id'];
+            // delete mess.respHeaders['x-frame-options'];
+            // delete mess.respHeaders['x-aed'];
+            // delete mess.respHeaders['cache-control'];
+
+            // delete mess.respHeaders['set-cookie'];
+            // mess.respHeaders['content-security-policy'] = police;
+
             Object.entries(mess.respHeaders).map(([key, val]) => {
-                client.res.setHeader(key, val);
+                if (val) client.res.setHeader(key, val);
             });
+
+            // client.res.setHeader('Access-Control-Allow-Credentials', "true");
+            // client.res.setHeader('Access-Control-Allow-Origin', "localhost");
+            // client.res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,UPDATE,OPTIONS');
+            // client.res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+
         }
     }
 
