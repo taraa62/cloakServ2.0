@@ -1,7 +1,7 @@
 {
   "data": {
-    "donorOrigin": "https://www.instagram.com/katusha_adushkina/",
-    "ourHost": "t63.com",
+    "donorOrigin": "",
+    "ourHost": "",
     "nameResourceFolder": "./resource2/ritcapuk_5.com",
     "fraudfilter": {
       "isUse": false,
@@ -29,7 +29,7 @@
     "listSubHost": [
       {
         "isUse": false,
-        "serverHost": "ironsky.today",
+        "serverHost": "",
         "nginx": {
           "ssl": true,
           "sslStrictMod": true,
@@ -67,7 +67,7 @@
         "who": "I'm"
       }
     },
-    "blackReplaceDomain": ["instagram.fiev18-1.fna.fbcdn.net"],
+    "blackReplaceDomain": [""],
     "blackReplaceSubDomain": [],
     "blackParamForSave": [],
     "prioritySaveParam": [
